@@ -97,6 +97,49 @@
         "title": "Add water test (placeholder)",
         "description": "This becomes the real form in Sprint 5. For now, it validates the Dialog primitive (focus, keyboard, escape to close).",
         "body": "Nothing is saved yet — TankLog remains frontend-only and user-controlled."
+      },
+      "form": {
+        "title": "Add water test",
+        "description": "Save one test session as multiple measurements (one row per parameter) in your tank sheet.",
+        "locked": "Connect your TankLog Drive folder first.",
+        "loadingTanks": "Loading tanks…",
+        "noTanks": "No tanks found. Create your first tank in Settings to start logging tests.",
+        "save": "Save test",
+        "saving": "Saving…",
+        "fields": {
+          "date": "Date & time",
+          "tank": "Tank",
+          "parameters": "Parameters",
+          "method": "Method (optional)",
+          "note": "Note (optional)"
+        },
+        "hints": {
+          "date": "Saved as an ISO timestamp in the sheet (UTC).",
+          "tank": "Uses the active tank selected in the header.",
+          "parameters": "Fill only what you measured — empty fields are skipped."
+        },
+        "placeholders": {
+          "value": "Value",
+          "method": "e.g. Salifert",
+          "note": "Optional"
+        },
+        "errors": {
+          "noTank": "Select an active tank first.",
+          "missingDate": "Pick a date and time.",
+          "invalidDate": "Enter a valid date/time.",
+          "noMeasurements": "Add at least one measurement.",
+          "mustBePositive": "Enter a value ≥ 0.",
+          "fixFields": "Fix the highlighted fields.",
+          "saveFailed": "Failed to save the test."
+        },
+        "success": {
+          "saved": "Saved {count} measurement(s) to Google Sheets."
+        }
+      },
+      "history": {
+        "title": "History (coming next)",
+        "description": "Listing, detail view, and filters arrive in Sprint 6.",
+        "body": "For now you can already log tests above. Next sprint we’ll add a per-tank history list and a simple detail view."
       }
     },
     "photos": {

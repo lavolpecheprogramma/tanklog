@@ -108,13 +108,13 @@
 ## Sprint 5 — Water tests: create (write to Sheets)
 **Goal**: users can add a water test record.
 
-- [ ] Define WATER_TESTS model (measurement-based: one row per parameter measurement) + client-side ID generation
-- [ ] Water test form (minimal: date, tank, key params)
-- [ ] Write to `WATER_TESTS` tab via Sheets API
+- [x] Define WATER_TESTS model (measurement-based: one row per parameter measurement) + client-side ID generation
+- [x] Water test form (minimal: date, tank, key params)
+- [x] Write to `WATER_TESTS` tab via Sheets API
 
 **Done when**
-- [ ] Submitting the form creates a new row in Google Sheets
-- [ ] Basic validation prevents obvious bad inputs
+- [x] Submitting the form creates a new row in Google Sheets
+- [x] Basic validation prevents obvious bad inputs
 
 ## Sprint 6 — Water tests: list + detail
 **Goal**: history is usable.

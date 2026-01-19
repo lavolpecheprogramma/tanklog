@@ -32,6 +32,12 @@ type SheetsUpdateValuesResponse = {
   updatedCells?: number
 }
 
+type SheetsAppendValuesResponse = {
+  spreadsheetId?: string
+  tableRange?: string
+  updates?: SheetsUpdateValuesResponse
+}
+
 async function readErrorMessage(response: Response): Promise<string> {
   try {
     const data = (await response.json()) as { error?: { message?: string } }
@@ -145,11 +151,44 @@ export function useGoogleSheets() {
     })
   }
 
+  async function appendValues(options: {
+    spreadsheetId: string
+    range: string
+    values: SheetsCellValue[][]
+    valueInputOption?: "RAW" | "USER_ENTERED"
+    insertDataOption?: "INSERT_ROWS" | "OVERWRITE"
+  }): Promise<SheetsAppendValuesResponse> {
+    const query = toQueryString({
+      valueInputOption: options.valueInputOption ?? "RAW",
+      insertDataOption: options.insertDataOption ?? "INSERT_ROWS",
+    })
+
+    const normalizedValues = options.values.map((row) =>
+      row.map((cell) => (cell === null || cell === undefined ? "" : cell))
+    )
+
+    const body = {
+      range: options.range,
+      majorDimension: "ROWS",
+      values: normalizedValues,
+    }
+
+    const encodedRange = encodeURIComponent(options.range)
+    return await request<SheetsAppendValuesResponse>(`/${options.spreadsheetId}/values/${encodedRange}:append${query}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
+  }
+
   return {
     getValues,
     getSpreadsheet,
     batchUpdate,
     updateValues,
+    appendValues,
   }
 }
 

@@ -97,6 +97,49 @@
         "title": "Aggiungi test acqua (segnaposto)",
         "description": "Diventerà il form reale nello Sprint 5. Per ora valida il componente Dialog (focus, tastiera, ESC per chiudere).",
         "body": "Per ora non viene salvato nulla — TankLog resta solo frontend e con dati sotto il tuo controllo."
+      },
+      "form": {
+        "title": "Aggiungi test acqua",
+        "description": "Salva una sessione di test come più misurazioni (una riga per parametro) nel foglio della vasca.",
+        "locked": "Collega prima la cartella TankLog su Drive.",
+        "loadingTanks": "Caricamento vasche…",
+        "noTanks": "Nessuna vasca trovata. Crea la prima vasca in Impostazioni per iniziare a registrare i test.",
+        "save": "Salva test",
+        "saving": "Salvataggio…",
+        "fields": {
+          "date": "Data e ora",
+          "tank": "Vasca",
+          "parameters": "Parametri",
+          "method": "Metodo (opzionale)",
+          "note": "Nota (opzionale)"
+        },
+        "hints": {
+          "date": "Viene salvato come timestamp ISO nel foglio (UTC).",
+          "tank": "Usa la vasca attiva selezionata nell’header.",
+          "parameters": "Compila solo ciò che hai misurato — i campi vuoti vengono ignorati."
+        },
+        "placeholders": {
+          "value": "Valore",
+          "method": "es. Salifert",
+          "note": "Opzionale"
+        },
+        "errors": {
+          "noTank": "Seleziona prima una vasca attiva.",
+          "missingDate": "Seleziona data e ora.",
+          "invalidDate": "Inserisci una data/ora valida.",
+          "noMeasurements": "Aggiungi almeno una misurazione.",
+          "mustBePositive": "Inserisci un valore ≥ 0.",
+          "fixFields": "Correggi i campi evidenziati.",
+          "saveFailed": "Salvataggio del test non riuscito."
+        },
+        "success": {
+          "saved": "Salvate {count} misurazione(i) su Google Sheets."
+        }
+      },
+      "history": {
+        "title": "Storico (in arrivo)",
+        "description": "Lista, dettaglio e filtri arrivano nello Sprint 6.",
+        "body": "Per ora puoi già registrare i test qui sopra. Nel prossimo sprint aggiungeremo lo storico per vasca e una vista dettaglio semplice."
       }
     },
     "photos": {
