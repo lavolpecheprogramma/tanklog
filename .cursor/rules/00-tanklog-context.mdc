@@ -1,0 +1,17 @@
+---
+description: "TankLog: always include the project definition and roadmap in Agent context."
+alwaysApply: true
+---
+
+# TankLog — Source of truth (always applied)
+
+Always treat these as the canonical requirements/spec:
+
+@project.md
+@roadmap.md
+
+## Rules
+- **Follow constraints first**: frontend-only, SSG, free stack, user-controlled data storage.
+- **Roadmap-driven work**: keep changes small and aligned to the current sprint scope; update `roadmap.md` if scope changes.
+- **Call out conflicts early**: if a request violates constraints, explain why and propose the closest compliant alternative.
+

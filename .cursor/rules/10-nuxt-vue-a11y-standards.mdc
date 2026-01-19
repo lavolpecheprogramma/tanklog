@@ -1,0 +1,60 @@
+---
+description: "TankLog frontend standards: Nuxt 3 + Vue 3 + TypeScript + accessibility best practices."
+alwaysApply: false
+globs:
+  - "app.vue"
+  - "nuxt.config.*"
+  - "pages/**"
+  - "layouts/**"
+  - "components/**"
+  - "composables/**"
+  - "plugins/**"
+  - "middleware/**"
+  - "assets/**"
+  - "public/**"
+  - "**/*.vue"
+  - "**/*.ts"
+---
+
+# TankLog — Nuxt/Vue/TS + Accessibility standards
+
+## Nuxt 3 / Vue 3 (required)
+- Use Vue 3 SFCs with **`<script setup lang="ts">`** and Composition API.
+- Prefer Nuxt conventions over custom plumbing:
+  - Routing via `pages/`
+  - Head via `useHead()`
+  - Page metadata via `definePageMeta()`
+  - Runtime config via `useRuntimeConfig()` (only `public` keys in client code)
+- Keep templates simple:
+  - No heavy logic inside templates; move to computed/composables.
+  - Always provide stable `:key` for `v-for`.
+  - Avoid `v-if` and `v-for` on the same element.
+- Data access rules:
+  - Put Google API calls in composables (e.g. `useGoogleSheets`, `useGoogleDrive`, `useAuth`).
+  - Avoid hidden side effects; prefer explicit actions and typed return values.
+- Components:
+  - Prefer small, focused components; split when they grow too large.
+  - Use `defineProps`/`defineEmits` with proper typing; avoid `any`.
+
+## Accessibility (WCAG AA, required)
+- Use semantic elements and landmarks: `header`, `nav`, `main`, `footer`.
+- Use correct interactive elements:
+  - Actions use `<button type="button">`
+  - Navigation uses `<a>` / `<NuxtLink>`
+  - Don’t make clickable `<div>`/`<span>`; don’t remove focus outlines.
+- Keyboard + focus:
+  - Everything interactive must be reachable and usable via keyboard.
+  - Dialogs/menus must manage focus correctly (trap and restore focus).
+- Forms:
+  - Inputs must have an accessible name (`<label>` or `aria-label`).
+  - Error messages must be connected (`aria-describedby`) and not only color-based.
+- Images:
+  - Use meaningful `alt`; decorative images use `alt=""`.
+- Charts:
+  - Provide a text summary and/or an accessible table view; don’t rely on color only.
+
+## Notifications UX (required when implementing reminders)
+- Ask for Notification permission **only after a user action** (never on first load).
+- Always provide an in-app fallback (due list/badges) if notifications aren’t available/allowed.
+- Quiet hours + snooze should be user-configurable, with safe defaults.
+
