@@ -38,6 +38,7 @@ export const GOOGLE_OAUTH_SCOPES = [
   "email",
   "profile",
   "https://www.googleapis.com/auth/spreadsheets",
+  "https://www.googleapis.com/auth/drive.metadata.readonly",
   "https://www.googleapis.com/auth/drive.file",
 ].join(" ")
 

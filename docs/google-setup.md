@@ -17,6 +17,7 @@ TankLog is **frontend-only** and uses **Google Identity Services (GIS)** to get 
   - `email`
   - `profile`
   - `https://www.googleapis.com/auth/spreadsheets`
+  - `https://www.googleapis.com/auth/drive.metadata.readonly`
   - `https://www.googleapis.com/auth/drive.file`
 
 ## 3) Enable Google APIs
@@ -59,5 +60,5 @@ npm run dev
 - TankLog stores the session token in **session storage** (cleared when the tab is closed).
 - Requested scopes:
   - Sheets: full spreadsheet access (needed to read/write your TankLog sheet)
-  - Drive: `drive.file` (only files created/opened by TankLog)
+  - Drive: `drive.metadata.readonly` (to discover folders/files) + `drive.file` (to create/upload TankLog files)
 

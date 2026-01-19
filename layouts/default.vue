@@ -4,27 +4,32 @@ import { Button } from "@/components/ui/button"
 const route = useRoute()
 const { activeTankId } = useActiveTank()
 const auth = useAuth()
+const storage = useTankLogRootFolderId()
+storage.hydrateFromStorage()
+
+const isStorageReady = computed(() => storage.hasRootFolderId.value)
 
 const userEmail = computed(() => auth.user.value?.email ?? null)
 const userName = computed(() => auth.user.value?.name ?? null)
 const userPicture = computed(() => auth.user.value?.picture ?? null)
 
-const userAltText = computed(() => {
-  const label = userEmail.value || userName.value
-  return label ? `Google account: ${label}` : "Google account"
-})
+const userLabel = computed(() => userEmail.value || userName.value || null)
 
 const navItems = computed(() => {
-  const tankHref = `/vasques/${activeTankId.value}`
+  if (!isStorageReady.value) {
+    return [{ to: "/settings", labelKey: "nav.settings", isActive: route.path.startsWith("/settings") }]
+  }
+
+  const tankHref = activeTankId.value ? `/vasques/${activeTankId.value}` : "/settings"
 
   return [
-    { to: "/", label: "Home", isActive: route.path === "/" },
-    { to: tankHref, label: "Tank", isActive: route.path.startsWith("/vasques") },
-    { to: "/tests", label: "Tests", isActive: route.path.startsWith("/tests") },
-    { to: "/photos", label: "Photos", isActive: route.path.startsWith("/photos") },
-    { to: "/events", label: "Events", isActive: route.path.startsWith("/events") },
-    { to: "/reminders", label: "Reminders", isActive: route.path.startsWith("/reminders") },
-    { to: "/settings", label: "Settings", isActive: route.path.startsWith("/settings") },
+    { to: "/", labelKey: "nav.home", isActive: route.path === "/" },
+    { to: tankHref, labelKey: "nav.tank", isActive: route.path.startsWith("/vasques") },
+    { to: "/tests", labelKey: "nav.tests", isActive: route.path.startsWith("/tests") },
+    { to: "/photos", labelKey: "nav.photos", isActive: route.path.startsWith("/photos") },
+    { to: "/events", labelKey: "nav.events", isActive: route.path.startsWith("/events") },
+    { to: "/reminders", labelKey: "nav.reminders", isActive: route.path.startsWith("/reminders") },
+    { to: "/settings", labelKey: "nav.settings", isActive: route.path.startsWith("/settings") },
   ]
 })
 
@@ -40,7 +45,7 @@ async function onLogout() {
       class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
       href="#main"
     >
-      Skip to content
+      {{ $t("a11y.skipToContent") }}
     </a>
 
     <header class="border-b border-border/60 bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50">
@@ -48,25 +53,26 @@ async function onLogout() {
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <NuxtLink
             class="font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            to="/"
+            :to="isStorageReady ? '/' : '/settings'"
           >
             TankLog
           </NuxtLink>
 
           <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-            <ActiveTankSelector />
+            <ActiveTankSelector v-if="isStorageReady" />
+            <LanguageSwitcher />
 
             <div class="flex items-center gap-2">
               <img
                 v-if="userPicture"
                 :src="userPicture"
-                :alt="userAltText"
+                :alt="userLabel ? $t('a11y.googleAccountWithLabel', { label: userLabel }) : $t('a11y.googleAccount')"
                 class="size-8 rounded-full border border-border"
                 referrerpolicy="no-referrer"
               />
               <span v-if="userEmail" class="text-sm text-muted-foreground">{{ userEmail }}</span>
 
-              <Button type="button" variant="secondary" size="sm" @click="onLogout">Logout</Button>
+              <Button type="button" variant="secondary" size="sm" @click="onLogout">{{ $t("actions.logout") }}</Button>
             </div>
           </div>
         </div>
@@ -80,7 +86,7 @@ async function onLogout() {
             :to="item.to"
             :aria-current="item.isActive ? 'page' : undefined"
           >
-            {{ item.label }}
+            {{ $t(item.labelKey) }}
           </NuxtLink>
         </nav>
       </div>
@@ -92,7 +98,7 @@ async function onLogout() {
 
     <footer class="border-t border-border/60">
       <div class="mx-auto w-full max-w-5xl px-4 py-6">
-        <small class="text-muted-foreground">TankLog — frontend-only, static, user-controlled data.</small>
+        <small class="text-muted-foreground">{{ $t("footer.tagline") }}</small>
       </div>
     </footer>
   </div>

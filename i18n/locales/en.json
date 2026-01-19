@@ -1,0 +1,248 @@
+{
+  "a11y": {
+    "skipToContent": "Skip to content",
+    "googleAccount": "Google account",
+    "googleAccountWithLabel": "Google account: {label}"
+  },
+  "nav": {
+    "home": "Home",
+    "tank": "Tank",
+    "tests": "Tests",
+    "photos": "Photos",
+    "events": "Events",
+    "reminders": "Reminders",
+    "settings": "Settings"
+  },
+  "language": {
+    "label": "Language",
+    "options": {
+      "it": "Italian",
+      "en": "English"
+    }
+  },
+  "tank": {
+    "activeLabel": "Active tank",
+    "selector": {
+      "loading": "Loading tanks…",
+      "empty": "No tanks found",
+      "error": "Couldn’t load tanks"
+    }
+  },
+  "footer": {
+    "tagline": "TankLog — frontend-only, static, user-controlled data."
+  },
+  "actions": {
+    "logout": "Logout",
+    "loggingOut": "Logging out…",
+    "backToHome": "Back to Home",
+    "goToPhotos": "Go to Photos",
+    "goToEvents": "Go to Events",
+    "goToReminders": "Go to Reminders",
+    "goToSettings": "Go to Settings",
+    "goToWaterTests": "Go to Water tests",
+    "openActiveTank": "Open active tank",
+    "openWaterTests": "Open Water tests",
+    "previewAddTest": "Preview “Add test”",
+    "signInWithGoogle": "Sign in with Google",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…"
+  },
+  "pages": {
+    "home": {
+      "metaTitle": "Home",
+      "heroTitle": "TankLog",
+      "heroDescription": "A frontend-only aquarium logbook to capture tests, events, photos, and spot trends over time.",
+      "sprint1": {
+        "title": "Sprint 1",
+        "description": "Page skeletons + coherent navigation (with a mocked “active tank” selector).",
+        "bullets": [
+          "All main routes exist: tanks, tests, photos, events, reminders, settings",
+          "Active tank selector is visible in the header (mock list)",
+          "Mobile-friendly nav (scrollable tabs)"
+        ]
+      }
+    },
+    "tank": {
+      "metaTitle": "Tank",
+      "title": "Tank",
+      "description": "This will become the main per-tank dashboard (latest values, alerts, charts, photos, and events).",
+      "sprint1": {
+        "title": "Sprint 1 skeleton",
+        "descriptionPrefix": "You’re viewing a mocked tank route:",
+        "nextUpLabel": "Next up:",
+        "bullets": [
+            "Read real tanks from the user’s TankLog Drive folder (Sprint 4)",
+          "Bring together tests, ranges, and charts here (Sprint 6–9)"
+        ]
+      },
+      "unknown": {
+        "title": "Unknown tank",
+        "descriptionPrefix": "We don’t recognize this tank id yet:",
+        "body": "For Sprint 1 we’re using a temporary mock list. Pick an “Active tank” from the header to navigate to a valid tank page."
+      }
+    },
+    "tests": {
+      "metaTitle": "Water tests",
+      "title": "Water tests",
+      "description": "Log measurements, review history, and spot trends over time.",
+      "comingTitle": "Coming in Sprint 5–8",
+      "comingDescription": "In Sprint 1 we’re just building the page skeletons and navigation.",
+      "plannedLabel": "Planned:",
+      "plannedBullets": [
+        "Add a test (write to Google Sheets)",
+        "History list + detail view",
+        "Out-of-range highlighting + charts"
+      ],
+      "dialog": {
+        "title": "Add water test (placeholder)",
+        "description": "This becomes the real form in Sprint 5. For now, it validates the Dialog primitive (focus, keyboard, escape to close).",
+        "body": "Nothing is saved yet — TankLog remains frontend-only and user-controlled."
+      }
+    },
+    "photos": {
+      "metaTitle": "Photos",
+      "title": "Photos",
+      "description": "Build a visual timeline of tank progress and compare changes over time.",
+      "comingTitle": "Coming in Sprint 13–14",
+      "comingDescription": "We’ll upload to Google Drive and store metadata in Google Sheets.",
+      "plannedLabel": "Planned:",
+      "plannedBullets": [
+        "Upload photos (Drive)",
+        "Timeline gallery (per tank)",
+        "Basic compare mode"
+      ]
+    },
+    "events": {
+      "metaTitle": "Events",
+      "title": "Events",
+      "description": "Track interventions like water changes, dosing, equipment swaps, and maintenance.",
+      "comingTitle": "Coming in Sprint 10",
+      "comingDescription": "Events will be stored in the user’s Google Sheet.",
+      "plannedLabel": "Planned:",
+      "plannedBullets": [
+        "Create events (type, date, notes, tank)",
+        "List and filter per tank"
+      ]
+    },
+    "reminders": {
+      "metaTitle": "Reminders",
+      "title": "Reminders",
+      "description": "Set recurring tasks (water change, dosing, batteries) and get best-effort notifications.",
+      "comingTitle": "Coming in Sprint 11–12",
+      "comingDescription": "Reminders will be stored in Sheets and evaluated client-side.",
+      "plannedLabel": "Planned:",
+      "plannedBullets": [
+        "Create reminders (one-time or recurring)",
+        "Upcoming + overdue views",
+        "Notification permission UX (only after user action)"
+      ]
+    },
+    "settings": {
+      "metaTitle": "Settings",
+      "title": "Settings",
+      "description": "Account, language, and TankLog storage live here.",
+      "account": {
+        "title": "Account",
+        "description": "Signed in with Google (frontend-only OAuth).",
+        "googleUserLabel": "Google user",
+        "profileUnavailable": "Profile unavailable (token-only session).",
+        "tokenExpiresLabel": "Token expires",
+        "scopesLabel": "Scopes"
+      },
+      "storage": {
+        "title": "Storage (Google Drive)",
+        "description": "Select your TankLog folder in Google Drive. Until it’s connected, the rest of the app is locked.",
+        "statusLabel": "Connection status",
+        "statusConnected": "Connected",
+        "statusNotConnected": "Not connected",
+        "openInDrive": "Open folder in Google Drive",
+        "label": "TankLog folder ID or URL",
+        "placeholder": "https://drive.google.com/drive/folders/…",
+        "hint": "Paste the TankLog folder link/ID. You can also search for existing “TankLog” folders or create one.",
+        "connect": "Connect folder",
+        "disconnect": "Disconnect",
+        "findExisting": "Find existing “TankLog” folders",
+        "searching": "Searching…",
+        "foundLabel": "Found folders",
+        "useThisFolder": "Use this folder",
+        "create": "Create “TankLog” folder",
+        "createConfirm": "Create folder",
+        "creating": "Creating…",
+        "createDialog": {
+          "title": "Create TankLog folder",
+          "description": "TankLog will create a “TankLog” folder in your Drive root. You can move it later if you want."
+        },
+        "errors": {
+          "invalidFolder": "Enter a valid Google Drive folder ID or URL.",
+          "noFoldersFound": "No “TankLog” folders found in your Drive.",
+          "searchFailed": "Failed to search folders.",
+          "createFailed": "Failed to create the TankLog folder."
+        },
+        "success": {
+          "connected": "Folder connected.",
+          "disconnected": "Folder disconnected.",
+          "created": "TankLog folder created and connected."
+        }
+      },
+      "tanks": {
+        "title": "Tanks",
+        "description": "Create tanks (Drive folder + per-tank spreadsheet) and select the active one.",
+        "locked": "Connect your TankLog Drive folder first.",
+        "listTitle": "Your tanks",
+        "listHint": "Tanks are discovered from Drive folders inside TankLog.",
+        "refresh": "Refresh",
+        "add": "Add tank",
+        "open": "Open",
+        "loading": "Loading tanks…",
+        "empty": "No tanks found. Create your first tank to get started.",
+        "creating": "Creating…",
+        "createConfirm": "Create tank",
+        "createDialog": {
+          "title": "Add a new tank",
+          "description": "TankLog will create the tank folder structure and initialize tank_data.xlsx with the required sheets."
+        },
+        "fields": {
+          "name": "Tank name",
+          "type": "Tank type",
+          "volume": "Volume (liters)",
+          "startDate": "Start date",
+          "notes": "Notes"
+        },
+        "placeholders": {
+          "name": "e.g. Reef 300L",
+          "volume": "e.g. 300",
+          "notes": "Optional"
+        },
+        "types": {
+          "freshwater": "Freshwater",
+          "marine": "Marine",
+          "reef": "Reef"
+        },
+        "errors": {
+          "noRootFolder": "Connect the TankLog folder first.",
+          "missingName": "Enter a tank name.",
+          "invalidVolume": "Enter a valid volume in liters.",
+          "createFailed": "Failed to create the tank."
+        },
+        "success": {
+          "created": "Tank created."
+        }
+      }
+    },
+    "login": {
+      "metaTitle": "Login",
+      "title": "Sign in",
+      "description": "TankLog uses Google to access your own Google Sheets + Drive (no backend, no proprietary DB).",
+      "cardTitle": "Continue with Google",
+      "cardDescription": "We’ll request access to Sheets and Drive (folder discovery + files created by TankLog).",
+      "missingClientIdPrefix": "Missing",
+      "missingClientIdSuffix": "See",
+      "errors": {
+        "missingClientId": "Missing Google Client ID. Set NUXT_PUBLIC_GOOGLE_CLIENT_ID and reload.",
+        "loginFailed": "Login failed."
+      },
+      "sessionNote": "Session is stored in this browser tab (session storage)."
+    }
+  }
+}
+

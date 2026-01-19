@@ -2,38 +2,46 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-useHead({
-  title: "Events",
+const { t, tm } = useI18n()
+
+useHead(() => ({
+  title: t("pages.events.metaTitle"),
+}))
+
+const plannedBullets = computed(() => {
+  const value = tm("pages.events.plannedBullets")
+  return Array.isArray(value) ? value : []
 })
 </script>
 
 <template>
   <section class="space-y-6">
     <div class="space-y-2">
-      <h1 class="text-2xl font-semibold tracking-tight">Events</h1>
+      <h1 class="text-2xl font-semibold tracking-tight">{{ $t("pages.events.title") }}</h1>
       <p class="max-w-prose text-muted-foreground">
-        Track interventions like water changes, dosing, equipment swaps, and maintenance.
+        {{ $t("pages.events.description") }}
       </p>
     </div>
 
     <Card>
       <CardHeader>
-        <CardTitle>Coming in Sprint 10</CardTitle>
-        <CardDescription>Events will be stored in the user’s Google Sheet.</CardDescription>
+        <CardTitle>{{ $t("pages.events.comingTitle") }}</CardTitle>
+        <CardDescription>{{ $t("pages.events.comingDescription") }}</CardDescription>
       </CardHeader>
       <CardContent class="text-sm text-muted-foreground">
-        Planned:
+        {{ $t("pages.events.plannedLabel") }}
         <ul class="mt-2 list-disc space-y-1 pl-5">
-          <li>Create events (type, date, notes, tank)</li>
-          <li>List and filter per tank</li>
+          <li v-for="item in plannedBullets" :key="item">
+            {{ item }}
+          </li>
         </ul>
       </CardContent>
       <CardFooter class="flex flex-wrap gap-2">
         <Button as-child>
-          <NuxtLink to="/reminders">Go to Reminders</NuxtLink>
+          <NuxtLink to="/reminders">{{ $t("actions.goToReminders") }}</NuxtLink>
         </Button>
         <Button variant="secondary" as-child>
-          <NuxtLink to="/photos">Go to Photos</NuxtLink>
+          <NuxtLink to="/photos">{{ $t("actions.goToPhotos") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>

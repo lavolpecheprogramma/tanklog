@@ -1,0 +1,248 @@
+{
+  "a11y": {
+    "skipToContent": "Vai al contenuto",
+    "googleAccount": "Account Google",
+    "googleAccountWithLabel": "Account Google: {label}"
+  },
+  "nav": {
+    "home": "Home",
+    "tank": "Vasca",
+    "tests": "Test",
+    "photos": "Foto",
+    "events": "Eventi",
+    "reminders": "Promemoria",
+    "settings": "Impostazioni"
+  },
+  "language": {
+    "label": "Lingua",
+    "options": {
+      "it": "Italiano",
+      "en": "Inglese"
+    }
+  },
+  "tank": {
+    "activeLabel": "Vasca attiva",
+    "selector": {
+      "loading": "Caricamento vasche…",
+      "empty": "Nessuna vasca trovata",
+      "error": "Impossibile caricare le vasche"
+    }
+  },
+  "footer": {
+    "tagline": "TankLog — solo frontend, statico, dati sotto il tuo controllo."
+  },
+  "actions": {
+    "logout": "Esci",
+    "loggingOut": "Uscita…",
+    "backToHome": "Torna alla Home",
+    "goToPhotos": "Vai a Foto",
+    "goToEvents": "Vai a Eventi",
+    "goToReminders": "Vai a Promemoria",
+    "goToSettings": "Vai a Impostazioni",
+    "goToWaterTests": "Vai a Test acqua",
+    "openActiveTank": "Apri vasca attiva",
+    "openWaterTests": "Apri Test acqua",
+    "previewAddTest": "Anteprima “Aggiungi test”",
+    "signInWithGoogle": "Accedi con Google",
+    "signIn": "Accedi",
+    "signingIn": "Accesso…"
+  },
+  "pages": {
+    "home": {
+      "metaTitle": "Home",
+      "heroTitle": "TankLog",
+      "heroDescription": "Un registro acquariofilo solo frontend per salvare test, eventi e foto e individuare trend nel tempo.",
+      "sprint1": {
+        "title": "Sprint 1",
+        "description": "Scheletri delle pagine + navigazione coerente (con selettore “vasca attiva” fittizio).",
+        "bullets": [
+          "Tutte le route principali esistono: vasche, test, foto, eventi, promemoria, impostazioni",
+          "Il selettore “vasca attiva” è visibile nell’header (lista fittizia)",
+          "Navigazione mobile-friendly (tab scorrevoli)"
+        ]
+      }
+    },
+    "tank": {
+      "metaTitle": "Vasca",
+      "title": "Vasca",
+      "description": "Questa diventerà la dashboard principale per vasca (ultimi valori, avvisi, grafici, foto ed eventi).",
+      "sprint1": {
+        "title": "Scheletro Sprint 1",
+        "descriptionPrefix": "Stai visualizzando una route fittizia:",
+        "nextUpLabel": "Prossimi passi:",
+        "bullets": [
+            "Leggere le vasche reali dalla cartella TankLog su Drive (Sprint 4)",
+          "Riunire qui test, range e grafici (Sprint 6–9)"
+        ]
+      },
+      "unknown": {
+        "title": "Vasca sconosciuta",
+        "descriptionPrefix": "Questo id vasca non è ancora riconosciuto:",
+        "body": "Per lo Sprint 1 stiamo usando una lista fittizia. Scegli una “Vasca attiva” dall’header per navigare verso una pagina valida."
+      }
+    },
+    "tests": {
+      "metaTitle": "Test acqua",
+      "title": "Test acqua",
+      "description": "Registra misurazioni, consulta lo storico e individua trend nel tempo.",
+      "comingTitle": "In arrivo nello Sprint 5–8",
+      "comingDescription": "Nello Sprint 1 stiamo solo costruendo gli scheletri delle pagine e la navigazione.",
+      "plannedLabel": "Previsto:",
+      "plannedBullets": [
+        "Aggiungere un test (scrittura su Google Sheets)",
+        "Storico + dettaglio",
+        "Valori fuori range + grafici"
+      ],
+      "dialog": {
+        "title": "Aggiungi test acqua (segnaposto)",
+        "description": "Diventerà il form reale nello Sprint 5. Per ora valida il componente Dialog (focus, tastiera, ESC per chiudere).",
+        "body": "Per ora non viene salvato nulla — TankLog resta solo frontend e con dati sotto il tuo controllo."
+      }
+    },
+    "photos": {
+      "metaTitle": "Foto",
+      "title": "Foto",
+      "description": "Crea una timeline visiva dei progressi della vasca e confronta i cambiamenti nel tempo.",
+      "comingTitle": "In arrivo nello Sprint 13–14",
+      "comingDescription": "Caricheremo su Google Drive e salveremo i metadati in Google Sheets.",
+      "plannedLabel": "Previsto:",
+      "plannedBullets": [
+        "Caricamento foto (Drive)",
+        "Galleria timeline (per vasca)",
+        "Confronto base"
+      ]
+    },
+    "events": {
+      "metaTitle": "Eventi",
+      "title": "Eventi",
+      "description": "Traccia interventi come cambi d’acqua, dosaggi, sostituzioni e manutenzione.",
+      "comingTitle": "In arrivo nello Sprint 10",
+      "comingDescription": "Gli eventi saranno salvati nel Google Sheet dell’utente.",
+      "plannedLabel": "Previsto:",
+      "plannedBullets": [
+        "Creare eventi (tipo, data, note, vasca)",
+        "Lista e filtri per vasca"
+      ]
+    },
+    "reminders": {
+      "metaTitle": "Promemoria",
+      "title": "Promemoria",
+      "description": "Imposta attività ricorrenti (cambio acqua, dosaggi, batterie) e ricevi notifiche best-effort.",
+      "comingTitle": "In arrivo nello Sprint 11–12",
+      "comingDescription": "I promemoria saranno salvati su Sheets e valutati lato client.",
+      "plannedLabel": "Previsto:",
+      "plannedBullets": [
+        "Creare promemoria (una tantum o ricorrenti)",
+        "Vista in arrivo + scaduti",
+        "UX permessi notifiche (solo dopo un’azione utente)"
+      ]
+    },
+    "settings": {
+      "metaTitle": "Impostazioni",
+      "title": "Impostazioni",
+      "description": "Qui trovi account, lingua e storage di TankLog.",
+      "account": {
+        "title": "Account",
+        "description": "Accesso con Google (OAuth solo frontend).",
+        "googleUserLabel": "Utente Google",
+        "profileUnavailable": "Profilo non disponibile (sessione solo token).",
+        "tokenExpiresLabel": "Scadenza token",
+        "scopesLabel": "Scope"
+      },
+      "storage": {
+        "title": "Storage (Google Drive)",
+        "description": "Seleziona la cartella TankLog su Google Drive. Finché non è collegata, il resto dell’app è bloccato.",
+        "statusLabel": "Stato connessione",
+        "statusConnected": "Collegato",
+        "statusNotConnected": "Non collegato",
+        "openInDrive": "Apri la cartella su Google Drive",
+        "label": "ID o URL della cartella TankLog",
+        "placeholder": "https://drive.google.com/drive/folders/…",
+        "hint": "Incolla link/ID della cartella TankLog. Puoi anche cercare cartelle “TankLog” esistenti o crearne una.",
+        "connect": "Collega cartella",
+        "disconnect": "Disconnetti",
+        "findExisting": "Cerca cartelle “TankLog” esistenti",
+        "searching": "Ricerca…",
+        "foundLabel": "Cartelle trovate",
+        "useThisFolder": "Usa questa cartella",
+        "create": "Crea cartella “TankLog”",
+        "createConfirm": "Crea cartella",
+        "creating": "Creazione…",
+        "createDialog": {
+          "title": "Crea cartella TankLog",
+          "description": "TankLog creerà una cartella “TankLog” nella root del tuo Drive. Se vuoi, puoi spostarla più tardi."
+        },
+        "errors": {
+          "invalidFolder": "Inserisci un ID o URL valido di una cartella Google Drive.",
+          "noFoldersFound": "Nessuna cartella “TankLog” trovata nel tuo Drive.",
+          "searchFailed": "Ricerca cartelle non riuscita.",
+          "createFailed": "Creazione della cartella TankLog non riuscita."
+        },
+        "success": {
+          "connected": "Cartella collegata.",
+          "disconnected": "Cartella disconnessa.",
+          "created": "Cartella TankLog creata e collegata."
+        }
+      },
+      "tanks": {
+        "title": "Vasche",
+        "description": "Crea vasche (cartella Drive + foglio per vasca) e seleziona quella attiva.",
+        "locked": "Collega prima la cartella TankLog su Drive.",
+        "listTitle": "Le tue vasche",
+        "listHint": "Le vasche vengono scoperte dalle cartelle Drive dentro TankLog.",
+        "refresh": "Aggiorna",
+        "add": "Aggiungi vasca",
+        "open": "Apri",
+        "loading": "Caricamento vasche…",
+        "empty": "Nessuna vasca trovata. Crea la prima vasca per iniziare.",
+        "creating": "Creazione…",
+        "createConfirm": "Crea vasca",
+        "createDialog": {
+          "title": "Aggiungi una nuova vasca",
+          "description": "TankLog creerà la struttura della cartella e inizializzerà tank_data.xlsx con i fogli richiesti."
+        },
+        "fields": {
+          "name": "Nome vasca",
+          "type": "Tipo vasca",
+          "volume": "Volume (litri)",
+          "startDate": "Data avvio",
+          "notes": "Note"
+        },
+        "placeholders": {
+          "name": "es. Reef 300L",
+          "volume": "es. 300",
+          "notes": "Opzionale"
+        },
+        "types": {
+          "freshwater": "Acqua dolce",
+          "marine": "Marino",
+          "reef": "Reef"
+        },
+        "errors": {
+          "noRootFolder": "Collega prima la cartella TankLog.",
+          "missingName": "Inserisci un nome vasca.",
+          "invalidVolume": "Inserisci un volume valido in litri.",
+          "createFailed": "Creazione vasca non riuscita."
+        },
+        "success": {
+          "created": "Vasca creata."
+        }
+      }
+    },
+    "login": {
+      "metaTitle": "Accesso",
+      "title": "Accedi",
+      "description": "TankLog usa Google per accedere ai tuoi Google Sheets + Drive (niente backend, niente DB proprietari).",
+      "cardTitle": "Continua con Google",
+      "cardDescription": "Richiederemo accesso a Sheets e Drive (ricerca cartelle + file creati da TankLog).",
+      "missingClientIdPrefix": "Manca",
+      "missingClientIdSuffix": "Vedi",
+      "errors": {
+        "missingClientId": "Client ID Google mancante. Imposta NUXT_PUBLIC_GOOGLE_CLIENT_ID e ricarica.",
+        "loginFailed": "Accesso non riuscito."
+      },
+      "sessionNote": "La sessione è salvata in questa scheda del browser (session storage)."
+    }
+  }
+}
+

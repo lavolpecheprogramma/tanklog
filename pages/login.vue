@@ -6,9 +6,11 @@ definePageMeta({
   layout: "auth",
 })
 
-useHead({
-  title: "Login",
-})
+const { t } = useI18n()
+
+useHead(() => ({
+  title: t("pages.login.metaTitle"),
+}))
 
 const route = useRoute()
 const auth = useAuth()
@@ -38,7 +40,7 @@ async function onLogin() {
   errorMessage.value = null
 
   if (!hasClientId.value) {
-    errorMessage.value = "Missing Google Client ID. Set NUXT_PUBLIC_GOOGLE_CLIENT_ID and reload."
+    errorMessage.value = t("pages.login.errors.missingClientId")
     return
   }
 
@@ -47,7 +49,7 @@ async function onLogin() {
     await auth.loginWithGoogle({ prompt: "select_account" })
     await navigateTo(redirectTarget.value)
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : "Login failed."
+    errorMessage.value = error instanceof Error ? error.message : t("pages.login.errors.loginFailed")
   } finally {
     isSubmitting.value = false
   }
@@ -57,21 +59,23 @@ async function onLogin() {
 <template>
   <section class="mx-auto w-full max-w-md space-y-6">
     <div class="space-y-2">
-      <h1 class="text-2xl font-semibold tracking-tight">Sign in</h1>
+      <h1 class="text-2xl font-semibold tracking-tight">{{ $t("pages.login.title") }}</h1>
       <p class="text-muted-foreground">
-        TankLog uses Google to access your own Google Sheets + Drive (no backend, no proprietary DB).
+        {{ $t("pages.login.description") }}
       </p>
     </div>
 
     <Card>
       <CardHeader>
-        <CardTitle>Continue with Google</CardTitle>
-        <CardDescription>We’ll request access to Sheets and Drive (files created by TankLog).</CardDescription>
+        <CardTitle>{{ $t("pages.login.cardTitle") }}</CardTitle>
+        <CardDescription>{{ $t("pages.login.cardDescription") }}</CardDescription>
       </CardHeader>
 
       <CardContent class="space-y-4">
         <p v-if="!hasClientId" class="text-sm text-destructive" role="alert">
-          Missing <code class="rounded bg-muted px-1 py-0.5">NUXT_PUBLIC_GOOGLE_CLIENT_ID</code>. See
+          {{ $t("pages.login.missingClientIdPrefix") }}
+          <code class="rounded bg-muted px-1 py-0.5">NUXT_PUBLIC_GOOGLE_CLIENT_ID</code>.
+          {{ $t("pages.login.missingClientIdSuffix") }}
           <code class="rounded bg-muted px-1 py-0.5">docs/google-setup.md</code>.
         </p>
 
@@ -82,12 +86,12 @@ async function onLogin() {
 
       <CardFooter class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Button type="button" class="w-full sm:w-auto" :disabled="isSubmitting || !hasClientId" @click="onLogin">
-          <span v-if="isSubmitting">Signing in…</span>
-          <span v-else>Sign in with Google</span>
+          <span v-if="isSubmitting">{{ $t("actions.signingIn") }}</span>
+          <span v-else>{{ $t("actions.signInWithGoogle") }}</span>
         </Button>
 
         <p class="text-xs text-muted-foreground">
-          Session is stored in this browser tab (session storage).
+          {{ $t("pages.login.sessionNote") }}
         </p>
       </CardFooter>
     </Card>

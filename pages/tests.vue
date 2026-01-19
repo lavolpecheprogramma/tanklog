@@ -10,55 +10,61 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-useHead({
-  title: "Water tests",
+const { t, tm } = useI18n()
+
+useHead(() => ({
+  title: t("pages.tests.metaTitle"),
+}))
+
+const plannedBullets = computed(() => {
+  const value = tm("pages.tests.plannedBullets")
+  return Array.isArray(value) ? value : []
 })
 </script>
 
 <template>
   <section class="space-y-6">
     <div class="space-y-2">
-      <h1 class="text-2xl font-semibold tracking-tight">Water tests</h1>
+      <h1 class="text-2xl font-semibold tracking-tight">{{ $t("pages.tests.title") }}</h1>
       <p class="max-w-prose text-muted-foreground">
-        Log measurements, review history, and spot trends over time.
+        {{ $t("pages.tests.description") }}
       </p>
     </div>
 
     <Card>
       <CardHeader>
-        <CardTitle>Coming in Sprint 5–8</CardTitle>
-        <CardDescription>In Sprint 1 we’re just building the page skeletons and navigation.</CardDescription>
+        <CardTitle>{{ $t("pages.tests.comingTitle") }}</CardTitle>
+        <CardDescription>{{ $t("pages.tests.comingDescription") }}</CardDescription>
       </CardHeader>
       <CardContent class="text-sm text-muted-foreground">
-        Planned:
+        {{ $t("pages.tests.plannedLabel") }}
         <ul class="mt-2 list-disc space-y-1 pl-5">
-          <li>Add a test (write to Google Sheets)</li>
-          <li>History list + detail view</li>
-          <li>Out-of-range highlighting + charts</li>
+          <li v-for="item in plannedBullets" :key="item">
+            {{ item }}
+          </li>
         </ul>
       </CardContent>
       <CardFooter class="flex flex-wrap gap-2">
         <Dialog>
           <DialogTrigger as-child>
-            <Button variant="secondary">Preview “Add test”</Button>
+            <Button variant="secondary">{{ $t("actions.previewAddTest") }}</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add water test (placeholder)</DialogTitle>
+              <DialogTitle>{{ $t("pages.tests.dialog.title") }}</DialogTitle>
               <UiDialogDescription>
-                This becomes the real form in Sprint 5. For now, it validates the Dialog primitive (focus,
-                keyboard, escape to close).
+                {{ $t("pages.tests.dialog.description") }}
               </UiDialogDescription>
             </DialogHeader>
 
             <div class="text-sm text-muted-foreground">
-              Nothing is saved yet — TankLog remains frontend-only and user-controlled.
+              {{ $t("pages.tests.dialog.body") }}
             </div>
           </DialogContent>
         </Dialog>
 
         <Button as-child>
-          <NuxtLink to="/photos">Go to Photos</NuxtLink>
+          <NuxtLink to="/photos">{{ $t("actions.goToPhotos") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>

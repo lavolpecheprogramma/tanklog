@@ -22,7 +22,7 @@
 - Sprint 1: Page skeletons + app navigation
 - Sprint 2: i18n foundation (it/en)
 - Sprint 3: Google setup + Auth (client-side)
-- Sprint 4: Google Sheets: connect + read basics
+- Sprint 4: Google Drive: connect + discover tanks (per-tank sheets)
 - Sprint 5: Water tests: create (write to Sheets)
 - Sprint 6: Water tests: list + detail
 - Sprint 7: Parameter ranges + out-of-range highlighting
@@ -40,39 +40,41 @@
 ## Sprint 0 — Repo scaffold + first deploy
 **Goal**: a running Nuxt 3 static app with a clean UI baseline.
 
-- [ ] Scaffold Nuxt 3 (TypeScript) configured for **SSG**
-- [ ] Install + configure Tailwind + `shadcn-vue`
-- [ ] Enable PWA (`@vite-pwa/nuxt`): manifest + icons + service worker
-- [ ] Offline cache baseline (app shell + static assets)
-- [ ] App shell: header + simple navigation + responsive container
+- [x] Scaffold Nuxt 3 (TypeScript) configured for **SSG**
+- [x] Install + configure Tailwind + `shadcn-vue`
+- [x] Enable PWA (`@vite-pwa/nuxt`): manifest + icons + service worker
+- [x] Offline cache baseline (app shell + static assets)
+- [x] App shell: header + simple navigation + responsive container
+- [x] Add GitHub Pages deploy workflow (`.github/workflows/deploy.yml`)
 - [ ] Deploy to a free host (GitHub Pages / Netlify / Cloudflare Pages)
 
 **Done when**
-- [ ] `npm run build` produces a static output and deploy is live
-- [ ] Home page loads and navigation works
-- [ ] App is installable as a PWA (manifest detected)
-- [ ] Home loads offline after a first successful visit
+- [x] `npm run generate` produces a static output
+- [ ] Deploy is live
+- [x] Home page loads and navigation works
+- [x] App is installable as a PWA (manifest detected)
+- [x] Home loads offline after a first successful visit
 
 ## Sprint 1 — Page skeletons + app navigation
 **Goal**: all main pages exist and feel coherent.
 
-- [ ] Create pages: `/`, `/vasques/[id]`, `/tests`, `/photos`, `/events`, `/reminders`, `/settings`
-- [ ] Add active tank selector (temporary “mock” list)
-- [ ] Add simple UI primitives (Card, Button, Dialog) and consistent spacing
+- [x] Create pages: `/`, `/vasques/[id]`, `/tests`, `/photos`, `/events`, `/reminders`, `/settings`
+- [x] Add active tank selector (temporary “mock” list)
+- [x] Add simple UI primitives (Card, Button, Dialog) and consistent spacing
 
 **Done when**
-- [ ] You can click through all pages without broken routes
-- [ ] “Active tank” is visible in the UI (even if mocked)
+- [x] You can click through all pages without broken routes
+- [x] “Active tank” is visible in the UI (even if mocked)
 
 ## Sprint 2 — i18n foundation (it/en)
 **Goal**: the whole UI can switch language.
 
-- [ ] Configure Nuxt i18n (Italian + English)
-- [ ] Add `LanguageSwitcher` component
-- [ ] Localize navigation, page titles, buttons, empty states
+- [x] Configure Nuxt i18n (Italian + English)
+- [x] Add `LanguageSwitcher` component
+- [x] Localize navigation, page titles, buttons, empty states
 
 **Done when**
-- [ ] Language switch updates UI immediately and persists (local storage)
+- [x] Language switch updates UI immediately and persists (local storage)
 
 ## Sprint 3 — Google setup + Auth (client-side)
 **Goal**: login/logout works and we can call Google APIs.
@@ -87,20 +89,26 @@
 - [x] Login + logout work
 - [x] We can obtain an access token with the right scopes
 
-## Sprint 4 — Google Sheets: connect + read basics
-**Goal**: read user data from a spreadsheet.
+## Sprint 4 — Google Drive: connect + discover tanks (per-tank sheets)
+**Goal**: connect the user’s TankLog folder and discover tanks from Drive.
 
-- [ ] `useGoogleSheets()` composable: auth header + basic read helpers
-- [ ] “Connect spreadsheet” step (spreadsheet ID stored locally)
-- [ ] Read `TANKS` and show real tank list + active tank selection
+- [x] `useGoogleDrive()` composable: auth header + list helpers (folders/files)
+- [x] `useGoogleSheets()` composable: basic read helpers (values/batch updates)
+- [x] “Connect TankLog folder” step (Drive folder ID stored locally)
+- [x] Discover tanks from Drive:
+  - list `TankLog/` subfolders (one folder per tank)
+  - find `tank_data.xlsx` in each tank folder
+  - read `TANK_INFO` and show real tank list + active tank selection
+- [x] Gate the app: until the TankLog folder is connected, only Settings is accessible
+- [x] Create tank: create the tank folder structure + initialize `tank_data.xlsx` with required sheets/headers
 
 **Done when**
-- [ ] App loads tanks from the user’s sheet and remembers the chosen sheet
+- [x] App requires the TankLog Drive folder, remembers it locally, loads tanks from per‑tank sheets, and can create a new tank end‑to‑end
 
 ## Sprint 5 — Water tests: create (write to Sheets)
 **Goal**: users can add a water test record.
 
-- [ ] Define WATER_TESTS model + client-side ID generation
+- [ ] Define WATER_TESTS model (measurement-based: one row per parameter measurement) + client-side ID generation
 - [ ] Water test form (minimal: date, tank, key params)
 - [ ] Write to `WATER_TESTS` tab via Sheets API
 

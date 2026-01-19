@@ -2,42 +2,49 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-useHead({
-  title: 'Home'
-})
+const { t, tm } = useI18n()
+
+useHead(() => ({
+  title: t("pages.home.metaTitle"),
+}))
 
 const { activeTank } = useActiveTank()
+
+const sprint1Bullets = computed(() => {
+  const value = tm("pages.home.sprint1.bullets")
+  return Array.isArray(value) ? value : []
+})
 </script>
 
 <template>
   <section class="space-y-6">
     <div class="space-y-2">
-      <h1 class="text-2xl font-semibold tracking-tight">TankLog</h1>
+      <h1 class="text-2xl font-semibold tracking-tight">{{ $t("pages.home.heroTitle") }}</h1>
       <p class="max-w-prose text-muted-foreground">
-        A frontend-only aquarium logbook to capture tests, events, photos, and spot trends over time.
+        {{ $t("pages.home.heroDescription") }}
       </p>
     </div>
 
     <Card>
       <CardHeader>
-        <CardTitle>Sprint 1</CardTitle>
+        <CardTitle>{{ $t("pages.home.sprint1.title") }}</CardTitle>
         <CardDescription>
-          Page skeletons + coherent navigation (with a mocked “active tank” selector).
+          {{ $t("pages.home.sprint1.description") }}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-          <li>All main routes exist: tanks, tests, photos, events, reminders, settings</li>
-          <li>Active tank selector is visible in the header (mock list)</li>
-          <li>Mobile-friendly nav (scrollable tabs)</li>
+          <li v-for="item in sprint1Bullets" :key="item">
+            {{ item }}
+          </li>
         </ul>
       </CardContent>
       <CardFooter class="flex gap-2">
         <Button as-child>
-          <NuxtLink :to="activeTank ? `/vasques/${activeTank.id}` : '/'">Open active tank</NuxtLink>
+          <NuxtLink :to="activeTank ? `/vasques/${activeTank.id}` : '/'">{{ $t("actions.openActiveTank") }}</NuxtLink>
         </Button>
         <Button variant="secondary" as-child>
-          <NuxtLink to="/tests">Open Water tests</NuxtLink>
+          <NuxtLink to="/tests">{{ $t("actions.openWaterTests") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>

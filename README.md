@@ -41,8 +41,12 @@ After a successful first visit, the app shell can load offline (best-effort, bro
 
 ### GitHub Pages
 - A workflow is included at `.github/workflows/deploy.yml`.
+- Enable GitHub Pages in your repo settings: **Settings → Pages → Build and deployment: GitHub Actions**.
 - Pushing to `main` builds and deploys `./.output/public`.
-- The workflow sets `NUXT_APP_BASE_URL` automatically for project pages (`/<repo>/`).
+- The workflow sets `NUXT_APP_BASE_URL` automatically for:
+  - User/Org pages (`<owner>.github.io`) → `/`
+  - Project pages (`/<repo>/`) → `/<repo>/`
+- Optional (recommended): set `NUXT_PUBLIC_GOOGLE_CLIENT_ID` as a repository secret so the deployed build has Google Login enabled.
 
 ### Netlify / Cloudflare Pages
 - **Build command**: `npm run generate`

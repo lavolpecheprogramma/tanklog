@@ -4,9 +4,9 @@ const baseURL = (globalThis as any).process?.env?.NUXT_APP_BASE_URL || '/'
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
-  modules: ['@nuxtjs/tailwindcss', '@vite-pwa/nuxt'],
+  modules: ['@nuxtjs/tailwindcss', '@vite-pwa/nuxt', '@nuxtjs/i18n'],
   css: ['~/assets/css/tailwind.css'],
-
+  ssr: false,
   runtimeConfig: {
     public: {
       // Google Identity Services OAuth client id (Web application)
@@ -21,6 +21,18 @@ export default defineNuxtConfig({
       extensions: ['vue']
     }
   ],
+
+  i18n: {
+    strategy: 'no_prefix',
+    defaultLocale: 'it',
+    langDir: 'locales',
+    locales: [
+      { code: 'it', iso: 'it-IT', name: 'Italiano', file: 'it.json' },
+      { code: 'en', iso: 'en-US', name: 'English', file: 'en.json' },
+    ],
+    detectBrowserLanguage: false,
+    vueI18n: './i18n.config.ts',
+  },
 
   // TankLog constraint: Static Site Generation (SSG), frontend-only
   nitro: {

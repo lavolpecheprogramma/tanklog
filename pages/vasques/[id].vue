@@ -2,9 +2,11 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-useHead({
-  title: "Tank",
-})
+const { t, tm } = useI18n()
+
+useHead(() => ({
+  title: t("pages.tank.metaTitle"),
+}))
 
 const route = useRoute()
 const { tanks, activeTankId, setActiveTankId } = useActiveTank()
@@ -14,7 +16,12 @@ const tankId = computed(() => {
   return Array.isArray(raw) ? raw[0] : raw
 })
 
-const tank = computed(() => tanks.value.find((t) => t.id === tankId.value))
+const tank = computed(() => tanks.value.find((tankItem) => tankItem.id === tankId.value))
+
+const nextUpBullets = computed(() => {
+  const value = tm("pages.tank.sprint1.bullets")
+  return Array.isArray(value) ? value : []
+})
 
 watchEffect(() => {
   if (!tank.value) return
@@ -26,55 +33,57 @@ watchEffect(() => {
   <section class="space-y-6">
     <div class="space-y-2">
       <h1 class="text-2xl font-semibold tracking-tight">
-        <span>Tank</span>
+        <span>{{ $t("pages.tank.title") }}</span>
         <span v-if="tank" class="text-muted-foreground">· {{ tank.name }}</span>
       </h1>
       <p class="max-w-prose text-muted-foreground">
-        This will become the main per-tank dashboard (latest values, alerts, charts, photos, and events).
+        {{ $t("pages.tank.description") }}
       </p>
     </div>
 
     <Card v-if="tank">
       <CardHeader>
-        <CardTitle>Sprint 1 skeleton</CardTitle>
+        <CardTitle>{{ $t("pages.tank.sprint1.title") }}</CardTitle>
         <CardDescription>
-          You’re viewing a mocked tank route: <code class="rounded bg-muted px-1 py-0.5">{{ tank.id }}</code>
+          {{ $t("pages.tank.sprint1.descriptionPrefix") }}
+          <code class="rounded bg-muted px-1 py-0.5">{{ tank.id }}</code>
         </CardDescription>
       </CardHeader>
       <CardContent class="text-sm text-muted-foreground">
-        Next up:
+        {{ $t("pages.tank.sprint1.nextUpLabel") }}
         <ul class="mt-2 list-disc space-y-1 pl-5">
-          <li>Read real tanks from the user’s Google Sheet (Sprint 4)</li>
-          <li>Bring together tests, ranges, and charts here (Sprint 6–9)</li>
+          <li v-for="item in nextUpBullets" :key="item">
+            {{ item }}
+          </li>
         </ul>
       </CardContent>
       <CardFooter class="flex flex-wrap gap-2">
         <Button as-child>
-          <NuxtLink to="/tests">Water tests</NuxtLink>
+          <NuxtLink to="/tests">{{ $t("pages.tests.title") }}</NuxtLink>
         </Button>
         <Button variant="secondary" as-child>
-          <NuxtLink to="/photos">Photos</NuxtLink>
+          <NuxtLink to="/photos">{{ $t("nav.photos") }}</NuxtLink>
         </Button>
         <Button variant="secondary" as-child>
-          <NuxtLink to="/events">Events</NuxtLink>
+          <NuxtLink to="/events">{{ $t("nav.events") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>
 
     <Card v-else>
       <CardHeader>
-        <CardTitle>Unknown tank</CardTitle>
+        <CardTitle>{{ $t("pages.tank.unknown.title") }}</CardTitle>
         <CardDescription>
-          We don’t recognize this tank id yet: <code class="rounded bg-muted px-1 py-0.5">{{ tankId }}</code>
+          {{ $t("pages.tank.unknown.descriptionPrefix") }}
+          <code class="rounded bg-muted px-1 py-0.5">{{ tankId }}</code>
         </CardDescription>
       </CardHeader>
       <CardContent class="text-sm text-muted-foreground">
-        For Sprint 1 we’re using a temporary mock list. Pick an “Active tank” from the header to navigate
-        to a valid tank page.
+        {{ $t("pages.tank.unknown.body") }}
       </CardContent>
       <CardFooter class="flex flex-wrap gap-2">
         <Button as-child>
-          <NuxtLink to="/">Back to Home</NuxtLink>
+          <NuxtLink to="/">{{ $t("actions.backToHome") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>

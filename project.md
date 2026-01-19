@@ -101,19 +101,52 @@ Reminder notifications are **best-effort** without a backend: reliable backgroun
 
 ## Data Model (Source of Truth)
 
-Data is organized in a **single Google Sheet** with the following tabs:
+TankLog stores data **per tank** (no shared database across tanks).
 
-- TANKS
-- WATER_TESTS
-- ANIMALS
-- PHOTOS
-- EVENTS
-- REMINDERS
-- EQUIPMENT
-- PARAMETER_RANGES
+- Each tank has a dedicated Google Drive folder: `Tank_<tank_id>_<tank_name>`
+- Inside that folder there is one Google Spreadsheet: `tank_data.xlsx`
+- The full storage architecture is defined in `docs/schema_sheets.md` (Drive + Sheets)
 
-Each row = one record
-IDs generated client-side
+### WATER_TESTS (measurement-based)
+
+TankLog stores water tests as an **event/measurement log**:
+
+- **One row in `WATER_TESTS` represents ONE measurement of ONE parameter.**
+- A “test session” is represented by **multiple rows**, all sharing the same:
+  - `test_group_id`
+  - `date`
+
+#### Required sheet structure
+
+- **Sheet name**: `WATER_TESTS`
+
+**Columns:**
+
+- `id` (unique measurement id, generated client-side)
+- `test_group_id` (same value for measurements taken in the same session)
+- `date` (ISO string)
+- `parameter` (string, e.g. `pH`, `KH`, `NO3`)
+- `value` (number)
+- `unit` (string)
+- `method` (optional, e.g. test kit)
+- `note` (optional)
+
+#### Behavior
+
+- If a user submits a form with multiple parameters, the app must create **multiple rows** (one per parameter), all sharing the same `test_group_id` and `date`.
+- The UI may look like a “single test”, but storage is always **atomic** per measurement.
+
+#### Do NOT
+
+- Do NOT store multiple parameters in the same row.
+- Do NOT create one sheet per parameter.
+- Do NOT rely on empty cells for missing parameters (missing measurements are represented by **missing rows**, not blanks).
+
+#### Rationale
+
+- Tests may be partial (e.g. only `pH` today, `KH` another day).
+- This model simplifies charts, trends, filtering, and future analysis.
+- This is the standard approach for time-series and logging systems.
 
 (see `docs/schema_sheets.md`)
 
@@ -194,7 +227,7 @@ IDs generated client-side
 ### Phase 2 – Core Data
 - CRUD for WATER_TESTS
 - CRUD for REMINDERS
-- Read TANKS
+- Discover tanks from Drive (per-tank sheets via `TANK_INFO`)
 
 ### Phase 3 – Visualization
 - Charts
