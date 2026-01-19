@@ -1,11 +1,19 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-const baseURL = process.env.NUXT_APP_BASE_URL || '/'
+const baseURL = (globalThis as any).process?.env?.NUXT_APP_BASE_URL || '/'
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
 
   modules: ['@nuxtjs/tailwindcss', '@vite-pwa/nuxt'],
   css: ['~/assets/css/tailwind.css'],
+
+  runtimeConfig: {
+    public: {
+      // Google Identity Services OAuth client id (Web application)
+      // Required for Sprint 3 (Auth) and all Google API calls.
+      googleClientId: (globalThis as any).process?.env?.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+    },
+  },
 
   components: [
     {
@@ -18,7 +26,7 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'static',
     prerender: {
-      routes: ['/vasques/reef-300l', '/vasques/nano-40l', '/vasques/fresh-120l']
+      routes: ['/login', '/vasques/reef-300l', '/vasques/nano-40l', '/vasques/fresh-120l']
     }
   },
 
@@ -30,6 +38,7 @@ export default defineNuxtConfig({
         { name: 'description', content: 'TankLog — frontend-only aquarium logbook and trends dashboard.' },
         { name: 'theme-color', content: '#09090b' }
       ],
+      script: [{ src: 'https://accounts.google.com/gsi/client', async: true, defer: true }],
       link: [
         { rel: 'icon', href: `${baseURL}favicon.ico`, sizes: 'any' },
         { rel: 'icon', href: `${baseURL}pwa-icon.svg`, type: 'image/svg+xml' },

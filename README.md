@@ -14,6 +14,13 @@ npm install
 npm run dev
 ```
 
+## Google login (Sprint 3)
+
+TankLog uses Google OAuth (client-side) via Google Identity Services.
+
+- Set `NUXT_PUBLIC_GOOGLE_CLIENT_ID` (see `docs/google-setup.md`)
+- Then reload the dev server
+
 ## Static build (SSG)
 
 ```bash

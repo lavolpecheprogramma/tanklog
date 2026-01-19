@@ -77,14 +77,15 @@
 ## Sprint 3 — Google setup + Auth (client-side)
 **Goal**: login/logout works and we can call Google APIs.
 
-- [ ] Create/Document Google Cloud project setup (OAuth consent + credentials)
-- [ ] Enable Google Sheets API + Google Drive API
-- [ ] Implement Google Identity Services login (client-side OAuth)
-- [ ] Store session/token safely for the session (and rehydrate on refresh)
+- [x] Create/Document Google Cloud project setup (OAuth consent + credentials)
+- [x] Enable Google Sheets API + Google Drive API
+- [x] Implement Google Identity Services login (client-side OAuth)
+- [x] Protect all dashboard routes behind login (Nuxt middleware + `/login`)
+- [x] Store session/token safely for the session (and rehydrate on refresh)
 
 **Done when**
-- [ ] Login + logout work
-- [ ] We can obtain an access token with the right scopes
+- [x] Login + logout work
+- [x] We can obtain an access token with the right scopes
 
 ## Sprint 4 — Google Sheets: connect + read basics
 **Goal**: read user data from a spreadsheet.

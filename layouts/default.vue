@@ -1,6 +1,18 @@
 <script setup lang="ts">
+import { Button } from "@/components/ui/button"
+
 const route = useRoute()
 const { activeTankId } = useActiveTank()
+const auth = useAuth()
+
+const userEmail = computed(() => auth.user.value?.email ?? null)
+const userName = computed(() => auth.user.value?.name ?? null)
+const userPicture = computed(() => auth.user.value?.picture ?? null)
+
+const userAltText = computed(() => {
+  const label = userEmail.value || userName.value
+  return label ? `Google account: ${label}` : "Google account"
+})
 
 const navItems = computed(() => {
   const tankHref = `/vasques/${activeTankId.value}`
@@ -15,6 +27,11 @@ const navItems = computed(() => {
     { to: "/settings", label: "Settings", isActive: route.path.startsWith("/settings") },
   ]
 })
+
+async function onLogout() {
+  await auth.logout({ revoke: true })
+  await navigateTo("/login")
+}
 </script>
 
 <template>
@@ -36,7 +53,22 @@ const navItems = computed(() => {
             TankLog
           </NuxtLink>
 
-          <ActiveTankSelector />
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <ActiveTankSelector />
+
+            <div class="flex items-center gap-2">
+              <img
+                v-if="userPicture"
+                :src="userPicture"
+                :alt="userAltText"
+                class="size-8 rounded-full border border-border"
+                referrerpolicy="no-referrer"
+              />
+              <span v-if="userEmail" class="text-sm text-muted-foreground">{{ userEmail }}</span>
+
+              <Button type="button" variant="secondary" size="sm" @click="onLogout">Logout</Button>
+            </div>
+          </div>
         </div>
 
         <nav class="mt-3 -mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1" aria-label="Primary">
