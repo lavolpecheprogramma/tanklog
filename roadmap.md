@@ -141,12 +141,14 @@
 ## Sprint 8 — Charts (trends over time)
 **Goal**: visualize stability and trends.
 
-- [ ] Add `ChartComponent` wrapper (Chart.js or ECharts)
-- [ ] Parameter time-series chart for active tank
-- [ ] Localize chart labels + tooltips (it/en)
+**Status**: Completed (started 2026-01-20)
+
+- [x] Add `ChartComponent` wrapper (Chart.js or ECharts)
+- [x] Parameter time-series chart for active tank
+- [x] Localize chart labels + tooltips (it/en)
 
 **Done when**
-- [ ] Users can select a parameter and see an accurate trend chart
+- [x] Users can select a parameter and see an accurate trend chart
 
 ## Sprint 9 — Tank detail page (bring it together)
 **Goal**: one place to understand the tank status.

@@ -97,6 +97,25 @@
         "History list + detail view",
         "Out-of-range highlighting + charts"
       ],
+      "trends": {
+        "title": "Trends",
+        "description": "Select a parameter to see an accurate trend chart over time.",
+        "loading": "Loading chart…",
+        "points": "{count} point(s)",
+        "fields": {
+          "parameter": "Parameter"
+        },
+        "axes": {
+          "date": "Date",
+          "value": "Value"
+        },
+        "ariaLabel": "Trend chart for {parameter}",
+        "empty": {
+          "noHistory": "No data yet.",
+          "noHistoryHint": "Add your first test above to see trends here.",
+          "noParameterData": "No measurements for this parameter yet."
+        }
+      },
       "dialog": {
         "title": "Add water test (placeholder)",
         "description": "This becomes the real form in Sprint 5. For now, it validates the Dialog primitive (focus, keyboard, escape to close).",

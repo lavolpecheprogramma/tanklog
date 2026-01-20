@@ -90,6 +90,8 @@ const filterDateFrom = ref("")
 const filterDateTo = ref("")
 const filterParameter = ref("")
 
+const trendParameter = ref("")
+
 const selectedSession = ref<WaterTestSession | null>(null)
 const isDetailOpen = ref(false)
 
@@ -274,6 +276,142 @@ const parameterOptions = computed(() => {
 
   return [...known, ...Array.from(unknown).sort((a, b) => a.localeCompare(b))]
 })
+
+type TrendPoint = { x: number; y: number }
+
+watch(
+  parameterOptions,
+  (options) => {
+    if (!options.length) {
+      trendParameter.value = ""
+      return
+    }
+
+    if (!trendParameter.value || !options.includes(trendParameter.value)) {
+      trendParameter.value = options[0]
+    }
+  },
+  { immediate: true }
+)
+
+const trendPoints = computed<TrendPoint[]>(() => {
+  const parameter = trendParameter.value.trim()
+  if (!parameter) return []
+
+  const points: TrendPoint[] = []
+
+  for (const session of sessions.value) {
+    const measurement = session.measurements.find((item) => item.parameter === parameter)
+    if (!measurement) continue
+
+    const ms = toEpochMs(session.date)
+    if (ms === null) continue
+
+    points.push({ x: ms, y: measurement.value })
+  }
+
+  points.sort((a, b) => a.x - b.x)
+  return points
+})
+
+const trendUnit = computed(() => {
+  const parameter = trendParameter.value.trim()
+  if (!parameter) return ""
+
+  for (const session of sessions.value) {
+    const measurement = session.measurements.find((item) => item.parameter === parameter)
+    if (measurement?.unit) return measurement.unit
+  }
+
+  return ""
+})
+
+function formatChartTick(value: number): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ""
+
+  try {
+    return new Intl.DateTimeFormat(locale.value, { month: "short", day: "2-digit" }).format(date)
+  } catch {
+    return date.toLocaleDateString()
+  }
+}
+
+function formatChartTooltipDate(value: number): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ""
+
+  try {
+    return new Intl.DateTimeFormat(locale.value, {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date)
+  } catch {
+    return date.toLocaleString()
+  }
+}
+
+const trendChartAriaLabel = computed(() => t("pages.tests.trends.ariaLabel", { parameter: trendParameter.value || "—" }))
+
+const trendChartData = computed(() => ({
+  datasets: [
+    {
+      label: trendParameter.value,
+      data: trendPoints.value,
+      borderColor: "rgba(37, 99, 235, 1)",
+      backgroundColor: "rgba(37, 99, 235, 0.15)",
+      fill: true,
+      tension: 0.25,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+    },
+  ],
+}))
+
+const trendChartOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: false,
+  interaction: { mode: "nearest", intersect: false },
+  scales: {
+    x: {
+      type: "linear",
+      title: { display: true, text: t("pages.tests.trends.axes.date") },
+      ticks: {
+        callback: (raw: string | number) => formatChartTick(typeof raw === "string" ? Number(raw) : raw),
+      },
+    },
+    y: {
+      title: { display: true, text: t("pages.tests.trends.axes.value") },
+      ticks: {
+        callback: (raw: string | number) => formatNumber(typeof raw === "string" ? Number(raw) : raw),
+      },
+    },
+  },
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      callbacks: {
+        title: (items: Array<{ parsed?: { x?: number } }>) => {
+          const x = items?.[0]?.parsed?.x
+          return typeof x === "number" ? formatChartTooltipDate(x) : ""
+        },
+        label: (item: { parsed?: { y?: number } }) => {
+          const y = item?.parsed?.y
+          if (typeof y !== "number") return ""
+
+          const value = formatNumber(y)
+          const unit = trendUnit.value
+          const parameter = trendParameter.value
+          return unit ? `${parameter}: ${value} ${unit}` : `${parameter}: ${value}`
+        },
+      },
+    },
+  },
+}))
 
 const hasActiveFilters = computed(() => Boolean(filterDateFrom.value || filterDateTo.value || filterParameter.value))
 
@@ -639,6 +777,55 @@ async function onSubmit() {
         </div>
 
         <div v-else class="space-y-4">
+          <section aria-labelledby="tests-trends-title" class="space-y-3 rounded-md border border-border bg-muted/20 p-4">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div class="space-y-1">
+                <h3 id="tests-trends-title" class="text-base font-medium text-foreground">
+                  {{ $t("pages.tests.trends.title") }}
+                </h3>
+                <p class="text-sm text-muted-foreground">{{ $t("pages.tests.trends.description") }}</p>
+              </div>
+
+              <div class="space-y-2 sm:w-72">
+                <label for="trend-parameter" class="text-sm font-medium text-foreground">
+                  {{ $t("pages.tests.trends.fields.parameter") }}
+                </label>
+                <select
+                  id="trend-parameter"
+                  v-model="trendParameter"
+                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option v-for="param in parameterOptions" :key="param" :value="param">
+                    {{ param }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <p class="text-xs text-muted-foreground">{{ $t("pages.tests.trends.points", { count: trendPoints.length }) }}</p>
+
+            <div v-if="historyStatus === 'loading'" class="text-sm text-muted-foreground">
+              {{ $t("pages.tests.trends.loading") }}
+            </div>
+            <p v-else-if="historyStatus === 'error'" class="text-sm text-destructive" role="alert">
+              {{ historyError }}
+            </p>
+            <div v-else-if="historyStatus === 'ready' && !sessions.length" class="space-y-1">
+              <p class="text-sm text-muted-foreground">{{ $t("pages.tests.trends.empty.noHistory") }}</p>
+              <p class="text-xs text-muted-foreground">{{ $t("pages.tests.trends.empty.noHistoryHint") }}</p>
+            </div>
+            <p v-else-if="historyStatus === 'ready' && !trendPoints.length" class="text-sm text-muted-foreground">
+              {{ $t("pages.tests.trends.empty.noParameterData") }}
+            </p>
+            <ChartComponent
+              v-else
+              :aria-label="trendChartAriaLabel"
+              :data="trendChartData"
+              :options="trendChartOptions"
+              container-class="h-72 sm:h-80"
+            />
+          </section>
+
           <div class="grid gap-4 sm:grid-cols-3">
             <div class="space-y-2">
               <label for="history-from" class="text-foreground">{{ $t("pages.tests.history.filters.from") }}</label>

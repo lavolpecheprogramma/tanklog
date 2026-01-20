@@ -97,6 +97,25 @@
         "Storico + dettaglio",
         "Valori fuori range + grafici"
       ],
+      "trends": {
+        "title": "Trend",
+        "description": "Seleziona un parametro per vedere un grafico trend accurato nel tempo.",
+        "loading": "Caricamento grafico…",
+        "points": "{count} punto(i)",
+        "fields": {
+          "parameter": "Parametro"
+        },
+        "axes": {
+          "date": "Data",
+          "value": "Valore"
+        },
+        "ariaLabel": "Grafico trend per {parameter}",
+        "empty": {
+          "noHistory": "Nessun dato ancora.",
+          "noHistoryHint": "Aggiungi il primo test qui sopra per vedere i trend qui.",
+          "noParameterData": "Nessuna misurazione ancora per questo parametro."
+        }
+      },
       "dialog": {
         "title": "Aggiungi test acqua (segnaposto)",
         "description": "Diventerà il form reale nello Sprint 5. Per ora valida il componente Dialog (focus, tastiera, ESC per chiudere).",
