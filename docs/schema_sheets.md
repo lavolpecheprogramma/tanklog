@@ -104,7 +104,7 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 | --- | --- | --- | --- |
 | `tank_id` | string | yes | Stable tank id (must match the folder’s `<tank_id>`) |
 | `tank_name` | string | yes | Human-friendly name |
-| `tank_type` | string | yes | One of: `freshwater`, `marine`, `reef` |
+| `tank_type` | string | yes | One of: `freshwater`, `planted`, `marine`, `reef` |
 | `volume_liters` | number | no | Tank volume in liters |
 | `start_date` | string | no | Date-only (`YYYY-MM-DD`) |
 | `notes` | string | no | Free text |
@@ -225,7 +225,7 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 
 ### SHEET: `PARAMETER_RANGES`
 
-**Purpose**: define acceptable parameter ranges used for alerts/highlights.
+**Purpose**: define parameter ranges (bands) used for alerts/highlights and reference values.
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
@@ -233,11 +233,30 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 | `min_value` | number | no | Minimum acceptable value (blank = no minimum) |
 | `max_value` | number | no | Maximum acceptable value (blank = no maximum) |
 | `unit` | string | yes | Unit label |
-| `tank_type` | string | yes | One of: `freshwater`, `marine`, `reef` |
+| `status` | string | yes | One of: `optimal`, `acceptable`, `critical` |
 
 **Invariants**
 
 - At least one of `min_value` or `max_value` MUST be set.
+- `status` MUST be one of: `optimal`, `acceptable`, `critical`.
+- Multiple rows per parameter are allowed (example: one `optimal` row and one `acceptable` row).
+
+**Notes**
+
+- `PARAMETER_RANGES` is stored **per tank** (inside the tank’s spreadsheet), so ranges are evaluated in the context of the tank’s `TANK_INFO.tank_type`.
+
+#### Parameter ranges initialization
+
+TankLog **auto-initializes** `PARAMETER_RANGES` when creating a new tank (Drive folder + `tank_data.xlsx`):
+
+- The sheet is created automatically as part of the tank spreadsheet setup.
+- The app pre-populates the sheet with a **default dataset** based on `TANK_INFO.tank_type`:
+  - `freshwater`
+  - `planted`
+  - `marine`
+  - `reef`
+- This initialization happens **only once**, at tank creation time.
+- TankLog **never overwrites** the user’s ranges automatically after creation (users may edit manually).
 
 ---
 

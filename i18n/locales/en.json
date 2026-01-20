@@ -48,7 +48,8 @@
     "previewAddTest": "Preview “Add test”",
     "signInWithGoogle": "Sign in with Google",
     "signIn": "Sign in",
-    "signingIn": "Signing in…"
+    "signingIn": "Signing in…",
+    "editRanges": "Edit ranges"
   },
   "pages": {
     "home": {
@@ -166,6 +167,92 @@
           "loadFailed": "Failed to load water tests."
         }
       },
+      "rangesEditor": {
+        "metaTitle": "Parameter ranges",
+        "title": "Parameter ranges",
+        "description": "Edit optimal, acceptable, and critical ranges used for out-of-range highlighting and reference. They are saved in your tank sheet (PARAMETER_RANGES).",
+        "loading": "Loading ranges…",
+        "preset": {
+          "title": "Presets",
+          "description": "Start quickly from a preset and then fine-tune values for your tank.",
+          "tankTypeLabel": "This tank type:",
+          "sourceLabel": "Preset source",
+          "apply": "Apply preset",
+          "confirmTitle": "Apply preset?",
+          "confirmDescription": "This will replace the parameters in the editor. It won’t change your sheet until you press Save.",
+          "confirmApply": "Apply",
+          "note": "Presets are starting points only. Always adjust based on livestock and husbandry."
+        },
+        "actions": {
+          "backToTests": "Back to tests",
+          "reload": "Reload from sheet",
+          "addRow": "Add parameter",
+          "removeRow": "Remove",
+          "save": "Save ranges",
+          "saving": "Saving…"
+        },
+        "table": {
+          "title": "Ranges",
+          "description": "Each card lets you set min/max for optimal, acceptable, and critical ranges (leave a band blank to skip it).",
+          "caption": "Editable table of parameter ranges",
+          "count": "{count} parameter(s)",
+          "empty": "No parameters yet. Add one or apply a preset.",
+          "placeholders": {
+            "none": "—"
+          },
+          "columns": {
+            "parameter": "Parameter",
+            "status": "Status",
+            "min": "Min",
+            "max": "Max",
+            "unit": "Unit",
+            "actions": "Actions"
+          },
+          "removeRowAria": "Remove row {row} {parameter}"
+        },
+        "status": {
+          "options": {
+            "optimal": "Optimal",
+            "acceptable": "Acceptable",
+            "critical": "Critical"
+          }
+        },
+        "validation": {
+          "bannerTitle": "Fix {count} issue(s) before saving",
+          "parameterRequired": "Parameter name is required.",
+          "duplicateParameter": "Duplicate parameter: {parameter}.",
+          "duplicateParameterStatus": "Duplicate range for {parameter} ({status}).",
+          "unitRequired": "Unit is required for {parameter}.",
+          "minOrMaxRequired": "Set at least a min or max for {parameter}.",
+          "minGreaterThanMax": "Min must be ≤ max for {parameter}.",
+          "minGreaterThanMaxStatus": "Min must be ≤ max for {parameter} ({status})."
+        },
+        "errors": {
+          "loadFailed": "Failed to load ranges.",
+          "saveFailed": "Failed to save ranges.",
+          "noTank": "Select an active tank first.",
+          "fixErrors": "Fix the highlighted issues before saving."
+        },
+        "success": {
+          "saved": "Saved {count} range(s) to Google Sheets."
+        }
+      },
+      "ranges": {
+        "loading": "Loading parameter ranges…",
+        "emptyHint": "No parameter ranges configured yet. Fill the PARAMETER_RANGES tab in your tank sheet to enable alerts.",
+        "expected": "Expected:",
+        "expectedLabel": "Expected: {range}",
+        "low": "Low",
+        "high": "High",
+        "sessionAlerts": "{count} alert(s)",
+        "banner": {
+          "title": "Out of range ({count})",
+          "description": "These measurements are outside the configured ranges for this tank type."
+        },
+        "errors": {
+          "loadFailed": "Failed to load parameter ranges."
+        }
+      },
       "detail": {
         "title": "Water test details",
         "description": "Open a test session to see all measurements.",
@@ -174,7 +261,8 @@
         "columns": {
           "parameter": "Parameter",
           "value": "Value",
-          "unit": "Unit"
+          "unit": "Unit",
+          "range": "Range"
         }
       }
     },
@@ -294,6 +382,7 @@
         },
         "types": {
           "freshwater": "Freshwater",
+          "planted": "Planted",
           "marine": "Marine",
           "reef": "Reef"
         },

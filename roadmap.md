@@ -129,12 +129,14 @@
 ## Sprint 7 — Parameter ranges + out-of-range highlighting
 **Goal**: detect “bad values” immediately.
 
-- [ ] Read `PARAMETER_RANGES` tab
-- [ ] Compute out-of-range per test + per parameter
-- [ ] Add `AlertBanner` + per-value highlighting in tables
+- [x] Read `PARAMETER_RANGES` tab
+- [x] Compute out-of-range per test + per parameter
+- [x] Add `AlertBanner` + per-value highlighting in tables
+- [x] Add a ranges editor page (frontend) with presets (freshwater/marine/reef)
 
 **Done when**
-- [ ] Any out-of-range value is clearly highlighted and explained
+- [x] Any out-of-range value is clearly highlighted and explained
+- [x] Users can edit parameter ranges from the UI and save them to Sheets
 
 ## Sprint 8 — Charts (trends over time)
 **Goal**: visualize stability and trends.

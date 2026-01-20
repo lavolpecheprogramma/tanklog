@@ -2,8 +2,9 @@ import { computed, readonly, watch, watchEffect } from "vue"
 
 import type { GoogleDriveFile } from "@/composables/useGoogleDrive"
 import type { SheetsCellValue } from "@/composables/useGoogleSheets"
+import { getDefaultParameterRangesForTankType } from "@/lib/parameterRangeDefaults"
 
-export type TankType = "freshwater" | "marine" | "reef"
+export type TankType = "freshwater" | "planted" | "marine" | "reef"
 
 export type Tank = {
   id: string
@@ -50,7 +51,7 @@ function parseTankFolderName(folderName: string): { tankId?: string; tankName?: 
 
 function normalizeTankType(value: string | undefined | null): TankType | null {
   const trimmed = value?.trim()
-  if (trimmed === "freshwater" || trimmed === "marine" || trimmed === "reef") return trimmed
+  if (trimmed === "freshwater" || trimmed === "planted" || trimmed === "marine" || trimmed === "reef") return trimmed
   return null
 }
 
@@ -306,6 +307,8 @@ export function useTanks() {
       ],
     })
 
+    const defaultParameterRanges = getDefaultParameterRangesForTankType(type)
+
     await Promise.all([
       sheets.updateValues({
         spreadsheetId,
@@ -334,8 +337,17 @@ export function useTanks() {
       }),
       sheets.updateValues({
         spreadsheetId,
-        range: "PARAMETER_RANGES!A1:E1",
-        values: [["parameter", "min_value", "max_value", "unit", "tank_type"]],
+        range: `PARAMETER_RANGES!A1:E${1 + defaultParameterRanges.length}`,
+        values: [
+          ["parameter", "min_value", "max_value", "unit", "status"],
+          ...defaultParameterRanges.map((row) => [
+            row.parameter,
+            row.minValue,
+            row.maxValue,
+            row.unit,
+            row.status,
+          ]),
+        ],
       }),
     ])
 

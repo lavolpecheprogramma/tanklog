@@ -48,7 +48,8 @@
     "previewAddTest": "Anteprima “Aggiungi test”",
     "signInWithGoogle": "Accedi con Google",
     "signIn": "Accedi",
-    "signingIn": "Accesso…"
+    "signingIn": "Accesso…",
+    "editRanges": "Modifica range"
   },
   "pages": {
     "home": {
@@ -166,6 +167,92 @@
           "loadFailed": "Impossibile caricare i test acqua."
         }
       },
+      "rangesEditor": {
+        "metaTitle": "Range parametri",
+        "title": "Range parametri",
+        "description": "Modifica i range ottimali, accettabili e critici usati per evidenziare i valori fuori range e come riferimento. Sono salvati nel foglio della vasca (PARAMETER_RANGES).",
+        "loading": "Caricamento range…",
+        "preset": {
+          "title": "Preset",
+          "description": "Parti velocemente da un preset e poi personalizza i valori per la tua vasca.",
+          "tankTypeLabel": "Tipo vasca:",
+          "sourceLabel": "Preset di partenza",
+          "apply": "Applica preset",
+          "confirmTitle": "Applicare il preset?",
+          "confirmDescription": "Questo sostituirà i parametri nell’editor. Non cambierà il foglio finché non premi Salva.",
+          "confirmApply": "Applica",
+          "note": "I preset sono solo un punto di partenza. Regola sempre in base a fauna e gestione."
+        },
+        "actions": {
+          "backToTests": "Torna ai test",
+          "reload": "Ricarica dal foglio",
+          "addRow": "Aggiungi parametro",
+          "removeRow": "Rimuovi",
+          "save": "Salva range",
+          "saving": "Salvataggio…"
+        },
+        "table": {
+          "title": "Range",
+          "description": "Ogni scheda ti permette di impostare min/max per i range ottimale, accettabile e critico (lascia vuota una fascia per non usarla).",
+          "caption": "Tabella modificabile dei range dei parametri",
+          "count": "{count} parametro(i)",
+          "empty": "Nessun parametro. Aggiungine uno o applica un preset.",
+          "placeholders": {
+            "none": "—"
+          },
+          "columns": {
+            "parameter": "Parametro",
+            "status": "Stato",
+            "min": "Min",
+            "max": "Max",
+            "unit": "Unità",
+            "actions": "Azioni"
+          },
+          "removeRowAria": "Rimuovi riga {row} {parameter}"
+        },
+        "status": {
+          "options": {
+            "optimal": "Ottimale",
+            "acceptable": "Accettabile",
+            "critical": "Critico"
+          }
+        },
+        "validation": {
+          "bannerTitle": "Correggi {count} problema(i) prima di salvare",
+          "parameterRequired": "Il nome del parametro è obbligatorio.",
+          "duplicateParameter": "Parametro duplicato: {parameter}.",
+          "duplicateParameterStatus": "Range duplicato per {parameter} ({status}).",
+          "unitRequired": "L’unità è obbligatoria per {parameter}.",
+          "minOrMaxRequired": "Imposta almeno un min o max per {parameter}.",
+          "minGreaterThanMax": "Min deve essere ≤ max per {parameter}.",
+          "minGreaterThanMaxStatus": "Min deve essere ≤ max per {parameter} ({status})."
+        },
+        "errors": {
+          "loadFailed": "Impossibile caricare i range.",
+          "saveFailed": "Impossibile salvare i range.",
+          "noTank": "Seleziona prima una vasca attiva.",
+          "fixErrors": "Correggi i problemi evidenziati prima di salvare."
+        },
+        "success": {
+          "saved": "Salvati {count} range su Google Sheets."
+        }
+      },
+      "ranges": {
+        "loading": "Caricamento range parametri…",
+        "emptyHint": "Nessun range parametri configurato. Compila la tab PARAMETER_RANGES nel foglio della vasca per attivare gli avvisi.",
+        "expected": "Atteso:",
+        "expectedLabel": "Atteso: {range}",
+        "low": "Basso",
+        "high": "Alto",
+        "sessionAlerts": "{count} avviso(i)",
+        "banner": {
+          "title": "Fuori range ({count})",
+          "description": "Queste misurazioni sono fuori dai range configurati per questo tipo di vasca."
+        },
+        "errors": {
+          "loadFailed": "Impossibile caricare i range dei parametri."
+        }
+      },
       "detail": {
         "title": "Dettaglio test acqua",
         "description": "Apri una sessione di test per vedere tutte le misurazioni.",
@@ -174,7 +261,8 @@
         "columns": {
           "parameter": "Parametro",
           "value": "Valore",
-          "unit": "Unità"
+          "unit": "Unità",
+          "range": "Intervallo"
         }
       }
     },
@@ -294,6 +382,7 @@
         },
         "types": {
           "freshwater": "Acqua dolce",
+          "planted": "Piantumata",
           "marine": "Marino",
           "reef": "Reef"
         },
