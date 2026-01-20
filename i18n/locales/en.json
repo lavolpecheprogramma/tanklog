@@ -340,6 +340,13 @@
         "emptyHint": "No parameter ranges configured yet. Fill the PARAMETER_RANGES tab in your tank sheet to enable parameter selection and alerts.",
         "expected": "Expected:",
         "expectedLabel": "Expected: {range}",
+        "verdict": {
+          "optimal": "Optimal",
+          "acceptable": "Acceptable",
+          "critical": "Critical",
+          "worst": "Worst",
+          "unknown": "Unknown"
+        },
         "low": "Low",
         "high": "High",
         "sessionAlerts": "{count} alert(s)",

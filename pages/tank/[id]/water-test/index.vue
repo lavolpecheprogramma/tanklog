@@ -2,10 +2,12 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import type { ParameterRange } from "@/composables/useParameterRanges"
+import type { ParameterRange, ParameterRangeStatus } from "@/composables/useParameterRanges"
 import { useParameterRanges } from "@/composables/useParameterRanges"
 import type { WaterTestSession } from "@/composables/useWaterTests"
 import { DEFAULT_CHART_COLOR, hexToRgbaOrFallback } from "@/lib/colors"
+import { ArrowDown, ArrowUp, CircleCheck, CircleDot, CircleQuestionMark, CircleX, TriangleAlert } from "lucide-vue-next"
+import type { Component } from "vue"
 
 definePageMeta({
   layout: "tank",
@@ -75,6 +77,7 @@ type RangesStatus = "idle" | "loading" | "ready" | "error"
 
 const rangesStatus = ref<RangesStatus>("idle")
 const rangesError = ref<string | null>(null)
+const parameterRangeRows = ref<ParameterRange[]>([])
 const parameterRanges = ref<ParameterRange[]>([])
 
 const parameterOptions = computed(() => parameterRanges.value.map((range) => range.parameter))
@@ -197,22 +200,106 @@ function formatRange(range: ParameterRange): string {
 }
 
 type Measurement = WaterTestSession["measurements"][number]
-type MeasurementRangeStatus = "ok" | "low" | "high" | "unknown"
 
-const rangeByParameterKey = computed(() => {
-  const map = new Map<string, ParameterRange>()
-  for (const range of parameterRanges.value) {
-    map.set(normalizeParameterKey(range.parameter), range)
+type MeasurementDirection = "low" | "high" | null
+type MeasurementVerdict = "optimal" | "acceptable" | "critical" | "worst" | "unknown"
+
+type ParameterBands = {
+  optimal: ParameterRange | null
+  acceptable: ParameterRange | null
+  critical: ParameterRange | null
+}
+
+type ParameterMeta = {
+  parameter: string
+  unit: string
+  color: string | null
+  bands: ParameterBands
+}
+
+type VerdictBadge = {
+  label: string
+  className: string
+  icon: Component
+  directionIcon: Component | null
+  directionLabel: string | null
+  ariaLabel: string
+}
+
+function pickPreferredColor(ranges: ParameterRange[]): string | null {
+  const preferredOrder: ParameterRangeStatus[] = ["acceptable", "optimal", "critical"]
+  for (const status of preferredOrder) {
+    const match = ranges.find((range) => range.status === status && Boolean(range.color))
+    if (match?.color) return match.color
   }
+  return ranges.find((range) => Boolean(range.color))?.color ?? null
+}
+
+function pickRepresentativeRange(ranges: ParameterRange[]): ParameterRange | null {
+  return (
+    ranges.find((range) => range.status === "acceptable")
+    ?? ranges.find((range) => range.status === "optimal")
+    ?? ranges.find((range) => range.status === "critical")
+    ?? null
+  )
+}
+
+function buildRepresentativeRanges(rows: ParameterRange[]): ParameterRange[] {
+  const grouped = new Map<string, ParameterRange[]>()
+  for (const range of rows) {
+    const key = normalizeParameterKey(range.parameter)
+    const list = grouped.get(key) ?? []
+    list.push(range)
+    grouped.set(key, list)
+  }
+
+  const representative: ParameterRange[] = []
+  for (const list of grouped.values()) {
+    const selected = pickRepresentativeRange(list)
+    if (!selected) continue
+    const color = selected.color ?? pickPreferredColor(list)
+    representative.push({ ...selected, color })
+  }
+
+  representative.sort((a, b) => a.parameter.localeCompare(b.parameter))
+  return representative
+}
+
+const metaByParameterKey = computed(() => {
+  const grouped = new Map<string, ParameterRange[]>()
+  for (const range of parameterRangeRows.value) {
+    const key = normalizeParameterKey(range.parameter)
+    const list = grouped.get(key) ?? []
+    list.push(range)
+    grouped.set(key, list)
+  }
+
+  const map = new Map<string, ParameterMeta>()
+  for (const [key, list] of grouped.entries()) {
+    const representative = pickRepresentativeRange(list)
+    if (!representative) continue
+
+    map.set(key, {
+      parameter: representative.parameter,
+      unit: representative.unit,
+      color: representative.color ?? pickPreferredColor(list),
+      bands: {
+        optimal: list.find((range) => range.status === "optimal") ?? null,
+        acceptable: list.find((range) => range.status === "acceptable") ?? null,
+        critical: list.find((range) => range.status === "critical") ?? null,
+      },
+    })
+  }
+
   return map
 })
 
 function getColorForParameter(parameter: string): string | null {
-  return rangeByParameterKey.value.get(normalizeParameterKey(parameter))?.color ?? null
+  return metaByParameterKey.value.get(normalizeParameterKey(parameter))?.color ?? null
 }
 
 function getUnitForParameter(parameter: string): string {
-  const unit = rangeByParameterKey.value.get(normalizeParameterKey(parameter))?.unit
+  const unit = metaByParameterKey.value.get(normalizeParameterKey(parameter))?.unit
   return unit ? unit : ""
 }
 
@@ -220,39 +307,143 @@ function getDisplayUnitForMeasurement(measurement: Measurement): string {
   return getUnitForParameter(measurement.parameter) || measurement.unit
 }
 
-function getMeasurementRangeStatus(measurement: Measurement): { status: MeasurementRangeStatus; range: ParameterRange | null } {
-  const range = rangeByParameterKey.value.get(normalizeParameterKey(measurement.parameter)) ?? null
-  if (!range) return { status: "unknown", range: null }
-  if (range.minValue !== null && measurement.value < range.minValue) return { status: "low", range }
-  if (range.maxValue !== null && measurement.value > range.maxValue) return { status: "high", range }
-  return { status: "ok", range }
+function isValueWithinRange(value: number, range: ParameterRange | null): boolean {
+  if (!range) return false
+  if (range.minValue !== null && value < range.minValue) return false
+  if (range.maxValue !== null && value > range.maxValue) return false
+  return true
+}
+
+function getDirectionRelativeToRange(value: number, range: ParameterRange | null): MeasurementDirection {
+  if (!range) return null
+  if (range.minValue !== null && value < range.minValue) return "low"
+  if (range.maxValue !== null && value > range.maxValue) return "high"
+  return null
+}
+
+function getExpectedRangeForParameter(parameter: string): ParameterRange | null {
+  const meta = metaByParameterKey.value.get(normalizeParameterKey(parameter))
+  if (!meta) return null
+  return meta.bands.acceptable ?? meta.bands.optimal ?? meta.bands.critical ?? null
+}
+
+function getExpectedRangeTextForParameter(parameter: string): string | null {
+  const expected = getExpectedRangeForParameter(parameter)
+  return expected ? formatRange(expected) : null
 }
 
 function getMeasurementExpectedLabel(measurement: Measurement): string | null {
-  const { range } = getMeasurementRangeStatus(measurement)
-  if (!range) return null
-  return t("pages.tests.ranges.expectedLabel", { range: formatRange(range) })
+  const rangeText = getExpectedRangeTextForParameter(measurement.parameter)
+  if (!rangeText) return null
+  return t("pages.tests.ranges.expectedLabel", { range: rangeText })
 }
 
 function getMeasurementRangeText(measurement: Measurement): string | null {
-  const { range } = getMeasurementRangeStatus(measurement)
-  if (!range) return null
-  return formatRange(range)
+  return getExpectedRangeTextForParameter(measurement.parameter)
 }
 
-function getOutOfRangeStatus(measurement: Measurement): "low" | "high" | null {
-  const { status } = getMeasurementRangeStatus(measurement)
-  return status === "low" || status === "high" ? status : null
+function getMeasurementVerdict(parameter: string, value: number): { verdict: MeasurementVerdict; direction: MeasurementDirection } {
+  const meta = metaByParameterKey.value.get(normalizeParameterKey(parameter))
+  if (!meta) return { verdict: "unknown", direction: null }
+
+  const optimal = meta.bands.optimal
+  const acceptable = meta.bands.acceptable
+  const critical = meta.bands.critical
+
+  const outer = critical ?? acceptable ?? optimal
+  if (outer && !isValueWithinRange(value, outer)) {
+    return { verdict: "worst", direction: getDirectionRelativeToRange(value, outer) }
+  }
+
+  if (acceptable) {
+    if (!isValueWithinRange(value, acceptable)) {
+      return { verdict: "critical", direction: getDirectionRelativeToRange(value, acceptable) }
+    }
+
+    if (optimal && isValueWithinRange(value, optimal)) return { verdict: "optimal", direction: null }
+    return { verdict: "acceptable", direction: null }
+  }
+
+  if (critical) {
+    if (optimal && isValueWithinRange(value, optimal)) return { verdict: "optimal", direction: null }
+    return { verdict: "critical", direction: null }
+  }
+
+  if (optimal) {
+    if (isValueWithinRange(value, optimal)) return { verdict: "optimal", direction: null }
+    return { verdict: "worst", direction: getDirectionRelativeToRange(value, optimal) }
+  }
+
+  return { verdict: "unknown", direction: null }
 }
 
-function isMeasurementOutOfRange(measurement: Measurement): boolean {
-  return getOutOfRangeStatus(measurement) !== null
+function verdictLabel(verdict: MeasurementVerdict): string {
+  if (verdict === "optimal") return t("pages.tests.ranges.verdict.optimal")
+  if (verdict === "acceptable") return t("pages.tests.ranges.verdict.acceptable")
+  if (verdict === "critical") return t("pages.tests.ranges.verdict.critical")
+  if (verdict === "worst") return t("pages.tests.ranges.verdict.worst")
+  return t("pages.tests.ranges.verdict.unknown")
+}
+
+function verdictClassName(verdict: MeasurementVerdict): string {
+  if (verdict === "optimal") return "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+  if (verdict === "acceptable") return "border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-400"
+  if (verdict === "critical") return "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+  if (verdict === "worst") return "border-destructive/40 bg-destructive/10 text-destructive"
+  return "border-border bg-muted/30 text-muted-foreground"
+}
+
+function verdictIcon(verdict: MeasurementVerdict): Component {
+  if (verdict === "optimal") return CircleCheck
+  if (verdict === "acceptable") return CircleDot
+  if (verdict === "critical") return TriangleAlert
+  if (verdict === "worst") return CircleX
+  return CircleQuestionMark
+}
+
+function verdictDirectionIcon(direction: MeasurementDirection): Component | null {
+  if (direction === "low") return ArrowDown
+  if (direction === "high") return ArrowUp
+  return null
+}
+
+function makeVerdictBadge(verdict: MeasurementVerdict, direction: MeasurementDirection): VerdictBadge {
+  const label = verdictLabel(verdict)
+  const directionLabel = direction ? (direction === "low" ? t("pages.tests.ranges.low") : t("pages.tests.ranges.high")) : null
+  return {
+    label,
+    className: verdictClassName(verdict),
+    icon: verdictIcon(verdict),
+    directionIcon: verdictDirectionIcon(direction),
+    directionLabel,
+    ariaLabel: directionLabel ? `${label} (${directionLabel})` : label,
+  }
+}
+
+function getMeasurementVerdictBadge(measurement: Measurement): VerdictBadge {
+  const result = getMeasurementVerdict(measurement.parameter, measurement.value)
+  return makeVerdictBadge(result.verdict, result.direction)
+}
+
+function getInputVerdictBadge(parameter: string): VerdictBadge | null {
+  const parsed = parseNumberInput(parameterValues.value[parameter] ?? "")
+  if (parsed === null || parsed < 0) return null
+  const result = getMeasurementVerdict(parameter, parsed)
+  return makeVerdictBadge(result.verdict, result.direction)
+}
+
+function measurementValueClass(measurement: Measurement): string {
+  const { verdict } = getMeasurementVerdict(measurement.parameter, measurement.value)
+  if (verdict === "worst") return "font-semibold text-destructive"
+  if (verdict === "critical") return "font-semibold text-amber-700 dark:text-amber-400"
+  return ""
 }
 
 type OutOfRangeAlert = {
   measurementId: string
   parameter: string
-  status: "low" | "high"
+  verdict: Exclude<MeasurementVerdict, "optimal" | "acceptable" | "unknown">
+  direction: MeasurementDirection
   actual: number
   unit: string
   expected: string
@@ -262,16 +453,17 @@ function getSessionOutOfRangeAlerts(session: WaterTestSession): OutOfRangeAlert[
   const alerts: OutOfRangeAlert[] = []
 
   for (const measurement of session.measurements) {
-    const result = getMeasurementRangeStatus(measurement)
-    if (result.status !== "low" && result.status !== "high") continue
+    const verdictResult = getMeasurementVerdict(measurement.parameter, measurement.value)
+    if (verdictResult.verdict !== "critical" && verdictResult.verdict !== "worst") continue
 
     alerts.push({
       measurementId: measurement.id,
       parameter: measurement.parameter,
-      status: result.status,
+      verdict: verdictResult.verdict,
+      direction: verdictResult.direction,
       actual: measurement.value,
       unit: getDisplayUnitForMeasurement(measurement),
-      expected: result.range ? formatRange(result.range) : "",
+      expected: getExpectedRangeTextForParameter(measurement.parameter) ?? "",
     })
   }
 
@@ -408,11 +600,11 @@ const trendChartData = computed(() => ({
 const trendChartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  animation: false,
-  interaction: { mode: "nearest", intersect: false },
+  animation: false as const,
+  interaction: { mode: "nearest" as const, intersect: false },
   scales: {
     x: {
-      type: "linear",
+      type: "linear" as const,
       title: { display: true, text: t("pages.tests.trends.axes.date") },
       ticks: {
         callback: (raw: string | number) => formatChartTick(typeof raw === "string" ? Number(raw) : raw),
@@ -429,11 +621,11 @@ const trendChartOptions = computed(() => ({
     legend: { display: false },
     tooltip: {
       callbacks: {
-        title: (items: Array<{ parsed?: { x?: number } }>) => {
+        title: (items: any[]) => {
           const x = items?.[0]?.parsed?.x
           return typeof x === "number" ? formatChartTooltipDate(x) : ""
         },
-        label: (item: { parsed?: { y?: number } }) => {
+        label: (item: any) => {
           const y = item?.parsed?.y
           if (typeof y !== "number") return ""
 
@@ -503,6 +695,7 @@ async function loadHistory() {
 async function loadRanges() {
   if (!import.meta.client) return
   if (!tank.value) {
+    parameterRangeRows.value = []
     parameterRanges.value = []
     rangesStatus.value = "idle"
     rangesError.value = null
@@ -513,12 +706,15 @@ async function loadRanges() {
   rangesError.value = null
 
   try {
-    parameterRanges.value = await parameterRangesApi.listParameterRanges({
+    const result = await parameterRangesApi.readParameterRangesSheet({
       spreadsheetId: tank.value.spreadsheetId,
       tankType: tank.value.type,
     })
+    parameterRangeRows.value = result.ranges
+    parameterRanges.value = buildRepresentativeRanges(result.ranges)
     rangesStatus.value = "ready"
   } catch (error) {
+    parameterRangeRows.value = []
     parameterRanges.value = []
     rangesError.value = error instanceof Error ? error.message : t("pages.tests.ranges.errors.loadFailed")
     rangesStatus.value = "error"
@@ -769,7 +965,31 @@ async function onSubmit() {
                 >
                   {{ parameterErrors[range.parameter] }}
                 </p>
-                <p v-else :id="`${toParameterInputId(range.parameter)}-feedback`" class="sr-only"> </p>
+                <p v-else :id="`${toParameterInputId(range.parameter)}-feedback`" class="text-xs text-muted-foreground">
+                  <span class="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span
+                      v-if="getInputVerdictBadge(range.parameter)"
+                      class="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase leading-none"
+                      :class="getInputVerdictBadge(range.parameter)!.className"
+                      :title="getInputVerdictBadge(range.parameter)!.ariaLabel"
+                    >
+                      <component :is="getInputVerdictBadge(range.parameter)!.icon" class="size-3.5" aria-hidden="true" />
+                      <span>{{ getInputVerdictBadge(range.parameter)!.label }}</span>
+                      <component
+                        v-if="getInputVerdictBadge(range.parameter)!.directionIcon"
+                        :is="getInputVerdictBadge(range.parameter)!.directionIcon"
+                        class="size-3.5"
+                        aria-hidden="true"
+                      />
+                      <span v-if="getInputVerdictBadge(range.parameter)!.directionLabel" class="sr-only">
+                        ({{ getInputVerdictBadge(range.parameter)!.directionLabel }})
+                      </span>
+                    </span>
+                    <span v-if="getExpectedRangeTextForParameter(range.parameter)">
+                      {{ $t("pages.tests.ranges.expected") }} {{ getExpectedRangeTextForParameter(range.parameter) }}
+                    </span>
+                  </span>
+                </p>
               </div>
             </div>
             <p class="text-xs text-muted-foreground">{{ $t("pages.tests.form.hints.parameters") }}</p>
@@ -898,7 +1118,7 @@ async function onSubmit() {
             </p>
             <ChartComponent
               v-else
-              :aria-label="trendChartAriaLabel"
+              :ariaLabel="trendChartAriaLabel"
               :data="trendChartData"
               :options="trendChartOptions"
               container-class="h-72 sm:h-80"
@@ -1041,10 +1261,21 @@ async function onSubmit() {
                       {{ formatNumber(measurement.value) }} {{ getDisplayUnitForMeasurement(measurement) }}
   
                       <span
-                        v-if="getOutOfRangeStatus(measurement)"
-                        class="ml-1 rounded border border-destructive/40 text-destructive px-1 text-[10px] font-medium uppercase leading-none"
+                        class="ml-2 inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase leading-none"
+                        :class="getMeasurementVerdictBadge(measurement).className"
+                        :title="getMeasurementVerdictBadge(measurement).ariaLabel"
                       >
-                        {{ getOutOfRangeStatus(measurement) === "low" ? $t("pages.tests.ranges.low") : $t("pages.tests.ranges.high") }}
+                        <component :is="getMeasurementVerdictBadge(measurement).icon" class="size-3.5" aria-hidden="true" />
+                        <span>{{ getMeasurementVerdictBadge(measurement).label }}</span>
+                        <component
+                          v-if="getMeasurementVerdictBadge(measurement).directionIcon"
+                          :is="getMeasurementVerdictBadge(measurement).directionIcon"
+                          class="size-3.5"
+                          aria-hidden="true"
+                        />
+                        <span v-if="getMeasurementVerdictBadge(measurement).directionLabel" class="sr-only">
+                          ({{ getMeasurementVerdictBadge(measurement).directionLabel }})
+                        </span>
                       </span>
                   </div>
                 </div>
@@ -1098,9 +1329,25 @@ async function onSubmit() {
                         <span>{{ item.parameter }}</span>
                       </span>:
                       <span class="text-foreground">{{ formatNumber(item.actual) }} {{ item.unit }}</span>
-                      <span class="text-muted-foreground"> — {{ $t("pages.tests.ranges.expected") }} {{ item.expected }}</span>
-                      <span class="sr-only">
-                        {{ item.status === "low" ? $t("pages.tests.ranges.low") : $t("pages.tests.ranges.high") }}
+                      <span
+                        class="ml-2 inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase leading-none"
+                        :class="makeVerdictBadge(item.verdict, item.direction).className"
+                        :title="makeVerdictBadge(item.verdict, item.direction).ariaLabel"
+                      >
+                        <component :is="makeVerdictBadge(item.verdict, item.direction).icon" class="size-3.5" aria-hidden="true" />
+                        <span>{{ makeVerdictBadge(item.verdict, item.direction).label }}</span>
+                        <component
+                          v-if="makeVerdictBadge(item.verdict, item.direction).directionIcon"
+                          :is="makeVerdictBadge(item.verdict, item.direction).directionIcon"
+                          class="size-3.5"
+                          aria-hidden="true"
+                        />
+                        <span v-if="makeVerdictBadge(item.verdict, item.direction).directionLabel" class="sr-only">
+                          ({{ makeVerdictBadge(item.verdict, item.direction).directionLabel }})
+                        </span>
+                      </span>
+                      <span v-if="item.expected" class="text-muted-foreground">
+                        — {{ $t("pages.tests.ranges.expected") }} {{ item.expected }}
                       </span>
                     </li>
                   </ul>
@@ -1130,12 +1377,28 @@ async function onSubmit() {
                           </span>
                         </th>
                         <td class="px-2 py-2 text-right">
-                          <span :class="isMeasurementOutOfRange(measurement) ? 'font-semibold text-destructive' : ''">
-                            {{ formatNumber(measurement.value) }}
-                          </span>
-                          <span v-if="getOutOfRangeStatus(measurement)" class="ml-2 text-xs font-medium text-destructive">
-                            ({{ getOutOfRangeStatus(measurement) === "low" ? $t("pages.tests.ranges.low") : $t("pages.tests.ranges.high") }})
-                          </span>
+                          <div class="flex flex-wrap items-center justify-end gap-2">
+                            <span :class="measurementValueClass(measurement)">
+                              {{ formatNumber(measurement.value) }}
+                            </span>
+                            <span
+                              class="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase leading-none"
+                              :class="getMeasurementVerdictBadge(measurement).className"
+                              :title="getMeasurementVerdictBadge(measurement).ariaLabel"
+                            >
+                              <component :is="getMeasurementVerdictBadge(measurement).icon" class="size-3.5" aria-hidden="true" />
+                              <span>{{ getMeasurementVerdictBadge(measurement).label }}</span>
+                              <component
+                                v-if="getMeasurementVerdictBadge(measurement).directionIcon"
+                                :is="getMeasurementVerdictBadge(measurement).directionIcon"
+                                class="size-3.5"
+                                aria-hidden="true"
+                              />
+                              <span v-if="getMeasurementVerdictBadge(measurement).directionLabel" class="sr-only">
+                                ({{ getMeasurementVerdictBadge(measurement).directionLabel }})
+                              </span>
+                            </span>
+                          </div>
                         </td>
                         <td class="px-2 py-2 text-left text-muted-foreground">
                           {{ getDisplayUnitForMeasurement(measurement) }}

@@ -340,6 +340,13 @@
         "emptyHint": "Nessun range parametri configurato. Compila la tab PARAMETER_RANGES nel foglio della vasca per abilitare selezione parametri e avvisi.",
         "expected": "Atteso:",
         "expectedLabel": "Atteso: {range}",
+        "verdict": {
+          "optimal": "Ottimale",
+          "acceptable": "Accettabile",
+          "critical": "Critico",
+          "worst": "Fuori range",
+          "unknown": "Sconosciuto"
+        },
         "low": "Basso",
         "high": "Alto",
         "sessionAlerts": "{count} avviso(i)",
