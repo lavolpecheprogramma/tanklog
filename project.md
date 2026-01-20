@@ -245,7 +245,8 @@ TankLog stores water tests as an **event/measurement log**:
 ### Pages
 ```
 /                   -> Home / Dashboard overview
-/vasques/[id]       -> Tank detail page (tests, events, photos)
+/tanks              -> Tank list (create + select)
+/tanks/[id]         -> Tank detail page (tests, events, photos)
 /tests              -> Add/view water tests
 /photos             -> Photo timeline gallery
 /events             -> Event list and management

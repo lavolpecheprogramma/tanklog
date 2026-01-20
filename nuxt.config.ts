@@ -25,6 +25,7 @@ export default defineNuxtConfig({
   i18n: {
     strategy: 'no_prefix',
     defaultLocale: 'it',
+    // Locale files live in /i18n/locales (Nuxt i18n resolves langDir relative to /i18n).
     langDir: 'locales',
     locales: [
       { code: 'it', iso: 'it-IT', name: 'Italiano', file: 'it.json' },
@@ -38,7 +39,7 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'static',
     prerender: {
-      routes: ['/login', '/vasques/reef-300l', '/vasques/nano-40l', '/vasques/fresh-120l']
+      routes: ['/login', '/tanks', '/tanks/reef-300l', '/tanks/nano-40l', '/tanks/fresh-120l']
     }
   },
 

@@ -41,7 +41,7 @@ const sprint1Bullets = computed(() => {
       </CardContent>
       <CardFooter class="flex gap-2">
         <Button as-child>
-          <NuxtLink :to="activeTank ? `/vasques/${activeTank.id}` : '/'">{{ $t("actions.openActiveTank") }}</NuxtLink>
+          <NuxtLink :to="activeTank ? `/tanks/${activeTank.id}` : '/tanks'">{{ $t("actions.openActiveTank") }}</NuxtLink>
         </Button>
         <Button variant="secondary" as-child>
           <NuxtLink to="/tests">{{ $t("actions.openWaterTests") }}</NuxtLink>

@@ -99,10 +99,14 @@ async function onCreateTank() {
   }
 
   const volumeText = newTankVolumeLiters.value.toString().trim()
-  const volume = volumeText ? Number(volumeText) : null
-  if (volumeText && (!Number.isFinite(volume) || volume <= 0)) {
-    createTankError.value = t("pages.settings.tanks.errors.invalidVolume")
-    return
+  let volume: number | null = null
+  if (volumeText) {
+    const parsedVolume = Number(volumeText)
+    if (!Number.isFinite(parsedVolume) || parsedVolume <= 0) {
+      createTankError.value = t("pages.settings.tanks.errors.invalidVolume")
+      return
+    }
+    volume = parsedVolume
   }
 
   const startDate = newTankStartDate.value.trim() || null
@@ -518,7 +522,7 @@ async function onLogout() {
                 </div>
 
                 <Button as-child size="sm">
-                  <NuxtLink :to="`/vasques/${tank.id}`">{{ $t("pages.settings.tanks.open") }}</NuxtLink>
+                  <NuxtLink :to="`/tanks/${tank.id}`">{{ $t("pages.settings.tanks.open") }}</NuxtLink>
                 </Button>
               </div>
             </li>

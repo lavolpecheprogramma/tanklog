@@ -58,7 +58,7 @@
 ## Sprint 1 — Page skeletons + app navigation
 **Goal**: all main pages exist and feel coherent.
 
-- [x] Create pages: `/`, `/vasques/[id]`, `/tests`, `/photos`, `/events`, `/reminders`, `/settings`
+- [x] Create pages: `/`, `/tanks`, `/tanks/[id]`, `/tests`, `/photos`, `/events`, `/reminders`, `/settings`
 - [x] Add active tank selector (temporary “mock” list)
 - [x] Add simple UI primitives (Card, Button, Dialog) and consistent spacing
 
@@ -149,7 +149,7 @@
 ## Sprint 9 — Tank detail page (bring it together)
 **Goal**: one place to understand the tank status.
 
-- [ ] `/vasques/[id]` shows: latest values, alerts, charts, recent events/photos placeholders
+- [ ] `/tanks/[id]` shows: latest values, alerts, charts, recent events/photos placeholders
 - [ ] “Last 7/30/90 days” quick ranges for charts
 
 **Done when**

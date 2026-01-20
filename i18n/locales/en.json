@@ -2,10 +2,12 @@
   "a11y": {
     "skipToContent": "Skip to content",
     "googleAccount": "Google account",
-    "googleAccountWithLabel": "Google account: {label}"
+    "googleAccountWithLabel": "Google account: {label}",
+    "openNavigation": "Open navigation"
   },
   "nav": {
     "home": "Home",
+    "tanks": "Tanks",
     "tank": "Tank",
     "tests": "Tests",
     "photos": "Photos",
