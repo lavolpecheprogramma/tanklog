@@ -72,9 +72,9 @@ function parseTankInfo(
     index.set(key, i)
   }
 
-  const tankIdCell = index.has("tank_id") ? row[index.get("tank_id")!] : null
-  const tankNameCell = index.has("tank_name") ? row[index.get("tank_name")!] : null
-  const tankTypeCell = index.has("tank_type") ? row[index.get("tank_type")!] : null
+  const tankIdCell = index.has("id") ? row[index.get("id")!] : null
+  const tankNameCell = index.has("name") ? row[index.get("name")!] : null
+  const tankTypeCell = index.has("type") ? row[index.get("type")!] : null
   const volumeCell = index.has("volume_liters") ? row[index.get("volume_liters")!] : null
 
   const tankId = tankIdCell === null || tankIdCell === undefined ? null : String(tankIdCell)
@@ -274,7 +274,7 @@ export function useTanks() {
       throw new Error("Failed to initialize the tank spreadsheet.")
     }
 
-    const sheetTitles = ["WATER_TESTS", "EVENTS", "ANIMALS", "PHOTOS", "EQUIPMENT", "PARAMETER_RANGES"] as const
+    const sheetTitles = ["WATER_TESTS", "EVENTS", "REMINDERS", "ANIMALS", "PHOTOS", "EQUIPMENT", "PARAMETER_RANGES"] as const
 
     await sheets.batchUpdate({
       spreadsheetId,
@@ -302,7 +302,7 @@ export function useTanks() {
       spreadsheetId,
       range: "TANK_INFO!A1:F2",
       values: [
-        ["tank_id", "tank_name", "tank_type", "volume_liters", "start_date", "notes"],
+        ["id", "name", "type", "volume_liters", "start_date", "notes"],
         tankInfoRow,
       ],
     })
@@ -318,22 +318,27 @@ export function useTanks() {
       sheets.updateValues({
         spreadsheetId,
         range: "EVENTS!A1:H1",
-        values: [["event_id", "date", "event_type", "description", "quantity", "unit", "product", "note"]],
+        values: [["id", "date", "type", "description", "quantity", "unit", "product", "note"]],
+      }),
+      sheets.updateValues({
+        spreadsheetId,
+        range: "REMINDERS!A1:F1",
+        values: [["id", "title", "next_due", "repeat_every_days", "last_done", "notes"]],
       }),
       sheets.updateValues({
         spreadsheetId,
         range: "ANIMALS!A1:H1",
-        values: [["animal_id", "name_common", "name_scientific", "category", "date_added", "date_removed", "status", "notes"]],
+        values: [["id", "name_common", "name_scientific", "category", "date_added", "date_removed", "status", "notes"]],
       }),
       sheets.updateValues({
         spreadsheetId,
         range: "PHOTOS!A1:G1",
-        values: [["photo_id", "date", "related_type", "related_id", "drive_file_id", "drive_url", "note"]],
+        values: [["id", "date", "related_type", "related_id", "drive_file_id", "drive_url", "note"]],
       }),
       sheets.updateValues({
         spreadsheetId,
         range: "EQUIPMENT!A1:F1",
-        values: [["equipment_id", "type", "brand_model", "installation_date", "maintenance_interval", "notes"]],
+        values: [["id", "type", "brand_model", "installation_date", "maintenance_interval", "notes"]],
       }),
       sheets.updateValues({
         spreadsheetId,
@@ -363,6 +368,21 @@ export function useTanks() {
     }
   }
 
+  async function deleteTank(options: { tankId: string }): Promise<void> {
+    if (!auth.isAuthenticated.value) throw new Error("Not authenticated.")
+    const rootFolderId = storage.rootFolderId.value
+    if (!rootFolderId) throw new Error("TankLog folder is not connected.")
+
+    const tankId = options.tankId?.trim()
+    if (!tankId) throw new Error("Missing tank id.")
+
+    const tank = tanks.value.find((item) => item.id === tankId) ?? null
+    if (!tank) throw new Error("Tank not found.")
+
+    await drive.trashFile({ fileId: tank.folderId })
+    await refresh()
+  }
+
   if (import.meta.client && !initialized.value) {
     initialized.value = true
 
@@ -385,6 +405,7 @@ export function useTanks() {
     error: readonly(error),
     refresh,
     createTank,
+    deleteTank,
   }
 }
 

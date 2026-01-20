@@ -18,6 +18,7 @@
 - Custom **reminders + notifications** (best effort, device/browser dependent)
 
 ### Sprint list (at a glance)
+- **Current sprint**: Sprint 15 — Settings + onboarding polish + MVP release (started 2026-01-20)
 - Sprint 0: Repo scaffold + first deploy (PWA foundation)
 - Sprint 1: Page skeletons + app navigation
 - Sprint 2: i18n foundation (it/en)
@@ -153,33 +154,39 @@
 ## Sprint 9 — Tank detail page (bring it together)
 **Goal**: one place to understand the tank status.
 
-- [ ] `/tank/[id]` shows: latest values, alerts, charts, recent events/photos placeholders
-- [ ] “Last 7/30/90 days” quick ranges for charts
+**Status**: Completed (started 2026-01-20)
+
+- [x] `/tank/[id]` shows: latest values, alerts, charts, recent events/photos placeholders
+- [x] “Last 7/30/90 days” quick ranges for charts
 
 **Done when**
-- [ ] Tank detail feels like the main dashboard for that tank
+- [x] Tank detail feels like the main dashboard for that tank
 
 ## Sprint 10 — Events: CRUD (Sheets)
 **Goal**: track interventions (water changes, dosing, maintenance).
 
-- [ ] Events model + form (type, date, notes, tank)
-- [ ] Write to `EVENTS` tab
-- [ ] List events on tank detail + `/tank/[id]/events` page
+**Status**: Completed (started 2026-01-20)
+
+- [x] Events model + form (type, date, notes, tank)
+- [x] Write to `EVENTS` tab
+- [x] List events on tank detail + `/tank/[id]/events` page
 
 **Done when**
-- [ ] Events can be added and viewed per tank
+- [x] Events can be added and viewed per tank
 
 ## Sprint 11 — Reminders: CRUD + upcoming/overdue (Sheets)
 **Goal**: track recurring tasks (water changes, dosing, batteries, etc).
 
-- [ ] Define REMINDERS model + client-side ID generation
-- [ ] Reminder form (title, tank optional, schedule, next due, notes)
-- [ ] Write to / read from `REMINDERS` tab via Sheets API (CRUD)
-- [ ] Upcoming + overdue views (global + per tank)
+**Status**: Completed (started 2026-01-20)
+
+- [x] Define REMINDERS model + client-side ID generation
+- [x] Reminder form (title, schedule, next due, notes)
+- [x] Write to / read from `REMINDERS` tab via Sheets API (CRUD)
+- [x] Upcoming + overdue views (global + per tank)
 
 **Done when**
-- [ ] A reminder can be created and appears in the upcoming list
-- [ ] Overdue reminders are clearly highlighted
+- [x] A reminder can be created and appears in the upcoming list
+- [x] Overdue reminders are clearly highlighted
 
 ## Sprint 12 — Notifications: permission + reminder delivery
 **Goal**: notify the user when reminders are due (best effort without backend).
@@ -197,22 +204,24 @@
 ## Sprint 13 — Photos: upload to Drive + save metadata
 **Goal**: store photos in user-controlled storage.
 
-- [ ] `useGoogleDrive()` composable: upload helper
-- [ ] Photo uploader UI (tank + date + optional notes)
-- [ ] Save photo metadata/link in `PHOTOS` tab
+**Status**: In progress (started 2026-01-20)
+
+- [x] `useGoogleDrive()` composable: upload helper
+- [x] Photo uploader UI (tank + date + optional notes)
+- [x] Save photo metadata/link in `PHOTOS` tab
 
 **Done when**
-- [ ] Upload creates a file in Drive and a row in the sheet
+- [x] Upload creates a file in Drive and a row in the sheet
 
 ## Sprint 14 — Photo timeline + comparison
 **Goal**: browse progress over time.
 
-- [ ] Photo timeline/gallery for a tank (ordered by date)
-- [ ] Fullscreen viewer
-- [ ] Basic compare mode (pick two photos and toggle/side-by-side)
+- [x] Photo timeline/gallery for a tank (ordered by date)
+- [x] Fullscreen viewer
+- [x] Basic compare mode (pick two photos and toggle/side-by-side)
 
 **Done when**
-- [ ] Users can browse and compare tank photos over time
+- [x] Users can browse and compare tank photos over time
 
 ## Sprint 15 — Settings + onboarding polish + MVP release
 **Goal**: make it easy to start and safe to use.

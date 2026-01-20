@@ -47,6 +47,15 @@ async function readErrorMessage(response: Response): Promise<string> {
   }
 }
 
+function extractSheetTitleFromRange(range: string | undefined): string | null {
+  if (!range) return null
+  const [sheetPart] = range.split("!")
+  if (!sheetPart) return null
+  const trimmed = sheetPart.trim()
+  if (!trimmed) return null
+  return trimmed.replace(/^'+|'+$/g, "").trim() || null
+}
+
 function toQueryString(params: Record<string, string | number | boolean | null | undefined>): string {
   const entries = Object.entries(params).filter(([, value]) => value !== null && value !== undefined)
   if (!entries.length) return ""
@@ -58,14 +67,18 @@ function toQueryString(params: Record<string, string | number | boolean | null |
 
 export function useGoogleSheets() {
   const auth = useAuth()
+  const { t } = useI18n()
 
   function getAccessTokenOrThrow(): string {
+    if (!auth.isAuthenticated.value) {
+      throw new Error(t("errors.auth.sessionExpired"))
+    }
     const token = auth.accessToken.value
-    if (!token) throw new Error("Missing Google access token.")
+    if (!token) throw new Error(t("errors.auth.sessionExpired"))
     return token
   }
 
-  async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  async function request<T>(path: string, init: RequestInit = {}, context: { range?: string } = {}): Promise<T> {
     const accessToken = getAccessTokenOrThrow()
     const response = await fetch(`${SHEETS_API_BASE_URL}${path}`, {
       ...init,
@@ -75,8 +88,26 @@ export function useGoogleSheets() {
       },
     })
 
+    if (response.status === 401) {
+      await auth.logout()
+      throw new Error(t("errors.auth.sessionExpired"))
+    }
+
     if (!response.ok) {
-      throw new Error(await readErrorMessage(response))
+      const message = await readErrorMessage(response)
+
+      if (response.status === 404) {
+        throw new Error(t("errors.sheets.notFound"))
+      }
+
+      if (response.status === 400 && message.toLowerCase().includes("unable to parse range")) {
+        const sheetTitle = extractSheetTitleFromRange(context.range)
+        if (sheetTitle) {
+          throw new Error(t("errors.sheets.missingTab", { sheet: sheetTitle }))
+        }
+      }
+
+      throw new Error(message)
     }
 
     return (await response.json()) as T
@@ -96,7 +127,11 @@ export function useGoogleSheets() {
     })
 
     const encodedRange = encodeURIComponent(options.range)
-    return await request<SheetsValuesResponse>(`/${options.spreadsheetId}/values/${encodedRange}${query}`, { method: "GET" })
+    return await request<SheetsValuesResponse>(
+      `/${options.spreadsheetId}/values/${encodedRange}${query}`,
+      { method: "GET" },
+      { range: options.range }
+    )
   }
 
   async function getSpreadsheet(options: { spreadsheetId: string; fields?: string }): Promise<SheetsSpreadsheetResponse> {
@@ -142,13 +177,17 @@ export function useGoogleSheets() {
     }
 
     const encodedRange = encodeURIComponent(options.range)
-    return await request<SheetsUpdateValuesResponse>(`/${options.spreadsheetId}/values/${encodedRange}${query}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
+    return await request<SheetsUpdateValuesResponse>(
+      `/${options.spreadsheetId}/values/${encodedRange}${query}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
       },
-      body: JSON.stringify(body),
-    })
+      { range: options.range }
+    )
   }
 
   async function appendValues(options: {
@@ -174,13 +213,17 @@ export function useGoogleSheets() {
     }
 
     const encodedRange = encodeURIComponent(options.range)
-    return await request<SheetsAppendValuesResponse>(`/${options.spreadsheetId}/values/${encodedRange}:append${query}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    return await request<SheetsAppendValuesResponse>(
+      `/${options.spreadsheetId}/values/${encodedRange}:append${query}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
       },
-      body: JSON.stringify(body),
-    })
+      { range: options.range }
+    )
   }
 
   return {

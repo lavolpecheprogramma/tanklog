@@ -102,16 +102,16 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `tank_id` | string | yes | Stable tank id (must match the folder’s `<tank_id>`) |
-| `tank_name` | string | yes | Human-friendly name |
-| `tank_type` | string | yes | One of: `freshwater`, `planted`, `marine`, `reef` |
+| `id` | string | yes | Stable tank id (must match the folder’s `<tank_id>`) |
+| `name` | string | yes | Human-friendly name |
+| `type` | string | yes | One of: `freshwater`, `planted`, `marine`, `reef` |
 | `volume_liters` | number | no | Tank volume in liters |
 | `start_date` | string | no | Date-only (`YYYY-MM-DD`) |
 | `notes` | string | no | Free text |
 
 **Invariants**
 
-- `tank_id` MUST match the tank folder name segment.
+- `id` MUST match the tank folder name segment.
 - There MUST be exactly one data row (row 2). Rows 3+ must be empty.
 
 ---
@@ -127,15 +127,17 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 - Tests may be partial.
 - A “test session” may include multiple parameters; TankLog writes multiple rows sharing the same `test_group_id` and `date`.
 - Missing measurements are represented by **missing rows**, not blank cells.
+- New measurements can only use parameters defined in `PARAMETER_RANGES` for the same tank.
+- The `unit` is derived from `PARAMETER_RANGES.unit` for the selected parameter (source of truth).
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
 | `id` | string | yes | Unique measurement id (client-generated) |
 | `test_group_id` | string | yes | Shared by all measurements taken in the same session |
 | `date` | string | yes | ISO timestamp (`YYYY-MM-DDTHH:mm:ss.sssZ`) |
-| `parameter` | string | yes | Example: `pH`, `KH`, `NO3`, `PO4` |
+| `parameter` | string | yes | Must be present in `PARAMETER_RANGES.parameter` (same tank). Example: `pH`, `KH`, `NO3`, `PO4` |
 | `value` | number | yes | Numeric value |
-| `unit` | string | yes | Unit label (example: `dKH`, `ppm`, `mg/L`, `°C`) |
+| `unit` | string | yes | Unit label (must match `PARAMETER_RANGES.unit` for the parameter). Example: `dKH`, `ppm`, `mg/L`, `°C` |
 | `method` | string | no | Optional test kit / method |
 | `note` | string | no | Optional free text |
 
@@ -154,14 +156,40 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `event_id` | string | yes | Unique event id (client-generated) |
+| `id` | string | yes | Unique event id (client-generated) |
 | `date` | string | yes | ISO timestamp (`YYYY-MM-DDTHH:mm:ss.sssZ`) |
-| `event_type` | string | yes | One of: `water_change`, `dosing`, `maintenance`, `livestock_addition`, `livestock_removal` |
+| `type` | string | yes | One of: `water_change`, `dosing`, `maintenance`, `livestock_addition`, `livestock_removal` |
 | `description` | string | yes | Short human description |
 | `quantity` | number | no | Numeric quantity (if applicable) |
 | `unit` | string | no | Unit for `quantity` (example: `L`, `ml`, `g`) |
 | `product` | string | no | Product name (if dosing/maintenance) |
 | `note` | string | no | Optional free text |
+
+---
+
+### SHEET: `REMINDERS`
+
+**Purpose**: track recurring or one-time tasks (water changes, dosing, maintenance) and their next due date.
+
+| Column | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `id` | string | yes | Unique reminder id (client-generated) |
+| `title` | string | yes | Short human title |
+| `next_due` | string | yes | ISO timestamp (`YYYY-MM-DDTHH:mm:ss.sssZ`) |
+| `repeat_every_days` | number | no | Blank = one-time reminder; if set must be > 0 |
+| `last_done` | string | no | ISO timestamp (`YYYY-MM-DDTHH:mm:ss.sssZ`) |
+| `notes` | string | no | Optional free text |
+
+**Behavior**
+
+- A reminder is **overdue** if `next_due` is before now.
+- A reminder is **due today** if `next_due` is today (user’s local date).
+- A reminder is **upcoming** if `next_due` is after today.
+
+**Legacy note**
+
+- Older spreadsheets may contain `next_due` / `last_done` as date-only (`YYYY-MM-DD`).
+- TankLog reads both formats; new reminders are saved as full ISO timestamps (UTC).
 
 ---
 
@@ -171,7 +199,7 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `animal_id` | string | yes | Unique animal id (client-generated) |
+| `id` | string | yes | Unique animal id (client-generated) |
 | `name_common` | string | yes | Common name |
 | `name_scientific` | string | no | Scientific name |
 | `category` | string | yes | One of: `fish`, `coral`, `invertebrate`, `plant` |
@@ -193,10 +221,10 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `photo_id` | string | yes | Unique photo id (client-generated) |
+| `id` | string | yes | Unique photo id (client-generated) |
 | `date` | string | yes | ISO timestamp (`YYYY-MM-DDTHH:mm:ss.sssZ`) |
 | `related_type` | string | yes | One of: `tank`, `animal` |
-| `related_id` | string | no | Required when `related_type = animal` (must match `ANIMALS.animal_id`) |
+| `related_id` | string | no | Required when `related_type = animal` (must match `ANIMALS.id`) |
 | `drive_file_id` | string | yes | Google Drive file id of the uploaded photo |
 | `drive_url` | string | yes | Shareable/view URL stored for convenience |
 | `note` | string | no | Optional caption / notes |
@@ -214,7 +242,7 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `equipment_id` | string | yes | Unique equipment id (client-generated) |
+| `id` | string | yes | Unique equipment id (client-generated) |
 | `type` | string | yes | Example: `light`, `pump`, `filter`, `skimmer`, `heater`, `ato` |
 | `brand_model` | string | yes | Brand + model |
 | `installation_date` | string | no | Date-only (`YYYY-MM-DD`) |
@@ -225,11 +253,11 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 
 ### SHEET: `PARAMETER_RANGES`
 
-**Purpose**: define parameter ranges (bands) used for alerts/highlights and reference values.
+**Purpose**: define parameter ranges (bands) used for alerts/highlights and reference values, and define the list of allowed test parameters + units.
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `parameter` | string | yes | Must match `WATER_TESTS.parameter` |
+| `parameter` | string | yes | Defines the allowed values for `WATER_TESTS.parameter` (same tank) |
 | `min_value` | number | no | Minimum acceptable value (blank = no minimum) |
 | `max_value` | number | no | Maximum acceptable value (blank = no maximum) |
 | `unit` | string | yes | Unit label |
@@ -240,17 +268,18 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 - At least one of `min_value` or `max_value` MUST be set.
 - `status` MUST be one of: `optimal`, `acceptable`, `critical`.
 - Multiple rows per parameter are allowed (example: one `optimal` row and one `acceptable` row).
+- The `unit` SHOULD be consistent across statuses for the same `parameter` (TankLog uses it as the source of truth when writing and displaying units).
 
 **Notes**
 
-- `PARAMETER_RANGES` is stored **per tank** (inside the tank’s spreadsheet), so ranges are evaluated in the context of the tank’s `TANK_INFO.tank_type`.
+- `PARAMETER_RANGES` is stored **per tank** (inside the tank’s spreadsheet), so ranges are evaluated in the context of the tank’s `TANK_INFO.type`.
 
 #### Parameter ranges initialization
 
 TankLog **auto-initializes** `PARAMETER_RANGES` when creating a new tank (Drive folder + `tank_data.xlsx`):
 
 - The sheet is created automatically as part of the tank spreadsheet setup.
-- The app pre-populates the sheet with a **default dataset** based on `TANK_INFO.tank_type`:
+- The app pre-populates the sheet with a **default dataset** based on `TANK_INFO.type`:
   - `freshwater`
   - `planted`
   - `marine`

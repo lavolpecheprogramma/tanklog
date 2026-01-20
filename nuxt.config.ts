@@ -84,6 +84,10 @@ export default defineNuxtConfig({
       ]
     },
     workbox: {
+      // NOTE: Workbox minification can fail with "Unexpected early exit (terser) renderChunk"
+      // in some build environments. Development mode disables SW minification while keeping
+      // the same caching behavior.
+      mode: 'development',
       // On static hosts, Nuxt generates 200.html as the SPA fallback.
       // Caching it enables basic offline navigation after a first visit.
       navigateFallback: `${baseURL}200.html`,

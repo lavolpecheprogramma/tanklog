@@ -1,6 +1,10 @@
 import type { SheetsCellValue } from "@/composables/useGoogleSheets"
 
-export type WaterTestParameter = "pH" | "KH" | "GH" | "NO2" | "NO3" | "PO4"
+/**
+ * Parameter names are defined per tank in `PARAMETER_RANGES`.
+ * Keep this type wide to support custom parameters.
+ */
+export type WaterTestParameter = string
 
 export type WaterTestParameterConfig = {
   parameter: WaterTestParameter

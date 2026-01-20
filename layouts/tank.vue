@@ -25,6 +25,7 @@ const tankLabel = computed(() => tank.value?.name ?? (tankId.value ? String(tank
 
 watchEffect(() => {
   if (!tankId.value) return
+  if (!tank.value) return
   if (activeTankId.value !== tankId.value) setActiveTankId(tankId.value)
 })
 
@@ -39,6 +40,7 @@ const tankNavItems = computed(() => {
     { to: `${base}/photos`, labelKey: "nav.photos", isActive: route.path.startsWith(`${base}/photos`) },
     { to: `${base}/events`, labelKey: "nav.events", isActive: route.path.startsWith(`${base}/events`) },
     { to: `${base}/reminders`, labelKey: "nav.reminders", isActive: route.path.startsWith(`${base}/reminders`) },
+    { to: `${base}/configuration`, labelKey: "nav.configuration", isActive: route.path.startsWith(`${base}/configuration`) },
   ]
 })
 

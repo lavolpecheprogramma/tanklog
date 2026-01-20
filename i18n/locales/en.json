@@ -14,6 +14,7 @@
     "photos": "Photos",
     "events": "Events",
     "reminders": "Reminders",
+    "configuration": "Configuration",
     "settings": "Settings"
   },
   "language": {
@@ -49,7 +50,21 @@
     "signInWithGoogle": "Sign in with Google",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
-    "editRanges": "Edit ranges"
+    "editRanges": "Edit ranges",
+    "cancel": "Cancel",
+    "close": "Close"
+  },
+  "errors": {
+    "auth": {
+      "sessionExpired": "Your session has expired. Please sign in again."
+    },
+    "drive": {
+      "notFound": "Google Drive item not found. Check the folder/file ID and access permissions."
+    },
+    "sheets": {
+      "notFound": "Tank spreadsheet not found. Check that the file exists and that you’re signed in with the right Google account.",
+      "missingTab": "Your tank spreadsheet is missing the “{sheet}” tab. Create it (or create a new tank) to continue."
+    }
   },
   "pages": {
     "home": {
@@ -79,10 +94,71 @@
           "Bring together tests, ranges, and charts here (Sprint 6–9)"
         ]
       },
+      "dashboard": {
+        "latest": {
+          "title": "Latest values",
+          "description": "Your most recent measurements and alerts for this tank.",
+          "loading": "Loading latest values…",
+          "emptyHint": "Add a water test to see latest values and alerts here.",
+          "lastTestLabel": "Last test"
+        },
+        "trends": {
+          "rangeLabel": "Range",
+          "ranges": {
+            "d7": "7d",
+            "d30": "30d",
+            "d90": "90d"
+          },
+          "summary": "{parameter} — last {days} days ({count} point(s))"
+        },
+        "events": {
+          "description": "Recent interventions and maintenance for this tank.",
+          "loading": "Loading events…",
+          "empty": "No events yet.",
+          "emptyHint": "Add a water change, dosing, or maintenance event to build a history here.",
+          "count": "{count} event(s)"
+        }
+      },
       "unknown": {
         "title": "Unknown tank",
         "descriptionPrefix": "We don’t recognize this tank id yet:",
         "body": "This tank wasn’t found in your TankLog folder. Go back to Home and pick a valid tank."
+      }
+    },
+    "tankConfiguration": {
+      "metaTitle": "Configuration",
+      "title": "Configuration",
+      "description": "Update tank info and manage the tank folder.",
+      "form": {
+        "title": "Tank info",
+        "description": "These fields are stored in the TANK_INFO tab of tank_data.xlsx.",
+        "loading": "Loading tank info…",
+        "save": "Save changes",
+        "saving": "Saving…",
+        "reload": "Reload",
+        "success": {
+          "saved": "Saved."
+        },
+        "errors": {
+          "missingName": "Enter a tank name.",
+          "invalidType": "Select a valid tank type.",
+          "invalidVolume": "Enter a valid volume in liters.",
+          "invalidStartDate": "Enter a valid start date (YYYY-MM-DD).",
+          "loadFailed": "Failed to load tank info.",
+          "saveFailed": "Failed to save changes."
+        }
+      },
+      "danger": {
+        "title": "Danger zone",
+        "description": "Deleting a tank will remove its Drive folder (including tank_data.xlsx and photos).",
+        "deleteAction": "Delete tank",
+        "confirmTitle": "Delete this tank?",
+        "confirmDescription": "This will move the tank folder (and everything inside) to Google Drive Trash.",
+        "deleteConfirm": "Yes, delete",
+        "deleting": "Deleting…",
+        "errors": {
+          "deleteFailed": "Failed to delete the tank."
+        }
       }
     },
     "tests": {
@@ -123,7 +199,7 @@
       },
       "form": {
         "title": "Add water test",
-        "description": "Save one test session as multiple measurements (one row per parameter) in your tank sheet.",
+        "description": "Save one test session as multiple measurements (one row per parameter) in your tank sheet. Parameters and units come from PARAMETER_RANGES.",
         "locked": "Connect your TankLog Drive folder first.",
         "loadingTanks": "Loading tanks…",
         "noTanks": "No tanks found. Create your first tank in Settings to start logging tests.",
@@ -139,7 +215,7 @@
         "hints": {
           "date": "Saved as an ISO timestamp in the sheet (UTC).",
           "tank": "This test will be saved to the tank you opened.",
-          "parameters": "Fill only what you measured — empty fields are skipped."
+          "parameters": "Fill only what you measured — empty fields are skipped. Parameters and units are taken from your parameter ranges."
         },
         "placeholders": {
           "value": "Value",
@@ -258,7 +334,7 @@
       },
       "ranges": {
         "loading": "Loading parameter ranges…",
-        "emptyHint": "No parameter ranges configured yet. Fill the PARAMETER_RANGES tab in your tank sheet to enable alerts.",
+        "emptyHint": "No parameter ranges configured yet. Fill the PARAMETER_RANGES tab in your tank sheet to enable parameter selection and alerts.",
         "expected": "Expected:",
         "expectedLabel": "Expected: {range}",
         "low": "Low",
@@ -288,7 +364,7 @@
     "photos": {
       "metaTitle": "Photos",
       "title": "Photos",
-      "description": "Build a visual timeline of tank progress and compare changes over time.",
+      "description": "Upload photos to Google Drive and start building a visual timeline of tank progress.",
       "comingTitle": "Coming in Sprint 13–14",
       "comingDescription": "We’ll upload to Google Drive and store metadata in Google Sheets.",
       "plannedLabel": "Planned:",
@@ -296,12 +372,181 @@
         "Upload photos (Drive)",
         "Timeline gallery (per tank)",
         "Basic compare mode"
-      ]
+      ],
+      "locked": "Connect your TankLog Drive folder first.",
+      "loadingTanks": "Loading tanks…",
+      "noTanks": {
+        "title": "No tanks yet",
+        "description": "No tanks found. Create your first tank in Settings to start uploading photos."
+      },
+      "form": {
+        "title": "Upload photo",
+        "description": "Upload a tank photo to Google Drive and save its metadata in the PHOTOS sheet for this tank.",
+        "save": "Upload photo",
+        "saving": "Uploading…",
+        "fields": {
+          "date": "Date & time",
+          "file": "Photo",
+          "note": "Note (optional)"
+        },
+        "hints": {
+          "date": "Saved as an ISO timestamp in the sheet (UTC).",
+          "file": "Choose an image file (JPG, PNG, WebP…)."
+        },
+        "placeholders": {
+          "note": "Optional"
+        },
+        "errors": {
+          "noTank": "Select an active tank first.",
+          "missingDate": "Pick a date and time.",
+          "invalidDate": "Enter a valid date/time.",
+          "missingFile": "Choose a photo file.",
+          "invalidFile": "Choose an image file.",
+          "saveFailed": "Failed to upload the photo."
+        },
+        "success": {
+          "saved": "Photo uploaded and saved to Google Sheets."
+        }
+      },
+      "list": {
+        "title": "Uploaded photos",
+        "description": "Photos uploaded for this tank (from the PHOTOS sheet).",
+        "loading": "Loading photos…",
+        "refresh": "Refresh photos",
+        "refreshing": "Refreshing…",
+        "empty": "No photos yet.",
+        "emptyHint": "Upload your first photo above — it will appear here.",
+        "labels": {
+          "note": "Note",
+          "openInDrive": "Open in Drive"
+        },
+        "errors": {
+          "loadFailed": "Failed to load photos."
+        }
+      },
+      "timeline": {
+        "title": "Timeline",
+        "description": "Browse tank photos over time. Click a photo to open it full screen.",
+        "viewModes": {
+          "gallery": "Gallery",
+          "list": "List"
+        },
+        "selection": {
+          "selectedCount": "{count} selected"
+        },
+        "actions": {
+          "loadPreview": "Load preview",
+          "loadingPreview": "Loading…",
+          "retryPreview": "Retry",
+          "selectForCompare": "Select for compare",
+          "unselectForCompare": "Unselect",
+          "clearSelection": "Clear selection",
+          "compare": "Compare",
+          "previous": "Previous",
+          "next": "Next",
+          "swap": "Swap"
+        },
+        "alt": {
+          "tankPhoto": "Tank photo from {date}"
+        },
+        "errors": {
+          "previewFailed": "Failed to load photo preview."
+        }
+      },
+      "viewer": {
+        "description": "Full-screen photo viewer."
+      },
+      "compare": {
+        "title": "Compare photos",
+        "description": "Compare two photos side-by-side or toggle between them.",
+        "modes": {
+          "sideBySide": "Side by side",
+          "toggle": "Toggle"
+        },
+        "actions": {
+          "showFirst": "Show first",
+          "showSecond": "Show second"
+        },
+        "errors": {
+          "needTwo": "Select two photos to compare."
+        }
+      }
     },
     "events": {
       "metaTitle": "Events",
       "title": "Events",
       "description": "Track interventions like water changes, dosing, equipment swaps, and maintenance.",
+      "locked": "Connect your TankLog Drive folder first.",
+      "loadingTanks": "Loading tanks…",
+      "noTanks": {
+        "title": "No tanks yet",
+        "description": "No tanks found. Create your first tank in Settings to start logging events."
+      },
+      "types": {
+        "water_change": "Water change",
+        "dosing": "Dosing",
+        "maintenance": "Maintenance",
+        "livestock_addition": "Livestock addition",
+        "livestock_removal": "Livestock removal"
+      },
+      "form": {
+        "title": "Add event",
+        "description": "Save an intervention as a single row in the EVENTS sheet for this tank.",
+        "save": "Save event",
+        "saving": "Saving…",
+        "fields": {
+          "date": "Date & time",
+          "type": "Type",
+          "description": "Description",
+          "quantity": "Quantity (optional)",
+          "unit": "Unit (optional)",
+          "product": "Product (optional)",
+          "note": "Note (optional)"
+        },
+        "hints": {
+          "date": "Saved as an ISO timestamp in the sheet (UTC).",
+          "type": "Choose what you did (water change, dosing, maintenance…).",
+          "description": "Keep it short and human (e.g. “20% water change”, “Cleaned skimmer”).",
+          "quantity": "Optional. Use with a unit when relevant (e.g. 20 L, 5 ml).",
+          "unit": "Optional. Examples: L, ml, g."
+        },
+        "placeholders": {
+          "type": "Select a type…",
+          "description": "What happened?",
+          "quantity": "e.g. 20",
+          "unit": "e.g. L",
+          "product": "e.g. Reef supplement",
+          "note": "Optional"
+        },
+        "errors": {
+          "noTank": "Select an active tank first.",
+          "missingDate": "Pick a date and time.",
+          "invalidDate": "Enter a valid date/time.",
+          "missingType": "Choose an event type.",
+          "missingDescription": "Add a description.",
+          "invalidQuantity": "Enter a quantity ≥ 0.",
+          "saveFailed": "Failed to save the event."
+        },
+        "success": {
+          "saved": "Event saved to Google Sheets."
+        }
+      },
+      "list": {
+        "title": "History",
+        "description": "Browse past events for this tank.",
+        "loading": "Loading events…",
+        "refresh": "Refresh events",
+        "refreshing": "Refreshing…",
+        "empty": "No events yet.",
+        "emptyHint": "Add your first event above — it will appear here.",
+        "labels": {
+          "product": "Product",
+          "note": "Note"
+        },
+        "errors": {
+          "loadFailed": "Failed to load events."
+        }
+      },
       "comingTitle": "Coming in Sprint 10",
       "comingDescription": "Events will be stored in the user’s Google Sheet.",
       "plannedLabel": "Planned:",
@@ -313,20 +558,125 @@
     "reminders": {
       "metaTitle": "Reminders",
       "title": "Reminders",
-      "description": "Set recurring tasks (water change, dosing, batteries) and get best-effort notifications.",
-      "comingTitle": "Coming in Sprint 11–12",
-      "comingDescription": "Reminders will be stored in Sheets and evaluated client-side.",
-      "plannedLabel": "Planned:",
-      "plannedBullets": [
-        "Create reminders (one-time or recurring)",
-        "Upcoming + overdue views",
-        "Notification permission UX (only after user action)"
-      ]
+      "description": "Track tasks (water changes, dosing, maintenance) and see what’s upcoming or overdue.",
+      "locked": "Connect your TankLog Drive folder first.",
+      "loadingTanks": "Loading tanks…",
+      "noTanks": {
+        "title": "No tanks yet",
+        "description": "No tanks found. Create your first tank in Settings to start using reminders."
+      },
+      "actions": {
+        "done": "Done",
+        "undo": "Undo",
+        "delete": "Delete",
+        "confirmDelete": "Delete reminder “{title}”?",
+        "statusUpdated": "Reminder updated.",
+        "statusDeleted": "Reminder deleted.",
+        "errors": {
+          "updateFailed": "Failed to update the reminder.",
+          "deleteFailed": "Failed to delete the reminder."
+        }
+      },
+      "form": {
+        "title": "Add reminder",
+        "description": "Save a task as a single row in the REMINDERS sheet for this tank.",
+        "save": "Save reminder",
+        "saving": "Saving…",
+        "fields": {
+          "title": "Title",
+          "nextDue": "Next due",
+          "repeatEveryDays": "Repeat every (days, optional)",
+          "notes": "Notes (optional)"
+        },
+        "hints": {
+          "nextDue": "Saved as an ISO timestamp in the sheet (UTC).",
+          "repeatEveryDays": "Leave blank for one-time reminders."
+        },
+        "placeholders": {
+          "title": "e.g. Water change",
+          "repeatEveryDays": "e.g. 7",
+          "notes": "Optional"
+        },
+        "errors": {
+          "noTank": "Select an active tank first.",
+          "missingTitle": "Add a title.",
+          "missingNextDue": "Pick a due date and time.",
+          "invalidNextDue": "Enter a valid date/time.",
+          "invalidRepeatEveryDays": "Enter a whole number of days > 0.",
+          "saveFailed": "Failed to save the reminder."
+        },
+        "success": {
+          "saved": "Reminder saved to Google Sheets."
+        }
+      },
+      "list": {
+        "title": "Upcoming & overdue",
+        "description": "What needs attention next.",
+        "loading": "Loading reminders…",
+        "refresh": "Refresh reminders",
+        "refreshing": "Refreshing…",
+        "empty": "No reminders yet.",
+        "emptyHint": "Add your first reminder above — it will appear here.",
+        "sections": {
+          "overdue": "Overdue",
+          "upcoming": "Upcoming",
+          "completed": "Completed"
+        },
+        "labels": {
+          "repeatEveryDays": "Repeat",
+          "notes": "Notes",
+          "lastDone": "Last done"
+        },
+        "badges": {
+          "dueToday": "Due today",
+          "overdue": "Overdue",
+          "upcoming": "Upcoming",
+          "done": "Done"
+        },
+        "errors": {
+          "loadFailed": "Failed to load reminders."
+        }
+      }
     },
     "settings": {
       "metaTitle": "Settings",
       "title": "Settings",
       "description": "Account, language, and TankLog storage live here.",
+      "onboarding": {
+        "title": "Getting started",
+        "description": "Follow these steps to set up TankLog in a few minutes.",
+        "template": {
+          "summary": "Template sheet structure",
+          "hint": "If you’re connecting an existing tank spreadsheet, make sure it contains these tabs (TankLog creates them automatically for new tanks)."
+        },
+        "steps": {
+          "storage": {
+            "title": "Connect your TankLog folder",
+            "description": "Connect the TankLog folder in Google Drive (paste the link/ID, search for it, or create it).",
+            "cta": "Go to Storage",
+            "done": "Folder connected."
+          },
+          "tanks": {
+            "title": "Create your first tank",
+            "description": "TankLog will create the Drive folder structure and initialize tank_data.xlsx with the required sheets.",
+            "cta": "Go to Tanks",
+            "locked": "Connect the TankLog folder first.",
+            "done": "{count} tank(s) found."
+          },
+          "next": {
+            "title": "Start logging",
+            "description": "Add water tests, events, photos, and reminders.",
+            "ctaHome": "Go to Home",
+            "ctaTank": "Open active tank",
+            "loadingTanks": "Loading tanks…",
+            "noTanks": "No tanks found yet — create one above to continue."
+          }
+        }
+      },
+      "language": {
+        "title": "Language",
+        "description": "Choose the language for the UI."
+      },
       "account": {
         "title": "Account",
         "description": "Signed in with Google (frontend-only OAuth).",
@@ -414,6 +764,14 @@
         "success": {
           "created": "Tank created."
         }
+      },
+      "reset": {
+        "title": "Reset",
+        "description": "Clear TankLog’s local settings from this device. This does not delete anything from Google Drive or Sheets.",
+        "action": "Reset local settings",
+        "confirmTitle": "Reset local settings?",
+        "confirmDescription": "This will disconnect the TankLog folder and clear the active tank from this device. Your data in Google Drive/Sheets will not be deleted.",
+        "confirmAction": "Reset"
       }
     },
     "login": {

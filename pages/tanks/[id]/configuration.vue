@@ -7,28 +7,20 @@ const tankId = computed(() => {
   return Array.isArray(raw) ? raw[0] : raw
 })
 
-const isIndexRoute = computed(() => {
-  if (!tankId.value) return false
-  return route.path === `/tanks/${tankId.value}`
-})
-
 watchEffect(() => {
   if (!import.meta.client) return
   if (!tankId.value) {
     navigateTo(localePath("/"), { replace: true })
     return
   }
-  if (isIndexRoute.value) {
-    navigateTo(localePath(`/tank/${tankId.value}`), { replace: true })
-  }
+  navigateTo(localePath(`/tank/${tankId.value}/configuration`), { replace: true })
 })
 </script>
 
 <template>
-  <section v-if="isIndexRoute" class="space-y-2">
+  <section class="space-y-2">
     <h1 class="text-2xl font-semibold tracking-tight">TankLog</h1>
     <p class="text-sm text-muted-foreground">Redirecting…</p>
   </section>
-  <NuxtPage v-else />
 </template>
 

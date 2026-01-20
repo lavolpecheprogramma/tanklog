@@ -14,6 +14,7 @@
     "photos": "Foto",
     "events": "Eventi",
     "reminders": "Promemoria",
+    "configuration": "Configurazione",
     "settings": "Impostazioni"
   },
   "language": {
@@ -49,7 +50,21 @@
     "signInWithGoogle": "Accedi con Google",
     "signIn": "Accedi",
     "signingIn": "Accesso…",
-    "editRanges": "Modifica range"
+    "editRanges": "Modifica range",
+    "cancel": "Annulla",
+    "close": "Chiudi"
+  },
+  "errors": {
+    "auth": {
+      "sessionExpired": "La sessione è scaduta. Accedi di nuovo."
+    },
+    "drive": {
+      "notFound": "Elemento Google Drive non trovato. Verifica ID cartella/file e permessi di accesso."
+    },
+    "sheets": {
+      "notFound": "Foglio della vasca non trovato. Verifica che il file esista e di aver effettuato l’accesso con l’account Google corretto.",
+      "missingTab": "Nel foglio della vasca manca la tab “{sheet}”. Creala (o crea una nuova vasca) per continuare."
+    }
   },
   "pages": {
     "home": {
@@ -79,10 +94,71 @@
           "Riunire qui test, range e grafici (Sprint 6–9)"
         ]
       },
+      "dashboard": {
+        "latest": {
+          "title": "Ultimi valori",
+          "description": "Le misurazioni più recenti e gli avvisi per questa vasca.",
+          "loading": "Caricamento ultimi valori…",
+          "emptyHint": "Aggiungi un test acqua per vedere qui ultimi valori e avvisi.",
+          "lastTestLabel": "Ultimo test"
+        },
+        "trends": {
+          "rangeLabel": "Periodo",
+          "ranges": {
+            "d7": "7 gg",
+            "d30": "30 gg",
+            "d90": "90 gg"
+          },
+          "summary": "{parameter} — ultimi {days} giorni ({count} punto(i))"
+        },
+        "events": {
+          "description": "Interventi e manutenzioni recenti per questa vasca.",
+          "loading": "Caricamento eventi…",
+          "empty": "Nessun evento ancora.",
+          "emptyHint": "Aggiungi un cambio acqua, un dosaggio o una manutenzione per costruire uno storico qui.",
+          "count": "{count} evento(i)"
+        }
+      },
       "unknown": {
         "title": "Vasca sconosciuta",
         "descriptionPrefix": "Questo id vasca non è ancora riconosciuto:",
         "body": "Questa vasca non è stata trovata nella tua cartella TankLog. Torna alla Home e scegli una vasca valida."
+      }
+    },
+    "tankConfiguration": {
+      "metaTitle": "Configurazione",
+      "title": "Configurazione",
+      "description": "Modifica le info della vasca e gestisci la cartella.",
+      "form": {
+        "title": "Info vasca",
+        "description": "Questi campi sono salvati nella scheda TANK_INFO di tank_data.xlsx.",
+        "loading": "Caricamento info vasca…",
+        "save": "Salva modifiche",
+        "saving": "Salvataggio…",
+        "reload": "Ricarica",
+        "success": {
+          "saved": "Salvato."
+        },
+        "errors": {
+          "missingName": "Inserisci un nome vasca.",
+          "invalidType": "Seleziona un tipo vasca valido.",
+          "invalidVolume": "Inserisci un volume valido in litri.",
+          "invalidStartDate": "Inserisci una data avvio valida (YYYY-MM-DD).",
+          "loadFailed": "Caricamento info vasca non riuscito.",
+          "saveFailed": "Salvataggio non riuscito."
+        }
+      },
+      "danger": {
+        "title": "Zona pericolosa",
+        "description": "Eliminando la vasca verrà rimossa la sua cartella su Drive (inclusi tank_data.xlsx e le foto).",
+        "deleteAction": "Elimina vasca",
+        "confirmTitle": "Eliminare questa vasca?",
+        "confirmDescription": "La cartella della vasca (e tutto il contenuto) verrà spostata nel Cestino di Google Drive.",
+        "deleteConfirm": "Sì, elimina",
+        "deleting": "Eliminazione…",
+        "errors": {
+          "deleteFailed": "Eliminazione vasca non riuscita."
+        }
       }
     },
     "tests": {
@@ -123,7 +199,7 @@
       },
       "form": {
         "title": "Aggiungi test acqua",
-        "description": "Salva una sessione di test come più misurazioni (una riga per parametro) nel foglio della vasca.",
+        "description": "Salva una sessione di test come più misurazioni (una riga per parametro) nel foglio della vasca. Parametri e unità vengono da PARAMETER_RANGES.",
         "locked": "Collega prima la cartella TankLog su Drive.",
         "loadingTanks": "Caricamento vasche…",
         "noTanks": "Nessuna vasca trovata. Crea la prima vasca in Impostazioni per iniziare a registrare i test.",
@@ -139,7 +215,7 @@
         "hints": {
           "date": "Viene salvato come timestamp ISO nel foglio (UTC).",
           "tank": "Il test verrà salvato nel foglio della vasca che hai aperto.",
-          "parameters": "Compila solo ciò che hai misurato — i campi vuoti vengono ignorati."
+          "parameters": "Compila solo ciò che hai misurato — i campi vuoti vengono ignorati. Parametri e unità arrivano dai range."
         },
         "placeholders": {
           "value": "Valore",
@@ -258,7 +334,7 @@
       },
       "ranges": {
         "loading": "Caricamento range parametri…",
-        "emptyHint": "Nessun range parametri configurato. Compila la tab PARAMETER_RANGES nel foglio della vasca per attivare gli avvisi.",
+        "emptyHint": "Nessun range parametri configurato. Compila la tab PARAMETER_RANGES nel foglio della vasca per abilitare selezione parametri e avvisi.",
         "expected": "Atteso:",
         "expectedLabel": "Atteso: {range}",
         "low": "Basso",
@@ -288,7 +364,7 @@
     "photos": {
       "metaTitle": "Foto",
       "title": "Foto",
-      "description": "Crea una timeline visiva dei progressi della vasca e confronta i cambiamenti nel tempo.",
+      "description": "Carica foto su Google Drive e inizia a costruire una timeline visiva dei progressi della vasca.",
       "comingTitle": "In arrivo nello Sprint 13–14",
       "comingDescription": "Caricheremo su Google Drive e salveremo i metadati in Google Sheets.",
       "plannedLabel": "Previsto:",
@@ -296,12 +372,181 @@
         "Caricamento foto (Drive)",
         "Galleria timeline (per vasca)",
         "Confronto base"
-      ]
+      ],
+      "locked": "Collega prima la cartella TankLog su Drive.",
+      "loadingTanks": "Caricamento vasche…",
+      "noTanks": {
+        "title": "Nessuna vasca ancora",
+        "description": "Nessuna vasca trovata. Crea la prima vasca in Impostazioni per iniziare a caricare foto."
+      },
+      "form": {
+        "title": "Carica foto",
+        "description": "Carica una foto della vasca su Google Drive e salva i metadati nella tab PHOTOS per questa vasca.",
+        "save": "Carica foto",
+        "saving": "Caricamento…",
+        "fields": {
+          "date": "Data e ora",
+          "file": "Foto",
+          "note": "Nota (opzionale)"
+        },
+        "hints": {
+          "date": "Viene salvata come timestamp ISO nel foglio (UTC).",
+          "file": "Scegli un file immagine (JPG, PNG, WebP…)."
+        },
+        "placeholders": {
+          "note": "Opzionale"
+        },
+        "errors": {
+          "noTank": "Seleziona prima una vasca attiva.",
+          "missingDate": "Seleziona data e ora.",
+          "invalidDate": "Inserisci una data/ora valida.",
+          "missingFile": "Scegli un file foto.",
+          "invalidFile": "Scegli un file immagine.",
+          "saveFailed": "Caricamento foto non riuscito."
+        },
+        "success": {
+          "saved": "Foto caricata e salvata su Google Sheets."
+        }
+      },
+      "list": {
+        "title": "Foto caricate",
+        "description": "Foto caricate per questa vasca (dalla tab PHOTOS).",
+        "loading": "Caricamento foto…",
+        "refresh": "Aggiorna foto",
+        "refreshing": "Aggiornamento…",
+        "empty": "Nessuna foto ancora.",
+        "emptyHint": "Carica la prima foto qui sopra — apparirà qui.",
+        "labels": {
+          "note": "Nota",
+          "openInDrive": "Apri su Drive"
+        },
+        "errors": {
+          "loadFailed": "Impossibile caricare le foto."
+        }
+      },
+      "timeline": {
+        "title": "Timeline",
+        "description": "Sfoglia le foto della vasca nel tempo. Clicca una foto per aprirla a schermo intero.",
+        "viewModes": {
+          "gallery": "Galleria",
+          "list": "Lista"
+        },
+        "selection": {
+          "selectedCount": "{count} selezionate"
+        },
+        "actions": {
+          "loadPreview": "Carica anteprima",
+          "loadingPreview": "Caricamento…",
+          "retryPreview": "Riprova",
+          "selectForCompare": "Seleziona per confronto",
+          "unselectForCompare": "Deseleziona",
+          "clearSelection": "Annulla selezione",
+          "compare": "Confronta",
+          "previous": "Precedente",
+          "next": "Successiva",
+          "swap": "Inverti"
+        },
+        "alt": {
+          "tankPhoto": "Foto della vasca del {date}"
+        },
+        "errors": {
+          "previewFailed": "Impossibile caricare l’anteprima della foto."
+        }
+      },
+      "viewer": {
+        "description": "Visualizzatore foto a schermo intero."
+      },
+      "compare": {
+        "title": "Confronta foto",
+        "description": "Confronta due foto affiancate o alternale.",
+        "modes": {
+          "sideBySide": "Affiancate",
+          "toggle": "Alterna"
+        },
+        "actions": {
+          "showFirst": "Mostra prima",
+          "showSecond": "Mostra seconda"
+        },
+        "errors": {
+          "needTwo": "Seleziona due foto da confrontare."
+        }
+      }
     },
     "events": {
       "metaTitle": "Eventi",
       "title": "Eventi",
       "description": "Traccia interventi come cambi d’acqua, dosaggi, sostituzioni e manutenzione.",
+      "locked": "Collega prima la cartella TankLog su Drive.",
+      "loadingTanks": "Caricamento vasche…",
+      "noTanks": {
+        "title": "Nessuna vasca ancora",
+        "description": "Nessuna vasca trovata. Crea la prima vasca in Impostazioni per iniziare a registrare gli eventi."
+      },
+      "types": {
+        "water_change": "Cambio acqua",
+        "dosing": "Dosaggio",
+        "maintenance": "Manutenzione",
+        "livestock_addition": "Inserimento fauna",
+        "livestock_removal": "Rimozione fauna"
+      },
+      "form": {
+        "title": "Aggiungi evento",
+        "description": "Salva un intervento come una singola riga nella tab EVENTS per questa vasca.",
+        "save": "Salva evento",
+        "saving": "Salvataggio…",
+        "fields": {
+          "date": "Data e ora",
+          "type": "Tipo",
+          "description": "Descrizione",
+          "quantity": "Quantità (opzionale)",
+          "unit": "Unità (opzionale)",
+          "product": "Prodotto (opzionale)",
+          "note": "Nota (opzionale)"
+        },
+        "hints": {
+          "date": "Viene salvato come timestamp ISO nel foglio (UTC).",
+          "type": "Scegli cosa hai fatto (cambio acqua, dosaggio, manutenzione…).",
+          "description": "Breve e chiaro (es. “Cambio acqua 20%”, “Pulito skimmer”).",
+          "quantity": "Opzionale. Usala con l’unità quando serve (es. 20 L, 5 ml).",
+          "unit": "Opzionale. Esempi: L, ml, g."
+        },
+        "placeholders": {
+          "type": "Seleziona un tipo…",
+          "description": "Cosa è stato fatto?",
+          "quantity": "es. 20",
+          "unit": "es. L",
+          "product": "es. Integratore reef",
+          "note": "Opzionale"
+        },
+        "errors": {
+          "noTank": "Seleziona prima una vasca attiva.",
+          "missingDate": "Seleziona data e ora.",
+          "invalidDate": "Inserisci una data/ora valida.",
+          "missingType": "Seleziona un tipo evento.",
+          "missingDescription": "Inserisci una descrizione.",
+          "invalidQuantity": "Inserisci una quantità ≥ 0.",
+          "saveFailed": "Salvataggio evento non riuscito."
+        },
+        "success": {
+          "saved": "Evento salvato su Google Sheets."
+        }
+      },
+      "list": {
+        "title": "Storico",
+        "description": "Consulta gli eventi passati per questa vasca.",
+        "loading": "Caricamento eventi…",
+        "refresh": "Aggiorna eventi",
+        "refreshing": "Aggiornamento…",
+        "empty": "Nessun evento ancora.",
+        "emptyHint": "Aggiungi il primo evento qui sopra — apparirà qui.",
+        "labels": {
+          "product": "Prodotto",
+          "note": "Nota"
+        },
+        "errors": {
+          "loadFailed": "Impossibile caricare gli eventi."
+        }
+      },
       "comingTitle": "In arrivo nello Sprint 10",
       "comingDescription": "Gli eventi saranno salvati nel Google Sheet dell’utente.",
       "plannedLabel": "Previsto:",
@@ -313,20 +558,125 @@
     "reminders": {
       "metaTitle": "Promemoria",
       "title": "Promemoria",
-      "description": "Imposta attività ricorrenti (cambio acqua, dosaggi, batterie) e ricevi notifiche best-effort.",
-      "comingTitle": "In arrivo nello Sprint 11–12",
-      "comingDescription": "I promemoria saranno salvati su Sheets e valutati lato client.",
-      "plannedLabel": "Previsto:",
-      "plannedBullets": [
-        "Creare promemoria (una tantum o ricorrenti)",
-        "Vista in arrivo + scaduti",
-        "UX permessi notifiche (solo dopo un’azione utente)"
-      ]
+      "description": "Traccia attività (cambi d’acqua, dosaggi, manutenzione) e vedi cosa è in arrivo o scaduto.",
+      "locked": "Collega prima la cartella TankLog su Drive.",
+      "loadingTanks": "Caricamento vasche…",
+      "noTanks": {
+        "title": "Nessuna vasca ancora",
+        "description": "Nessuna vasca trovata. Crea la prima vasca in Impostazioni per iniziare a usare i promemoria."
+      },
+      "actions": {
+        "done": "Fatto",
+        "undo": "Annulla",
+        "delete": "Elimina",
+        "confirmDelete": "Eliminare il promemoria “{title}”?",
+        "statusUpdated": "Promemoria aggiornato.",
+        "statusDeleted": "Promemoria eliminato.",
+        "errors": {
+          "updateFailed": "Impossibile aggiornare il promemoria.",
+          "deleteFailed": "Impossibile eliminare il promemoria."
+        }
+      },
+      "form": {
+        "title": "Aggiungi promemoria",
+        "description": "Salva un’attività come una singola riga nella tab REMINDERS per questa vasca.",
+        "save": "Salva promemoria",
+        "saving": "Salvataggio…",
+        "fields": {
+          "title": "Titolo",
+          "nextDue": "Prossima scadenza",
+          "repeatEveryDays": "Ripeti ogni (giorni, opzionale)",
+          "notes": "Note (opzionale)"
+        },
+        "hints": {
+          "nextDue": "Viene salvato come timestamp ISO nel foglio (UTC).",
+          "repeatEveryDays": "Lascia vuoto per promemoria una tantum."
+        },
+        "placeholders": {
+          "title": "es. Cambio acqua",
+          "repeatEveryDays": "es. 7",
+          "notes": "Opzionale"
+        },
+        "errors": {
+          "noTank": "Seleziona prima una vasca attiva.",
+          "missingTitle": "Inserisci un titolo.",
+          "missingNextDue": "Seleziona data e ora di scadenza.",
+          "invalidNextDue": "Inserisci una data/ora valida.",
+          "invalidRepeatEveryDays": "Inserisci un numero intero di giorni > 0.",
+          "saveFailed": "Salvataggio promemoria non riuscito."
+        },
+        "success": {
+          "saved": "Promemoria salvato su Google Sheets."
+        }
+      },
+      "list": {
+        "title": "In arrivo e scaduti",
+        "description": "Cosa richiede attenzione per primo.",
+        "loading": "Caricamento promemoria…",
+        "refresh": "Aggiorna promemoria",
+        "refreshing": "Aggiornamento…",
+        "empty": "Nessun promemoria ancora.",
+        "emptyHint": "Aggiungi il primo promemoria qui sopra — apparirà qui.",
+        "sections": {
+          "overdue": "Scaduti",
+          "upcoming": "In arrivo",
+          "completed": "Completati"
+        },
+        "labels": {
+          "repeatEveryDays": "Ripetizione",
+          "notes": "Note",
+          "lastDone": "Ultima esecuzione"
+        },
+        "badges": {
+          "dueToday": "Scade oggi",
+          "overdue": "Scaduto",
+          "upcoming": "In arrivo",
+          "done": "Completato"
+        },
+        "errors": {
+          "loadFailed": "Impossibile caricare i promemoria."
+        }
+      }
     },
     "settings": {
       "metaTitle": "Impostazioni",
       "title": "Impostazioni",
       "description": "Qui trovi account, lingua e storage di TankLog.",
+      "onboarding": {
+        "title": "Primi passi",
+        "description": "Segui questi passaggi per configurare TankLog in pochi minuti.",
+        "template": {
+          "summary": "Struttura del foglio (template)",
+          "hint": "Se colleghi un foglio vasca già esistente, assicurati che contenga queste tab (TankLog le crea automaticamente per le nuove vasche)."
+        },
+        "steps": {
+          "storage": {
+            "title": "Collega la cartella TankLog",
+            "description": "Collega la cartella TankLog su Google Drive (incolla link/ID, cercala, oppure creala).",
+            "cta": "Vai a Storage",
+            "done": "Cartella collegata."
+          },
+          "tanks": {
+            "title": "Crea la tua prima vasca",
+            "description": "TankLog creerà la struttura delle cartelle su Drive e inizializzerà tank_data.xlsx con i fogli richiesti.",
+            "cta": "Vai a Vasche",
+            "locked": "Collega prima la cartella TankLog.",
+            "done": "Trovate {count} vasche."
+          },
+          "next": {
+            "title": "Inizia a registrare",
+            "description": "Aggiungi test acqua, eventi, foto e promemoria.",
+            "ctaHome": "Vai alla Home",
+            "ctaTank": "Apri vasca attiva",
+            "loadingTanks": "Caricamento vasche…",
+            "noTanks": "Nessuna vasca ancora — creane una sopra per continuare."
+          }
+        }
+      },
+      "language": {
+        "title": "Lingua",
+        "description": "Scegli la lingua dell’interfaccia."
+      },
       "account": {
         "title": "Account",
         "description": "Accesso con Google (OAuth solo frontend).",
@@ -414,6 +764,14 @@
         "success": {
           "created": "Vasca creata."
         }
+      },
+      "reset": {
+        "title": "Reset",
+        "description": "Cancella le impostazioni locali di TankLog su questo dispositivo. Non elimina nulla da Google Drive o Sheets.",
+        "action": "Reset impostazioni locali",
+        "confirmTitle": "Reset impostazioni locali?",
+        "confirmDescription": "Questo disconnetterà la cartella TankLog e cancellerà la vasca attiva da questo dispositivo. I dati su Google Drive/Sheets non verranno eliminati.",
+        "confirmAction": "Reset"
       }
     },
     "login": {

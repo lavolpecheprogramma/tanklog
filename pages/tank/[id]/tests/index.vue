@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { ParameterRange } from "@/composables/useParameterRanges"
 import { useParameterRanges } from "@/composables/useParameterRanges"
-import { WATER_TEST_PARAMETERS, type WaterTestParameter, type WaterTestSession } from "@/composables/useWaterTests"
+import type { WaterTestSession } from "@/composables/useWaterTests"
 
 definePageMeta({
   layout: "tank",
@@ -53,21 +53,11 @@ function parseNumberInput(value: string | number): number | null {
   return parsed
 }
 
-function createEmptyParameterMap<T>(defaultValue: T): Record<WaterTestParameter, T> {
-  return WATER_TEST_PARAMETERS.reduce(
-    (acc, item) => {
-      acc[item.parameter] = defaultValue
-      return acc
-    },
-    {} as Record<WaterTestParameter, T>
-  )
-}
-
 const dateInput = ref("")
 const dateError = ref<string | null>(null)
 
-const parameterValues = ref<Record<WaterTestParameter, string>>(createEmptyParameterMap(""))
-const parameterErrors = ref<Record<WaterTestParameter, string | null>>(createEmptyParameterMap(null))
+const parameterValues = ref<Record<string, string>>({})
+const parameterErrors = ref<Record<string, string | null>>({})
 
 const methodInput = ref("")
 const noteInput = ref("")
@@ -85,6 +75,29 @@ type RangesStatus = "idle" | "loading" | "ready" | "error"
 const rangesStatus = ref<RangesStatus>("idle")
 const rangesError = ref<string | null>(null)
 const parameterRanges = ref<ParameterRange[]>([])
+
+const parameterOptions = computed(() => parameterRanges.value.map((range) => range.parameter))
+
+function syncParameterState(parameters: string[]) {
+  const nextValues: Record<string, string> = {}
+  const nextErrors: Record<string, string | null> = {}
+
+  for (const parameter of parameters) {
+    nextValues[parameter] = parameterValues.value[parameter] ?? ""
+    nextErrors[parameter] = parameterErrors.value[parameter] ?? null
+  }
+
+  parameterValues.value = nextValues
+  parameterErrors.value = nextErrors
+}
+
+watch(
+  parameterOptions,
+  (options) => {
+    syncParameterState(options)
+  },
+  { immediate: true }
+)
 
 const filterDateFrom = ref("")
 const filterDateTo = ref("")
@@ -167,6 +180,11 @@ function normalizeParameterKey(value: string): string {
   return value.trim().toLowerCase()
 }
 
+function toParameterInputId(parameter: string): string {
+  const safeKey = normalizeParameterKey(parameter).replace(/[^a-z0-9_-]+/g, "-")
+  return `param-${safeKey || "parameter"}`
+}
+
 function formatRange(range: ParameterRange): string {
   const min = range.minValue
   const max = range.maxValue
@@ -187,6 +205,15 @@ const rangeByParameterKey = computed(() => {
   }
   return map
 })
+
+function getUnitForParameter(parameter: string): string {
+  const unit = rangeByParameterKey.value.get(normalizeParameterKey(parameter))?.unit
+  return unit ? unit : ""
+}
+
+function getDisplayUnitForMeasurement(measurement: Measurement): string {
+  return getUnitForParameter(measurement.parameter) || measurement.unit
+}
 
 function getMeasurementRangeStatus(measurement: Measurement): { status: MeasurementRangeStatus; range: ParameterRange | null } {
   const range = rangeByParameterKey.value.get(normalizeParameterKey(measurement.parameter)) ?? null
@@ -238,7 +265,7 @@ function getSessionOutOfRangeAlerts(session: WaterTestSession): OutOfRangeAlert[
       parameter: measurement.parameter,
       status: result.status,
       actual: measurement.value,
-      unit: measurement.unit,
+      unit: getDisplayUnitForMeasurement(measurement),
       expected: result.range ? formatRange(result.range) : "",
     })
   }
@@ -264,19 +291,6 @@ const selectedSessionAlerts = computed(() => {
   return outOfRangeBySessionId.value.get(session.testGroupId) ?? []
 })
 
-const parameterOptions = computed(() => {
-  const known = WATER_TEST_PARAMETERS.map((item) => item.parameter)
-  const unknown = new Set<string>()
-
-  for (const session of sessions.value) {
-    for (const measurement of session.measurements) {
-      if (!known.includes(measurement.parameter as WaterTestParameter)) unknown.add(measurement.parameter)
-    }
-  }
-
-  return [...known, ...Array.from(unknown).sort((a, b) => a.localeCompare(b))]
-})
-
 type TrendPoint = { x: number; y: number }
 
 watch(
@@ -284,11 +298,16 @@ watch(
   (options) => {
     if (!options.length) {
       trendParameter.value = ""
+      if (filterParameter.value) filterParameter.value = ""
       return
     }
 
     if (!trendParameter.value || !options.includes(trendParameter.value)) {
       trendParameter.value = options[0]
+    }
+
+    if (filterParameter.value && !options.includes(filterParameter.value)) {
+      filterParameter.value = ""
     }
   },
   { immediate: true }
@@ -317,6 +336,9 @@ const trendPoints = computed<TrendPoint[]>(() => {
 const trendUnit = computed(() => {
   const parameter = trendParameter.value.trim()
   if (!parameter) return ""
+
+  const rangeUnit = getUnitForParameter(parameter)
+  if (rangeUnit) return rangeUnit
 
   for (const session of sessions.value) {
     const measurement = session.measurements.find((item) => item.parameter === parameter)
@@ -504,7 +526,10 @@ function resetForm() {
   dateError.value = null
   submitError.value = null
   submitStatus.value = null
-  parameterErrors.value = createEmptyParameterMap(null)
+  parameterErrors.value = Object.fromEntries(parameterOptions.value.map((parameter) => [parameter, null])) as Record<
+    string,
+    string | null
+  >
 }
 
 function validate() {
@@ -526,19 +551,34 @@ function validate() {
     return null
   }
 
-  const measurements: Array<{ parameter: WaterTestParameter; value: number; unit: string }> = []
+  if (rangesStatus.value === "loading") {
+    submitError.value = t("pages.tests.ranges.loading")
+    return null
+  }
 
-  for (const config of WATER_TEST_PARAMETERS) {
-    const raw = parameterValues.value[config.parameter]
+  if (rangesStatus.value === "error") {
+    submitError.value = rangesError.value || t("pages.tests.ranges.errors.loadFailed")
+    return null
+  }
+
+  if (!parameterRanges.value.length) {
+    submitError.value = t("pages.tests.ranges.emptyHint")
+    return null
+  }
+
+  const measurements: Array<{ parameter: string; value: number; unit: string }> = []
+
+  for (const range of parameterRanges.value) {
+    const raw = parameterValues.value[range.parameter] ?? ""
     const parsed = parseNumberInput(raw)
     if (parsed === null) continue
 
-    if (config.min !== undefined && parsed < config.min) {
-      parameterErrors.value[config.parameter] = t("pages.tests.form.errors.mustBePositive")
+    if (parsed < 0) {
+      parameterErrors.value[range.parameter] = t("pages.tests.form.errors.mustBePositive")
       continue
     }
 
-    measurements.push({ parameter: config.parameter, value: parsed, unit: config.unit })
+    measurements.push({ parameter: range.parameter, value: parsed, unit: range.unit })
   }
 
   const hasErrors = Object.values(parameterErrors.value).some((value) => Boolean(value))
@@ -574,7 +614,7 @@ async function onSubmit() {
 
     loadHistory()
 
-    parameterValues.value = createEmptyParameterMap("")
+    parameterValues.value = Object.fromEntries(parameterOptions.value.map((parameter) => [parameter, ""])) as Record<string, string>
     methodInput.value = ""
     noteInput.value = ""
     submitStatus.value = t("pages.tests.form.success.saved", { count: validated.measurements.length })
@@ -668,29 +708,49 @@ async function onSubmit() {
 
           <fieldset class="space-y-3">
             <legend class="text-sm font-medium text-foreground">{{ $t("pages.tests.form.fields.parameters") }}</legend>
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div v-for="config in WATER_TEST_PARAMETERS" :key="config.parameter" class="space-y-2">
-                <label :for="`param-${config.parameter}`" class="text-foreground">
-                  {{ config.label }}
-                  <span class="text-xs text-muted-foreground">({{ config.unit }})</span>
+            <p v-if="rangesStatus === 'loading'" class="text-xs text-muted-foreground">
+              {{ $t("pages.tests.ranges.loading") }}
+            </p>
+            <p v-else-if="rangesStatus === 'error'" class="text-xs text-destructive" role="alert">
+              {{ $t("pages.tests.ranges.errors.loadFailed") }}
+              <span v-if="rangesError">({{ rangesError }})</span>
+            </p>
+            <div v-else-if="!parameterRanges.length" class="space-y-2 rounded-md border border-border/60 bg-muted/20 p-4">
+              <p class="text-xs text-muted-foreground">
+                {{ $t("pages.tests.ranges.emptyHint") }}
+              </p>
+              <Button as-child variant="secondary" size="sm">
+                <NuxtLink :to="localePath(`/tank/${tankId}/tests/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
+              </Button>
+            </div>
+            <div v-else class="grid gap-4 sm:grid-cols-2">
+              <div v-for="range in parameterRanges" :key="range.parameter" class="space-y-2">
+                <label :for="toParameterInputId(range.parameter)" class="text-foreground">
+                  {{ range.parameter }}
+                  <span class="text-xs text-muted-foreground">({{ range.unit }})</span>
                 </label>
                 <input
-                  :id="`param-${config.parameter}`"
-                  v-model="parameterValues[config.parameter]"
+                  :id="toParameterInputId(range.parameter)"
+                  v-model="parameterValues[range.parameter]"
                   type="number"
                   inputmode="decimal"
                   autocomplete="off"
                   class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  :step="config.step ?? 'any'"
-                  :min="config.min"
+                  step="any"
+                  min="0"
                   :placeholder="$t('pages.tests.form.placeholders.value')"
-                  :aria-invalid="parameterErrors[config.parameter] ? 'true' : 'false'"
-                  :aria-describedby="`param-${config.parameter}-feedback`"
+                  :aria-invalid="parameterErrors[range.parameter] ? 'true' : 'false'"
+                  :aria-describedby="`${toParameterInputId(range.parameter)}-feedback`"
                 />
-                <p v-if="parameterErrors[config.parameter]" :id="`param-${config.parameter}-feedback`" class="text-sm text-destructive" role="alert">
-                  {{ parameterErrors[config.parameter] }}
+                <p
+                  v-if="parameterErrors[range.parameter]"
+                  :id="`${toParameterInputId(range.parameter)}-feedback`"
+                  class="text-sm text-destructive"
+                  role="alert"
+                >
+                  {{ parameterErrors[range.parameter] }}
                 </p>
-                <p v-else :id="`param-${config.parameter}-feedback`" class="sr-only"> </p>
+                <p v-else :id="`${toParameterInputId(range.parameter)}-feedback`" class="sr-only"> </p>
               </div>
             </div>
             <p class="text-xs text-muted-foreground">{{ $t("pages.tests.form.hints.parameters") }}</p>
@@ -726,7 +786,7 @@ async function onSubmit() {
           <p v-else-if="submitStatus" class="text-sm text-foreground" role="status">{{ submitStatus }}</p>
 
           <div class="flex flex-wrap gap-2">
-            <Button type="submit" :disabled="isSubmitting">
+            <Button type="submit" :disabled="isSubmitting || rangesStatus !== 'ready' || !parameterRanges.length">
               <span v-if="isSubmitting">{{ $t("pages.tests.form.saving") }}</span>
               <span v-else>{{ $t("pages.tests.form.save") }}</span>
             </Button>
@@ -952,7 +1012,7 @@ async function onSubmit() {
                     :class="isMeasurementOutOfRange(measurement) ? 'border border-destructive/40 bg-destructive/10 text-destructive' : 'bg-muted text-foreground'"
                   >
                     <span class="font-medium">{{ measurement.parameter }}</span>:
-                    {{ formatNumber(measurement.value) }} {{ measurement.unit }}
+                    {{ formatNumber(measurement.value) }} {{ getDisplayUnitForMeasurement(measurement) }}
 
                     <span
                       v-if="getOutOfRangeStatus(measurement)"
@@ -1038,7 +1098,7 @@ async function onSubmit() {
                           </span>
                         </td>
                         <td class="px-2 py-2 text-left text-muted-foreground">
-                          {{ measurement.unit }}
+                          {{ getDisplayUnitForMeasurement(measurement) }}
                         </td>
                         <td class="px-2 py-2 text-left text-muted-foreground">
                           {{ getMeasurementRangeText(measurement) ?? "—" }}

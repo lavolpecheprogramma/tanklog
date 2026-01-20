@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import type { GoogleDriveFile } from "@/composables/useGoogleDrive"
 
 const { t, locale: activeLocale } = useI18n()
@@ -60,11 +69,13 @@ const tankLogFolderUrl = computed(() => {
 })
 
 const { tanks, status: tanksStatus, error: tanksError, refresh: refreshTanks, createTank } = useTanks()
-const { setActiveTankId } = useActiveTank()
+const { activeTank, setActiveTankId } = useActiveTank()
 
 const isCreateTankDialogOpen = ref(false)
 const isCreatingTank = ref(false)
 const createTankError = ref<string | null>(null)
+
+const isResetDialogOpen = ref(false)
 
 const newTankName = ref("")
 const newTankType = ref<"freshwater" | "marine" | "reef">("freshwater")
@@ -154,9 +165,15 @@ function onDisconnectTankLogFolder() {
   searchError.value = null
   foundTankLogFolders.value = []
 
+  setActiveTankId("")
   storage.clearRootFolderId()
   folderInput.value = ""
   folderStatus.value = t("pages.settings.storage.success.disconnected")
+}
+
+function onResetLocalData() {
+  onDisconnectTankLogFolder()
+  isResetDialogOpen.value = false
 }
 
 async function onFindTankLogFolders() {
@@ -231,6 +248,140 @@ async function onLogout() {
 
     <Card>
       <CardHeader>
+        <CardTitle>{{ $t("pages.settings.onboarding.title") }}</CardTitle>
+        <CardDescription>{{ $t("pages.settings.onboarding.description") }}</CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-4 text-sm text-muted-foreground">
+        <ol class="space-y-4">
+          <li class="flex gap-3">
+            <div
+              class="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border border-border/60 text-xs text-muted-foreground"
+              aria-hidden="true"
+            >
+              1
+            </div>
+            <div class="min-w-0 space-y-1">
+              <div class="font-medium text-foreground">{{ $t("pages.settings.onboarding.steps.storage.title") }}</div>
+              <div class="max-w-prose">{{ $t("pages.settings.onboarding.steps.storage.description") }}</div>
+
+              <div class="flex flex-wrap gap-2 pt-2">
+                <Button size="sm" variant="secondary" as-child>
+                  <a href="#settings-storage">{{ $t("pages.settings.onboarding.steps.storage.cta") }}</a>
+                </Button>
+                <Button
+                  v-if="!rootFolderId"
+                  type="button"
+                  size="sm"
+                  :disabled="isCreateDialogOpen || isCreating"
+                  @click="isCreateDialogOpen = true"
+                >
+                  {{ $t("pages.settings.storage.create") }}
+                </Button>
+                <div v-else class="text-xs text-muted-foreground">
+                  {{ $t("pages.settings.onboarding.steps.storage.done") }}
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <li class="flex gap-3">
+            <div
+              class="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border border-border/60 text-xs text-muted-foreground"
+              aria-hidden="true"
+            >
+              2
+            </div>
+            <div class="min-w-0 space-y-1">
+              <div class="font-medium text-foreground">{{ $t("pages.settings.onboarding.steps.tanks.title") }}</div>
+              <div class="max-w-prose">{{ $t("pages.settings.onboarding.steps.tanks.description") }}</div>
+
+              <div class="flex flex-wrap gap-2 pt-2">
+                <Button size="sm" variant="secondary" as-child>
+                  <a href="#settings-tanks">{{ $t("pages.settings.onboarding.steps.tanks.cta") }}</a>
+                </Button>
+                <Button
+                  v-if="rootFolderId"
+                  type="button"
+                  size="sm"
+                  :disabled="isCreateTankDialogOpen || isCreatingTank"
+                  @click="isCreateTankDialogOpen = true"
+                >
+                  {{ $t("pages.settings.tanks.add") }}
+                </Button>
+                <div v-else class="text-xs text-muted-foreground">
+                  {{ $t("pages.settings.onboarding.steps.tanks.locked") }}
+                </div>
+                <div v-if="tanks.length" class="text-xs text-muted-foreground">
+                  {{ $t("pages.settings.onboarding.steps.tanks.done", { count: tanks.length }) }}
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <li class="flex gap-3">
+            <div
+              class="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border border-border/60 text-xs text-muted-foreground"
+              aria-hidden="true"
+            >
+              3
+            </div>
+            <div class="min-w-0 space-y-1">
+              <div class="font-medium text-foreground">{{ $t("pages.settings.onboarding.steps.next.title") }}</div>
+              <div class="max-w-prose">{{ $t("pages.settings.onboarding.steps.next.description") }}</div>
+
+              <div class="flex flex-wrap gap-2 pt-2">
+                <Button size="sm" variant="secondary" as-child>
+                  <NuxtLink :to="localePath('/')">{{ $t("pages.settings.onboarding.steps.next.ctaHome") }}</NuxtLink>
+                </Button>
+                <Button v-if="activeTank" size="sm" as-child>
+                  <NuxtLink :to="localePath(`/tank/${activeTank.id}`)">
+                    {{ $t("pages.settings.onboarding.steps.next.ctaTank") }}
+                  </NuxtLink>
+                </Button>
+                <div v-else-if="tanksStatus === 'loading'" class="text-xs text-muted-foreground">
+                  {{ $t("pages.settings.onboarding.steps.next.loadingTanks") }}
+                </div>
+                <div v-else-if="rootFolderId && !tanks.length" class="text-xs text-muted-foreground">
+                  {{ $t("pages.settings.onboarding.steps.next.noTanks") }}
+                </div>
+              </div>
+            </div>
+          </li>
+        </ol>
+
+        <details class="rounded-md border border-border/60 bg-background p-3">
+          <summary class="cursor-pointer text-sm font-medium text-foreground">
+            {{ $t("pages.settings.onboarding.template.summary") }}
+          </summary>
+          <div class="mt-2 space-y-2 text-xs text-muted-foreground">
+            <p class="max-w-prose">{{ $t("pages.settings.onboarding.template.hint") }}</p>
+            <ul class="list-disc space-y-1 pl-5">
+              <li><code class="rounded bg-muted px-1 py-0.5">TANK_INFO</code></li>
+              <li><code class="rounded bg-muted px-1 py-0.5">WATER_TESTS</code></li>
+              <li><code class="rounded bg-muted px-1 py-0.5">EVENTS</code></li>
+              <li><code class="rounded bg-muted px-1 py-0.5">REMINDERS</code></li>
+              <li><code class="rounded bg-muted px-1 py-0.5">PHOTOS</code></li>
+              <li><code class="rounded bg-muted px-1 py-0.5">PARAMETER_RANGES</code></li>
+              <li><code class="rounded bg-muted px-1 py-0.5">ANIMALS</code></li>
+              <li><code class="rounded bg-muted px-1 py-0.5">EQUIPMENT</code></li>
+            </ul>
+          </div>
+        </details>
+      </CardContent>
+    </Card>
+
+    <Card>
+      <CardHeader>
+        <CardTitle>{{ $t("pages.settings.language.title") }}</CardTitle>
+        <CardDescription>{{ $t("pages.settings.language.description") }}</CardDescription>
+      </CardHeader>
+      <CardContent class="text-sm text-muted-foreground">
+        <LanguageSwitcher />
+      </CardContent>
+    </Card>
+
+    <Card>
+      <CardHeader>
         <CardTitle>{{ $t("pages.settings.account.title") }}</CardTitle>
         <CardDescription>{{ $t("pages.settings.account.description") }}</CardDescription>
       </CardHeader>
@@ -270,7 +421,7 @@ async function onLogout() {
       </CardContent>
     </Card>
 
-    <Card>
+    <Card id="settings-storage">
       <CardHeader>
         <CardTitle>{{ $t("pages.settings.storage.title") }}</CardTitle>
         <CardDescription>{{ $t("pages.settings.storage.description") }}</CardDescription>
@@ -383,7 +534,7 @@ async function onLogout() {
       </CardContent>
     </Card>
 
-    <Card>
+    <Card id="settings-tanks">
       <CardHeader>
         <CardTitle>{{ $t("pages.settings.tanks.title") }}</CardTitle>
         <CardDescription>{{ $t("pages.settings.tanks.description") }}</CardDescription>
@@ -530,6 +681,34 @@ async function onLogout() {
             </li>
           </ul>
         </div>
+      </CardContent>
+    </Card>
+
+    <Card>
+      <CardHeader>
+        <CardTitle>{{ $t("pages.settings.reset.title") }}</CardTitle>
+        <CardDescription>{{ $t("pages.settings.reset.description") }}</CardDescription>
+      </CardHeader>
+      <CardContent class="text-sm text-muted-foreground">
+        <Dialog v-model:open="isResetDialogOpen">
+          <DialogTrigger as-child>
+            <Button type="button" variant="destructive">{{ $t("pages.settings.reset.action") }}</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{{ $t("pages.settings.reset.confirmTitle") }}</DialogTitle>
+              <DialogDescription>{{ $t("pages.settings.reset.confirmDescription") }}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <DialogClose as-child>
+                <Button type="button" variant="secondary">{{ $t("actions.cancel") }}</Button>
+              </DialogClose>
+              <Button type="button" variant="destructive" @click="onResetLocalData">
+                {{ $t("pages.settings.reset.confirmAction") }}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   </section>
