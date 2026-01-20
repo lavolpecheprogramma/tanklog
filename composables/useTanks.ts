@@ -342,15 +342,16 @@ export function useTanks() {
       }),
       sheets.updateValues({
         spreadsheetId,
-        range: `PARAMETER_RANGES!A1:E${1 + defaultParameterRanges.length}`,
+        range: `PARAMETER_RANGES!A1:F${1 + defaultParameterRanges.length}`,
         values: [
-          ["parameter", "min_value", "max_value", "unit", "status"],
+          ["parameter", "min_value", "max_value", "unit", "status", "color"],
           ...defaultParameterRanges.map((row) => [
             row.parameter,
             row.minValue,
             row.maxValue,
             row.unit,
             row.status,
+            row.color,
           ]),
         ],
       }),

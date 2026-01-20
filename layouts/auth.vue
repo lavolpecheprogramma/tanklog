@@ -23,7 +23,10 @@ useHead({
             TankLog
           </NuxtLink>
 
-          <LanguageSwitcher />
+          <div class="flex items-center gap-2">
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>

@@ -34,6 +34,7 @@ async function onLogout() {
 
         <div class="flex items-center gap-2">
           <LanguageSwitcher />
+          <ThemeToggle />
 
           <Button variant="secondary" size="sm" as-child>
             <NuxtLink to="/settings">{{ $t("nav.settings") }}</NuxtLink>

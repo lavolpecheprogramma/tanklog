@@ -14,6 +14,7 @@ storage.hydrateFromStorage()
 const isStorageReady = computed(() => storage.hasRootFolderId.value)
 
 const { tanks, status: tanksStatus, error: tanksError, refresh: refreshTanks } = useTanks()
+const isCreateTankDialogOpen = ref(false)
 
 function tankTypeLabel(type: string) {
   if (type === "freshwater" || type === "marine" || type === "reef") {
@@ -59,11 +60,19 @@ function formatVolume(volumeLiters: number | null) {
           <Button type="button" variant="secondary" size="sm" :disabled="tanksStatus === 'loading'" @click="refreshTanks">
             {{ $t("pages.settings.tanks.refresh") }}
           </Button>
-          <Button variant="secondary" size="sm" as-child>
-            <NuxtLink to="/settings">{{ $t("pages.settings.tanks.add") }}</NuxtLink>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            :disabled="isCreateTankDialogOpen"
+            @click="isCreateTankDialogOpen = true"
+          >
+            {{ $t("pages.settings.tanks.add") }}
           </Button>
         </div>
       </div>
+
+      <CreateTankDialog v-model:open="isCreateTankDialogOpen" />
 
       <div v-if="tanksError" class="text-sm text-destructive" role="alert">
         {{ tanksError }}
@@ -75,8 +84,8 @@ function formatVolume(volumeLiters: number | null) {
 
       <div v-else-if="!tanks.length" class="space-y-2">
         <p class="text-sm text-muted-foreground">{{ $t("pages.settings.tanks.empty") }}</p>
-        <Button as-child>
-          <NuxtLink to="/settings">{{ $t("pages.settings.tanks.add") }}</NuxtLink>
+        <Button type="button" :disabled="isCreateTankDialogOpen" @click="isCreateTankDialogOpen = true">
+          {{ $t("pages.settings.tanks.add") }}
         </Button>
       </div>
 

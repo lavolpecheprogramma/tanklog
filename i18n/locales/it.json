@@ -3,7 +3,9 @@
     "skipToContent": "Vai al contenuto",
     "googleAccount": "Account Google",
     "googleAccountWithLabel": "Account Google: {label}",
-    "openNavigation": "Apri menu"
+    "openNavigation": "Apri menu",
+    "switchToLightMode": "Passa al tema chiaro",
+    "switchToDarkMode": "Passa al tema scuro"
   },
   "nav": {
     "home": "Home",
@@ -72,11 +74,11 @@
       "heroTitle": "TankLog",
       "heroDescription": "Un registro acquariofilo solo frontend per salvare test, eventi e foto e individuare trend nel tempo.",
       "sprint1": {
-        "title": "Sprint 1",
-        "description": "Scheletri delle pagine + navigazione coerente (con selettore “vasca attiva” fittizio).",
+        "title": "Per iniziare",
+        "description": "Collega la cartella TankLog, poi scegli una vasca per iniziare a registrare.",
         "bullets": [
           "Tutte le route principali esistono: vasche, test, foto, eventi, promemoria, impostazioni",
-          "Il selettore “vasca attiva” è visibile nell’header (lista fittizia)",
+          "La vasca attiva viene salvata su questo dispositivo",
           "Navigazione mobile-friendly (tab scorrevoli)"
         ]
       }
@@ -86,12 +88,12 @@
       "title": "Vasca",
       "description": "Questa diventerà la dashboard principale per vasca (ultimi valori, avvisi, grafici, foto ed eventi).",
       "sprint1": {
-        "title": "Scheletro Sprint 1",
-        "descriptionPrefix": "Stai visualizzando una route fittizia:",
+        "title": "Informazioni pagina",
+        "descriptionPrefix": "ID vasca:",
         "nextUpLabel": "Prossimi passi:",
         "bullets": [
-            "Leggere le vasche reali dalla cartella TankLog su Drive (Sprint 4)",
-          "Riunire qui test, range e grafici (Sprint 6–9)"
+          "Leggere le vasche reali dalla cartella TankLog su Drive",
+          "Riunire qui test, range e grafici"
         ]
       },
       "dashboard": {
@@ -165,9 +167,9 @@
       "metaTitle": "Test acqua",
       "title": "Test acqua",
       "description": "Registra misurazioni, consulta lo storico e individua trend nel tempo.",
-      "comingTitle": "In arrivo nello Sprint 5–8",
-      "comingDescription": "Nello Sprint 1 stiamo solo costruendo gli scheletri delle pagine e la navigazione.",
-      "plannedLabel": "Previsto:",
+      "comingTitle": "Suggerimento",
+      "comingDescription": "Registra test con costanza per individuare trend e valori fuori range in anticipo.",
+      "plannedLabel": "Include:",
       "plannedBullets": [
         "Aggiungere un test (scrittura su Google Sheets)",
         "Storico + dettaglio",
@@ -193,9 +195,9 @@
         }
       },
       "dialog": {
-        "title": "Aggiungi test acqua (segnaposto)",
-        "description": "Diventerà il form reale nello Sprint 5. Per ora valida il componente Dialog (focus, tastiera, ESC per chiudere).",
-        "body": "Per ora non viene salvato nulla — TankLog resta solo frontend e con dati sotto il tuo controllo."
+        "title": "Aggiungi test acqua",
+        "description": "Aggiungi una nuova sessione di test per questa vasca.",
+        "body": "Le misurazioni vengono salvate nel foglio della vasca su Google Sheets."
       },
       "form": {
         "title": "Aggiungi test acqua",
@@ -301,6 +303,7 @@
             "min": "Min",
             "max": "Max",
             "unit": "Unità",
+            "color": "Colore",
             "actions": "Azioni"
           },
           "removeRowAria": "Rimuovi riga {row} {parameter}"
@@ -365,9 +368,9 @@
       "metaTitle": "Foto",
       "title": "Foto",
       "description": "Carica foto su Google Drive e inizia a costruire una timeline visiva dei progressi della vasca.",
-      "comingTitle": "In arrivo nello Sprint 13–14",
-      "comingDescription": "Caricheremo su Google Drive e salveremo i metadati in Google Sheets.",
-      "plannedLabel": "Previsto:",
+      "comingTitle": "Timeline",
+      "comingDescription": "Carica foto su Google Drive e salva i metadati in Google Sheets.",
+      "plannedLabel": "Include:",
       "plannedBullets": [
         "Caricamento foto (Drive)",
         "Galleria timeline (per vasca)",
@@ -547,9 +550,9 @@
           "loadFailed": "Impossibile caricare gli eventi."
         }
       },
-      "comingTitle": "In arrivo nello Sprint 10",
-      "comingDescription": "Gli eventi saranno salvati nel Google Sheet dell’utente.",
-      "plannedLabel": "Previsto:",
+      "comingTitle": "Eventi",
+      "comingDescription": "Gli eventi vengono salvati nel foglio della vasca su Google Sheets.",
+      "plannedLabel": "Include:",
       "plannedBullets": [
         "Creare eventi (tipo, data, note, vasca)",
         "Lista e filtri per vasca"

@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { type ParameterRangeStatus, useParameterRanges } from "@/composables/useParameterRanges"
 import type { TankType } from "@/composables/useTanks"
 import { WATER_TEST_PARAMETERS } from "@/composables/useWaterTests"
-import { getDefaultParameterRangesForTankType } from "@/lib/parameterRangeDefaults"
+import { getDefaultColorForParameter, getDefaultParameterRangesForTankType } from "@/lib/parameterRangeDefaults"
 
 definePageMeta({
   layout: "tank",
@@ -51,12 +51,15 @@ type EditableParameterRanges = {
   id: string
   parameter: string
   unit: string
+  color: string
   bands: {
     optimal: EditableBand
     acceptable: EditableBand
     critical: EditableBand
   }
 }
+
+const FALLBACK_PARAMETER_COLOR = "#94a3b8"
 
 const bandOrder: ParameterRangeStatus[] = ["optimal", "acceptable", "critical"]
 
@@ -126,11 +129,19 @@ function maybeAutofillUnit(item: EditableParameterRanges) {
   item.unit = match.unit
 }
 
-function addParameter(initial?: Partial<Pick<EditableParameterRanges, "parameter" | "unit">>) {
+function maybeAutofillColor(item: EditableParameterRanges) {
+  if (item.color !== FALLBACK_PARAMETER_COLOR) return
+  const suggested = getDefaultColorForParameter(item.parameter)
+  if (!suggested) return
+  item.color = suggested
+}
+
+function addParameter(initial?: Partial<Pick<EditableParameterRanges, "parameter" | "unit" | "color">>) {
   parameters.value.push({
     id: generateId("range-param"),
     parameter: initial?.parameter ?? "",
     unit: initial?.unit ?? "",
+    color: initial?.color ?? FALLBACK_PARAMETER_COLOR,
     bands: {
       optimal: blankBand(),
       acceptable: blankBand(),
@@ -155,6 +166,7 @@ function applyPreset(source: TankType) {
         id: generateId("range-param"),
         parameter: row.parameter,
         unit: row.unit,
+        color: row.color ?? FALLBACK_PARAMETER_COLOR,
         bands: {
           optimal: blankBand(),
           acceptable: blankBand(),
@@ -165,6 +177,7 @@ function applyPreset(source: TankType) {
 
     const target = byKey.get(key)!
     if (!target.unit.trim()) target.unit = row.unit
+    if (target.color === FALLBACK_PARAMETER_COLOR && row.color) target.color = row.color
     target.bands[row.status] = {
       minValue: row.minValue === null ? "" : String(row.minValue),
       maxValue: row.maxValue === null ? "" : String(row.maxValue),
@@ -271,8 +284,9 @@ async function loadRanges() {
       if (!existing) {
         byKey.set(key, {
           id: generateId("range-param"),
-      parameter: range.parameter,
+          parameter: range.parameter,
           unit: range.unit,
+          color: range.color ?? FALLBACK_PARAMETER_COLOR,
           bands: {
             optimal: blankBand(),
             acceptable: blankBand(),
@@ -283,9 +297,10 @@ async function loadRanges() {
 
       const target = byKey.get(key)!
       if (!target.unit.trim()) target.unit = range.unit
+      if (target.color === FALLBACK_PARAMETER_COLOR && range.color) target.color = range.color
       target.bands[range.status] = {
-      minValue: range.minValue === null ? "" : String(range.minValue),
-      maxValue: range.maxValue === null ? "" : String(range.maxValue),
+        minValue: range.minValue === null ? "" : String(range.minValue),
+        maxValue: range.maxValue === null ? "" : String(range.maxValue),
       }
     }
 
@@ -333,7 +348,7 @@ async function onSave() {
         const minValue = parseOptionalNumber(item.bands[status].minValue)
         const maxValue = parseOptionalNumber(item.bands[status].maxValue)
         if (minValue === null && maxValue === null) return null
-        return { parameter, unit, status, minValue, maxValue }
+        return { parameter, unit, status, minValue, maxValue, color: item.color }
       })
       .filter((row): row is NonNullable<typeof row> => Boolean(row))
   })
@@ -513,13 +528,21 @@ async function onSave() {
               <Card v-for="(item, index) in parameters" :key="item.id">
                 <CardHeader class="pb-3">
                   <CardTitle class="flex items-start justify-between gap-3">
-                    <span class="truncate">
-                      {{ item.parameter.trim() || $t("pages.tests.rangesEditor.table.columns.parameter") }}
+                    <span class="flex min-w-0 items-center gap-2">
+                      <span
+                        class="mt-1 inline-block size-2 shrink-0 rounded-full border border-border/60"
+                        :style="{ backgroundColor: item.color }"
+                        aria-hidden="true"
+                      />
+                      <span class="truncate">
+                        {{ item.parameter.trim() || $t("pages.tests.rangesEditor.table.columns.parameter") }}
+                      </span>
                     </span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
+                      class="text-destructive hover:bg-destructive/10 hover:text-destructive"
                       :aria-label="$t('pages.tests.rangesEditor.table.removeRowAria', { row: index + 1, parameter: item.parameter || '' })"
                       @click="removeParameter(item.id)"
                     >
@@ -533,7 +556,7 @@ async function onSave() {
                 </CardHeader>
 
                 <CardContent class="space-y-4 text-sm text-muted-foreground">
-                  <div class="grid gap-3 sm:grid-cols-2">
+                  <div class="grid gap-3 sm:grid-cols-3">
                     <div class="space-y-1">
                       <label :for="`parameter-${item.id}`" class="text-xs font-medium text-foreground">
                         {{ $t("pages.tests.rangesEditor.table.columns.parameter") }}
@@ -547,7 +570,10 @@ async function onSave() {
                         class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         list="parameter-list"
                         :aria-describedby="parameterErrors(item.id).length ? `errors-${item.id}` : undefined"
-                        @blur="maybeAutofillUnit(item)"
+                        @blur="
+                          maybeAutofillUnit(item);
+                          maybeAutofillColor(item);
+                        "
                       />
                     </div>
 
@@ -562,6 +588,19 @@ async function onSave() {
                         autocomplete="off"
                         spellcheck="false"
                         class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        :aria-describedby="parameterErrors(item.id).length ? `errors-${item.id}` : undefined"
+                      />
+                    </div>
+
+                    <div class="space-y-1">
+                      <label :for="`color-${item.id}`" class="text-xs font-medium text-foreground">
+                        {{ $t("pages.tests.rangesEditor.table.columns.color") }}
+                      </label>
+                      <input
+                        :id="`color-${item.id}`"
+                        v-model="item.color"
+                        type="color"
+                        class="h-9 w-full rounded-md border border-input bg-background px-2 py-1 shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         :aria-describedby="parameterErrors(item.id).length ? `errors-${item.id}` : undefined"
                       />
                     </div>
@@ -633,7 +672,7 @@ async function onSave() {
 
       <CardFooter class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button as-child variant="secondary">
-          <NuxtLink :to="localePath(`/tank/${tankId}/tests`)">{{ $t("pages.tests.rangesEditor.actions.backToTests") }}</NuxtLink>
+          <NuxtLink :to="localePath(`/tank/${tankId}/water-test`)">{{ $t("pages.tests.rangesEditor.actions.backToTests") }}</NuxtLink>
         </Button>
 
         <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">

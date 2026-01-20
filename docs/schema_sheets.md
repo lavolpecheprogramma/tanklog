@@ -262,6 +262,7 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 | `max_value` | number | no | Maximum acceptable value (blank = no maximum) |
 | `unit` | string | yes | Unit label |
 | `status` | string | yes | One of: `optimal`, `acceptable`, `critical` |
+| `color` | string | no | Optional UI color for this parameter (recommended: hex like `#3b82f6`). Should be consistent across statuses for the same `parameter`. |
 
 **Invariants**
 

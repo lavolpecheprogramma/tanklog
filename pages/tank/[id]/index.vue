@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import type { ParameterRange } from "@/composables/useParameterRanges"
 import { useParameterRanges } from "@/composables/useParameterRanges"
+import type { TankPhoto } from "@/composables/usePhotos"
 import type { TankEvent } from "@/composables/useEvents"
 import type { WaterTestSession } from "@/composables/useWaterTests"
+import { DEFAULT_CHART_COLOR, hexToRgbaOrFallback } from "@/lib/colors"
 
 definePageMeta({
   layout: "tank",
@@ -48,6 +50,7 @@ type LoadStatus = "idle" | "loading" | "ready" | "error"
 const waterTests = useWaterTests()
 const parameterRangesApi = useParameterRanges()
 const eventsApi = useEvents()
+const photosApi = usePhotos()
 
 const testsStatus = ref<LoadStatus>("idle")
 const testsError = ref<string | null>(null)
@@ -60,6 +63,10 @@ const parameterRanges = ref<ParameterRange[]>([])
 const eventsStatus = ref<LoadStatus>("idle")
 const eventsError = ref<string | null>(null)
 const events = ref<TankEvent[]>([])
+
+const photosStatus = ref<LoadStatus>("idle")
+const photosError = ref<string | null>(null)
+const photos = ref<TankPhoto[]>([])
 
 function toEpochMs(value: string): number | null {
   const parsed = Date.parse(value)
@@ -163,8 +170,31 @@ async function loadEvents() {
   }
 }
 
+async function loadPhotos() {
+  if (!import.meta.client) return
+
+  if (!tank.value) {
+    photos.value = []
+    photosStatus.value = "idle"
+    photosError.value = null
+    return
+  }
+
+  photosStatus.value = "loading"
+  photosError.value = null
+
+  try {
+    photos.value = await photosApi.listTankPhotos({ spreadsheetId: tank.value.spreadsheetId })
+    photosStatus.value = "ready"
+  } catch (error) {
+    photos.value = []
+    photosError.value = error instanceof Error ? error.message : t("pages.photos.list.errors.loadFailed")
+    photosStatus.value = "error"
+  }
+}
+
 async function refreshDashboard() {
-  await Promise.all([loadTests(), loadRanges(), loadEvents()])
+  await Promise.all([loadTests(), loadRanges(), loadEvents(), loadPhotos()])
 }
 
 watch(
@@ -177,6 +207,7 @@ watch(
 
 const latestSession = computed(() => sessions.value[0] ?? null)
 const recentEvents = computed(() => events.value.slice(0, 3))
+const recentPhotos = computed(() => photos.value.slice(0, 3))
 
 function normalizeParameterKey(value: string): string {
   return value.trim().toLowerCase()
@@ -196,6 +227,10 @@ const rangeByParameterKey = computed(() => {
   }
   return map
 })
+
+function getColorForParameter(parameter: string): string | null {
+  return rangeByParameterKey.value.get(normalizeParameterKey(parameter))?.color ?? null
+}
 
 function formatRange(range: ParameterRange): string {
   const min = range.minValue
@@ -369,17 +404,24 @@ function formatChartTooltipDate(value: number): string {
 
 const trendChartAriaLabel = computed(() => t("pages.tests.trends.ariaLabel", { parameter: trendParameter.value || "—" }))
 
+const trendStrokeColor = computed(() => getColorForParameter(trendParameter.value) ?? DEFAULT_CHART_COLOR)
+const trendFillColor = computed(() =>
+  hexToRgbaOrFallback({ hex: trendStrokeColor.value, alpha: 0.15, fallbackHex: DEFAULT_CHART_COLOR })
+)
+
 const trendChartData = computed(() => ({
   datasets: [
     {
       label: trendParameter.value,
       data: trendPoints.value,
-      borderColor: "rgba(37, 99, 235, 1)",
-      backgroundColor: "rgba(37, 99, 235, 0.15)",
+      borderColor: trendStrokeColor.value,
+      backgroundColor: trendFillColor.value,
       fill: true,
       tension: 0.25,
       pointRadius: 3,
       pointHoverRadius: 5,
+      pointBackgroundColor: trendStrokeColor.value,
+      pointBorderColor: trendStrokeColor.value,
     },
   ],
 }))
@@ -485,7 +527,7 @@ const trendChartOptions = computed(() => ({
           </CardContent>
           <CardFooter class="flex flex-wrap gap-2">
             <Button as-child>
-              <NuxtLink :to="localePath(`/tank/${tank.id}/tests`)">{{ $t("nav.tests") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/tank/${tank.id}/water-test`)">{{ $t("nav.tests") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
               <NuxtLink :to="localePath(`/tank/${tank.id}/photos`)">{{ $t("nav.photos") }}</NuxtLink>
@@ -512,7 +554,7 @@ const trendChartOptions = computed(() => ({
                 <p class="text-sm text-muted-foreground">{{ $t("pages.tests.history.empty") }}</p>
                 <p class="text-xs text-muted-foreground">{{ $t("pages.tank.dashboard.latest.emptyHint") }}</p>
                 <Button as-child>
-                  <NuxtLink :to="localePath(`/tank/${tank.id}/tests`)">{{ $t("actions.openWaterTests") }}</NuxtLink>
+                  <NuxtLink :to="localePath(`/tank/${tank.id}/water-test`)">{{ $t("actions.openWaterTests") }}</NuxtLink>
                 </Button>
               </div>
 
@@ -537,7 +579,7 @@ const trendChartOptions = computed(() => ({
                       {{ $t("pages.tests.history.refresh") }}
                     </Button>
                     <Button variant="secondary" size="sm" as-child>
-                      <NuxtLink :to="localePath(`/tank/${tank.id}/tests`)">{{ $t("actions.openWaterTests") }}</NuxtLink>
+                      <NuxtLink :to="localePath(`/tank/${tank.id}/water-test`)">{{ $t("actions.openWaterTests") }}</NuxtLink>
                     </Button>
                   </div>
                 </div>
@@ -552,7 +594,14 @@ const trendChartOptions = computed(() => ({
                   </p>
                   <ul class="mt-2 list-disc space-y-1 pl-4">
                     <li v-for="item in latestAlerts" :key="item.measurementId">
-                      <span class="font-medium text-foreground">{{ item.parameter }}</span>:
+                      <span class="inline-flex items-center gap-2 font-medium text-foreground">
+                        <span
+                          class="inline-block size-2 shrink-0 rounded-full border border-border/60"
+                          :style="{ backgroundColor: getColorForParameter(item.parameter) ?? 'transparent' }"
+                          aria-hidden="true"
+                        />
+                        <span>{{ item.parameter }}</span>
+                      </span>:
                       <span class="text-foreground">{{ formatNumber(item.actual) }} {{ item.unit }}</span>
                       <span class="text-muted-foreground"> — {{ $t("pages.tests.ranges.expected") }} {{ item.expected }}</span>
                       <span class="sr-only">
@@ -576,7 +625,14 @@ const trendChartOptions = computed(() => ({
                     <tbody>
                       <tr v-for="measurement in latestSession.measurements" :key="measurement.id" class="border-b border-border/60">
                         <th scope="row" class="px-2 py-2 text-left font-medium">
-                          {{ measurement.parameter }}
+                          <span class="inline-flex items-center gap-2">
+                            <span
+                              class="inline-block size-2 shrink-0 rounded-full border border-border/60"
+                              :style="{ backgroundColor: getColorForParameter(measurement.parameter) ?? 'transparent' }"
+                              aria-hidden="true"
+                            />
+                            <span>{{ measurement.parameter }}</span>
+                          </span>
                         </th>
                         <td class="px-2 py-2 text-right">
                           <span :class="isMeasurementOutOfRange(measurement) ? 'font-semibold text-destructive' : ''">
@@ -699,10 +755,46 @@ const trendChartOptions = computed(() => ({
           <Card>
             <CardHeader>
               <CardTitle>{{ $t("nav.photos") }}</CardTitle>
-              <CardDescription>{{ $t("pages.photos.comingTitle") }}</CardDescription>
+              <CardDescription>{{ $t("pages.photos.description") }}</CardDescription>
             </CardHeader>
-            <CardContent class="text-sm text-muted-foreground">
-              {{ $t("pages.photos.comingDescription") }}
+            <CardContent class="space-y-3 text-sm text-muted-foreground">
+              <div v-if="photosStatus === 'loading'">
+                {{ $t("pages.photos.list.loading") }}
+              </div>
+              <p v-else-if="photosStatus === 'error'" class="text-sm text-destructive" role="alert">
+                {{ photosError }}
+              </p>
+              <div v-else-if="photosStatus === 'ready' && !photos.length" class="space-y-1">
+                <p class="text-sm text-muted-foreground">{{ $t("pages.photos.list.empty") }}</p>
+                <p class="text-xs text-muted-foreground">{{ $t("pages.photos.list.emptyHint") }}</p>
+              </div>
+              <div v-else-if="photosStatus === 'ready'" class="space-y-3">
+                <ul role="list" class="space-y-2">
+                  <li
+                    v-for="photo in recentPhotos"
+                    :key="photo.photoId"
+                    class="flex flex-wrap items-start justify-between gap-2 rounded-md border border-border bg-muted/20 px-3 py-2"
+                  >
+                    <div class="min-w-0 space-y-1">
+                      <div class="text-sm font-medium text-foreground">
+                        {{ formatSessionDate(photo.date) }}
+                      </div>
+                      <p v-if="photo.note" class="line-clamp-2 text-xs text-muted-foreground">
+                        {{ photo.note }}
+                      </p>
+                    </div>
+
+                    <a
+                      class="text-xs font-medium text-primary underline underline-offset-4 hover:text-primary/90"
+                      :href="photo.driveUrl"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {{ $t("pages.photos.list.labels.openInDrive") }}
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </CardContent>
             <CardFooter>
               <Button variant="secondary" as-child>

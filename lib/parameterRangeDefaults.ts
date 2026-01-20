@@ -8,6 +8,47 @@ export type DefaultParameterRangeRow = {
   maxValue: number | null
   unit: string
   status: ParameterRangeStatus
+  /**
+   * Optional UI color for this parameter (recommended: hex like "#3b82f6").
+   * Stored in the `PARAMETER_RANGES.color` column.
+   */
+  color: string | null
+}
+
+function normalizeParameterKey(value: string): string {
+  return value.trim().toLowerCase()
+}
+
+const PARAMETER_COLOR_ALIASES: Record<string, string> = {
+  temperature: "temp",
+}
+
+const DEFAULT_PARAMETER_COLORS: Record<string, string> = {
+  temp: "#f97316", // orange-500
+  salinity: "#06b6d4", // cyan-500
+  ph: "#a855f7", // purple-500
+  kh: "#3b82f6", // blue-500
+  gh: "#6366f1", // indigo-500
+  ca: "#ec4899", // pink-500
+  mg: "#10b981", // emerald-500
+  nh3: "#f59e0b", // amber-500
+  no2: "#ef4444", // red-500
+  no3: "#22c55e", // green-500
+  po4: "#14b8a6", // teal-500
+  fe: "#eab308", // yellow-500
+}
+
+export function getDefaultColorForParameter(parameter: string): string | null {
+  const rawKey = normalizeParameterKey(parameter)
+  if (!rawKey) return null
+  const key = PARAMETER_COLOR_ALIASES[rawKey] ?? rawKey
+  return DEFAULT_PARAMETER_COLORS[key] ?? null
+}
+
+type BaseParameterRangeRow = Omit<DefaultParameterRangeRow, "color">
+
+function withDefaultColors(rows: BaseParameterRangeRow[]): DefaultParameterRangeRow[] {
+  return rows.map((row) => ({ ...row, color: getDefaultColorForParameter(row.parameter) }))
 }
 
 /**
@@ -26,7 +67,7 @@ export type DefaultParameterRangeRow = {
  */
 export function getDefaultParameterRangesForTankType(tankType: TankType): DefaultParameterRangeRow[] {
   if (tankType === "reef") {
-    return [
+    return withDefaultColors([
       { parameter: "Temp", minValue: 24, maxValue: 26, unit: "°C", status: "optimal" },
       { parameter: "Temp", minValue: 23, maxValue: 27, unit: "°C", status: "acceptable" },
       { parameter: "Temp", minValue: 22, maxValue: 28, unit: "°C", status: "critical" },
@@ -66,11 +107,11 @@ export function getDefaultParameterRangesForTankType(tankType: TankType): Defaul
       { parameter: "PO4", minValue: 0.02, maxValue: 0.1, unit: "ppm", status: "optimal" },
       { parameter: "PO4", minValue: 0, maxValue: 0.2, unit: "ppm", status: "acceptable" },
       { parameter: "PO4", minValue: 0, maxValue: 0.4, unit: "ppm", status: "critical" },
-    ]
+    ])
   }
 
   if (tankType === "marine") {
-    return [
+    return withDefaultColors([
       { parameter: "Temp", minValue: 24, maxValue: 26, unit: "°C", status: "optimal" },
       { parameter: "Temp", minValue: 23, maxValue: 27, unit: "°C", status: "acceptable" },
       { parameter: "Temp", minValue: 22, maxValue: 28, unit: "°C", status: "critical" },
@@ -102,11 +143,11 @@ export function getDefaultParameterRangesForTankType(tankType: TankType): Defaul
       { parameter: "PO4", minValue: 0, maxValue: 0.2, unit: "ppm", status: "optimal" },
       { parameter: "PO4", minValue: 0, maxValue: 0.3, unit: "ppm", status: "acceptable" },
       { parameter: "PO4", minValue: 0, maxValue: 0.5, unit: "ppm", status: "critical" },
-    ]
+    ])
   }
 
   if (tankType === "planted") {
-    return [
+    return withDefaultColors([
       { parameter: "Temp", minValue: 23, maxValue: 26, unit: "°C", status: "optimal" },
       { parameter: "Temp", minValue: 22, maxValue: 28, unit: "°C", status: "acceptable" },
       { parameter: "Temp", minValue: 20, maxValue: 30, unit: "°C", status: "critical" },
@@ -142,11 +183,11 @@ export function getDefaultParameterRangesForTankType(tankType: TankType): Defaul
       { parameter: "Fe", minValue: 0.05, maxValue: 0.2, unit: "ppm", status: "optimal" },
       { parameter: "Fe", minValue: 0.02, maxValue: 0.3, unit: "ppm", status: "acceptable" },
       { parameter: "Fe", minValue: 0, maxValue: 0.5, unit: "ppm", status: "critical" },
-    ]
+    ])
   }
 
   // freshwater (default)
-  return [
+  return withDefaultColors([
     { parameter: "Temp", minValue: 24, maxValue: 26, unit: "°C", status: "optimal" },
     { parameter: "Temp", minValue: 22, maxValue: 28, unit: "°C", status: "acceptable" },
     { parameter: "Temp", minValue: 20, maxValue: 30, unit: "°C", status: "critical" },
@@ -178,6 +219,6 @@ export function getDefaultParameterRangesForTankType(tankType: TankType): Defaul
     { parameter: "PO4", minValue: 0, maxValue: 1.0, unit: "ppm", status: "optimal" },
     { parameter: "PO4", minValue: 0, maxValue: 2.0, unit: "ppm", status: "acceptable" },
     { parameter: "PO4", minValue: 0, maxValue: 5.0, unit: "ppm", status: "critical" },
-  ]
+  ])
 }
 

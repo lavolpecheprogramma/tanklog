@@ -156,7 +156,7 @@
 
 **Status**: Completed (started 2026-01-20)
 
-- [x] `/tank/[id]` shows: latest values, alerts, charts, recent events/photos placeholders
+- [x] `/tank/[id]` shows: latest values, alerts, charts, recent events and photos preview
 - [x] “Last 7/30/90 days” quick ranges for charts
 
 **Done when**

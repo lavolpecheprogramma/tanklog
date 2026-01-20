@@ -3,7 +3,9 @@
     "skipToContent": "Skip to content",
     "googleAccount": "Google account",
     "googleAccountWithLabel": "Google account: {label}",
-    "openNavigation": "Open navigation"
+    "openNavigation": "Open navigation",
+    "switchToLightMode": "Switch to light mode",
+    "switchToDarkMode": "Switch to dark mode"
   },
   "nav": {
     "home": "Home",
@@ -72,11 +74,11 @@
       "heroTitle": "TankLog",
       "heroDescription": "A frontend-only aquarium logbook to capture tests, events, photos, and spot trends over time.",
       "sprint1": {
-        "title": "Sprint 1",
-        "description": "Page skeletons + coherent navigation (with a mocked “active tank” selector).",
+        "title": "Getting started",
+        "description": "Connect your TankLog folder, then pick a tank to start logging.",
         "bullets": [
           "All main routes exist: tanks, tests, photos, events, reminders, settings",
-          "Active tank selector is visible in the header (mock list)",
+          "Your active tank is saved on this device",
           "Mobile-friendly nav (scrollable tabs)"
         ]
       }
@@ -86,12 +88,12 @@
       "title": "Tank",
       "description": "This will become the main per-tank dashboard (latest values, alerts, charts, photos, and events).",
       "sprint1": {
-        "title": "Sprint 1 skeleton",
-        "descriptionPrefix": "You’re viewing a mocked tank route:",
+        "title": "About this page",
+        "descriptionPrefix": "Tank id:",
         "nextUpLabel": "Next up:",
         "bullets": [
-            "Read real tanks from the user’s TankLog Drive folder (Sprint 4)",
-          "Bring together tests, ranges, and charts here (Sprint 6–9)"
+          "Read tanks from the user’s TankLog Drive folder",
+          "Bring together tests, ranges, and charts here"
         ]
       },
       "dashboard": {
@@ -165,9 +167,9 @@
       "metaTitle": "Water tests",
       "title": "Water tests",
       "description": "Log measurements, review history, and spot trends over time.",
-      "comingTitle": "Coming in Sprint 5–8",
-      "comingDescription": "In Sprint 1 we’re just building the page skeletons and navigation.",
-      "plannedLabel": "Planned:",
+      "comingTitle": "Tips",
+      "comingDescription": "Log consistent tests to spot trends and out-of-range values early.",
+      "plannedLabel": "Includes:",
       "plannedBullets": [
         "Add a test (write to Google Sheets)",
         "History list + detail view",
@@ -193,9 +195,9 @@
         }
       },
       "dialog": {
-        "title": "Add water test (placeholder)",
-        "description": "This becomes the real form in Sprint 5. For now, it validates the Dialog primitive (focus, keyboard, escape to close).",
-        "body": "Nothing is saved yet — TankLog remains frontend-only and user-controlled."
+        "title": "Add water test",
+        "description": "Add a new water test session for this tank.",
+        "body": "Measurements are saved to your tank spreadsheet in Google Sheets."
       },
       "form": {
         "title": "Add water test",
@@ -301,6 +303,7 @@
             "min": "Min",
             "max": "Max",
             "unit": "Unit",
+            "color": "Color",
             "actions": "Actions"
           },
           "removeRowAria": "Remove row {row} {parameter}"
@@ -365,9 +368,9 @@
       "metaTitle": "Photos",
       "title": "Photos",
       "description": "Upload photos to Google Drive and start building a visual timeline of tank progress.",
-      "comingTitle": "Coming in Sprint 13–14",
-      "comingDescription": "We’ll upload to Google Drive and store metadata in Google Sheets.",
-      "plannedLabel": "Planned:",
+      "comingTitle": "Timeline",
+      "comingDescription": "Upload photos to Google Drive and store metadata in Google Sheets.",
+      "plannedLabel": "Includes:",
       "plannedBullets": [
         "Upload photos (Drive)",
         "Timeline gallery (per tank)",
@@ -547,9 +550,9 @@
           "loadFailed": "Failed to load events."
         }
       },
-      "comingTitle": "Coming in Sprint 10",
-      "comingDescription": "Events will be stored in the user’s Google Sheet.",
-      "plannedLabel": "Planned:",
+      "comingTitle": "Events",
+      "comingDescription": "Events are saved in your tank spreadsheet in Google Sheets.",
+      "plannedLabel": "Includes:",
       "plannedBullets": [
         "Create events (type, date, notes, tank)",
         "List and filter per tank"

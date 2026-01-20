@@ -36,7 +36,7 @@ const tankNavItems = computed(() => {
   const base = `/tank/${id}`
   return [
     { to: base, labelKey: "nav.overview", isActive: route.path === base },
-    { to: `${base}/tests`, labelKey: "nav.tests", isActive: route.path.startsWith(`${base}/tests`) },
+    { to: `${base}/water-test`, labelKey: "nav.tests", isActive: route.path.startsWith(`${base}/water-test`) },
     { to: `${base}/photos`, labelKey: "nav.photos", isActive: route.path.startsWith(`${base}/photos`) },
     { to: `${base}/events`, labelKey: "nav.events", isActive: route.path.startsWith(`${base}/events`) },
     { to: `${base}/reminders`, labelKey: "nav.reminders", isActive: route.path.startsWith(`${base}/reminders`) },
@@ -114,6 +114,7 @@ async function onLogout() {
 
             <div class="flex items-center gap-2">
               <LanguageSwitcher />
+              <ThemeToggle />
 
               <Button variant="secondary" size="sm" as-child>
                 <NuxtLink :to="localePath('/settings')">{{ $t("nav.settings") }}</NuxtLink>

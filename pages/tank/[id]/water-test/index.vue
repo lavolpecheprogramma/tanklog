@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import type { ParameterRange } from "@/composables/useParameterRanges"
 import { useParameterRanges } from "@/composables/useParameterRanges"
 import type { WaterTestSession } from "@/composables/useWaterTests"
+import { DEFAULT_CHART_COLOR, hexToRgbaOrFallback } from "@/lib/colors"
 
 definePageMeta({
   layout: "tank",
@@ -206,6 +207,10 @@ const rangeByParameterKey = computed(() => {
   return map
 })
 
+function getColorForParameter(parameter: string): string | null {
+  return rangeByParameterKey.value.get(normalizeParameterKey(parameter))?.color ?? null
+}
+
 function getUnitForParameter(parameter: string): string {
   const unit = rangeByParameterKey.value.get(normalizeParameterKey(parameter))?.unit
   return unit ? unit : ""
@@ -378,17 +383,24 @@ function formatChartTooltipDate(value: number): string {
 
 const trendChartAriaLabel = computed(() => t("pages.tests.trends.ariaLabel", { parameter: trendParameter.value || "—" }))
 
+const trendStrokeColor = computed(() => getColorForParameter(trendParameter.value) ?? DEFAULT_CHART_COLOR)
+const trendFillColor = computed(() =>
+  hexToRgbaOrFallback({ hex: trendStrokeColor.value, alpha: 0.15, fallbackHex: DEFAULT_CHART_COLOR })
+)
+
 const trendChartData = computed(() => ({
   datasets: [
     {
       label: trendParameter.value,
       data: trendPoints.value,
-      borderColor: "rgba(37, 99, 235, 1)",
-      backgroundColor: "rgba(37, 99, 235, 0.15)",
+      borderColor: trendStrokeColor.value,
+      backgroundColor: trendFillColor.value,
       fill: true,
       tension: 0.25,
       pointRadius: 3,
       pointHoverRadius: 5,
+      pointBackgroundColor: trendStrokeColor.value,
+      pointBorderColor: trendStrokeColor.value,
     },
   ],
 }))
@@ -720,13 +732,20 @@ async function onSubmit() {
                 {{ $t("pages.tests.ranges.emptyHint") }}
               </p>
               <Button as-child variant="secondary" size="sm">
-                <NuxtLink :to="localePath(`/tank/${tankId}/tests/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
+                <NuxtLink :to="localePath(`/tank/${tankId}/water-test/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
               </Button>
             </div>
             <div v-else class="grid gap-4 sm:grid-cols-2">
               <div v-for="range in parameterRanges" :key="range.parameter" class="space-y-2">
                 <label :for="toParameterInputId(range.parameter)" class="text-foreground">
-                  {{ range.parameter }}
+                  <span class="inline-flex items-center gap-2">
+                    <span
+                      class="inline-block size-2 shrink-0 rounded-full border border-border/60"
+                      :style="{ backgroundColor: range.color ?? 'transparent' }"
+                      aria-hidden="true"
+                    />
+                    <span>{{ range.parameter }}</span>
+                  </span>
                   <span class="text-xs text-muted-foreground">({{ range.unit }})</span>
                 </label>
                 <input
@@ -1011,7 +1030,14 @@ async function onSubmit() {
                     class="rounded px-2 py-1 text-xs"
                     :class="isMeasurementOutOfRange(measurement) ? 'border border-destructive/40 bg-destructive/10 text-destructive' : 'bg-muted text-foreground'"
                   >
-                    <span class="font-medium">{{ measurement.parameter }}</span>:
+                    <span class="inline-flex items-center gap-1.5 font-medium">
+                      <span
+                        class="inline-block size-2 shrink-0 rounded-full border border-border/60"
+                        :style="{ backgroundColor: getColorForParameter(measurement.parameter) ?? 'transparent' }"
+                        aria-hidden="true"
+                      />
+                      <span>{{ measurement.parameter }}</span>
+                    </span>:
                     {{ formatNumber(measurement.value) }} {{ getDisplayUnitForMeasurement(measurement) }}
 
                     <span
@@ -1063,7 +1089,14 @@ async function onSubmit() {
                   </p>
                   <ul class="mt-2 list-disc space-y-1 pl-4">
                     <li v-for="item in selectedSessionAlerts" :key="item.measurementId">
-                      <span class="font-medium text-foreground">{{ item.parameter }}</span>:
+                      <span class="inline-flex items-center gap-2 font-medium text-foreground">
+                        <span
+                          class="inline-block size-2 shrink-0 rounded-full border border-border/60"
+                          :style="{ backgroundColor: getColorForParameter(item.parameter) ?? 'transparent' }"
+                          aria-hidden="true"
+                        />
+                        <span>{{ item.parameter }}</span>
+                      </span>:
                       <span class="text-foreground">{{ formatNumber(item.actual) }} {{ item.unit }}</span>
                       <span class="text-muted-foreground"> — {{ $t("pages.tests.ranges.expected") }} {{ item.expected }}</span>
                       <span class="sr-only">
@@ -1087,7 +1120,14 @@ async function onSubmit() {
                     <tbody>
                       <tr v-for="measurement in selectedSession.measurements" :key="measurement.id" class="border-b border-border/60">
                         <th scope="row" class="px-2 py-2 text-left font-medium">
-                          {{ measurement.parameter }}
+                          <span class="inline-flex items-center gap-2">
+                            <span
+                              class="inline-block size-2 shrink-0 rounded-full border border-border/60"
+                              :style="{ backgroundColor: getColorForParameter(measurement.parameter) ?? 'transparent' }"
+                              aria-hidden="true"
+                            />
+                            <span>{{ measurement.parameter }}</span>
+                          </span>
                         </th>
                         <td class="px-2 py-2 text-right">
                           <span :class="isMeasurementOutOfRange(measurement) ? 'font-semibold text-destructive' : ''">
@@ -1114,7 +1154,7 @@ async function onSubmit() {
       </CardContent>
       <CardFooter class="flex flex-wrap gap-2">
         <Button as-child variant="secondary">
-          <NuxtLink :to="localePath(`/tank/${tankId}/tests/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
+          <NuxtLink :to="localePath(`/tank/${tankId}/water-test/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
         </Button>
         <Button as-child variant="secondary">
           <NuxtLink :to="localePath(`/tank/${tankId}/photos`)">{{ $t("actions.goToPhotos") }}</NuxtLink>

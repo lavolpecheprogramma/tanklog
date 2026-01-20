@@ -9,6 +9,11 @@ export type ParameterRange = {
   maxValue: number | null
   unit: string
   status: ParameterRangeStatus
+  /**
+   * Optional UI color for this parameter (recommended: hex like "#3b82f6").
+   * Stored in the `PARAMETER_RANGES.color` column.
+   */
+  color: string | null
 }
 
 export type ListParameterRangesInput = {
@@ -33,6 +38,7 @@ export type SaveParameterRangesInput = {
     maxValue: number | null
     unit: string
     status?: ParameterRangeStatus | null
+    color?: string | null
   }>
   existingRowCount?: number | null
 }
@@ -68,6 +74,14 @@ function normalizeStatus(value: string | null): ParameterRangeStatus | null {
   return null
 }
 
+function normalizeColor(value: string | null): string | null {
+  const trimmed = value?.trim()
+  if (!trimmed) return null
+  const normalized = trimmed.toLowerCase()
+  if (!/^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/.test(normalized)) return null
+  return normalized
+}
+
 function isRowEmpty(row: SheetsCellValue[] | undefined): boolean {
   if (!row?.length) return true
   return row.every((cell) => cell === null || cell === undefined || (typeof cell === "string" && !cell.trim()))
@@ -80,6 +94,7 @@ function looksLikeHeaderRow(row: SheetsCellValue[] | undefined): boolean {
     normalizeHeaderCell(row[0]) === "parameter"
     && normalizeHeaderCell(row[1]) === "min_value"
     && normalizeHeaderCell(row[2]) === "max_value"
+    && normalizeHeaderCell(row[3]) === "unit"
     && (normalizeHeaderCell(row[4]) === "status" || normalizeHeaderCell(row[4]) === "tank_type")
   )
 }
@@ -91,6 +106,7 @@ function parseParameterRangeRow(row: SheetsCellValue[]): ParameterRange | null {
   const unit = cellToString(row[3])
   const statusCell = cellToString(row[4])
   const status = normalizeStatus(statusCell) ?? "acceptable"
+  const color = normalizeColor(cellToString(row[5]))
 
   if (!parameter || !unit) return null
   if (minValue === null && maxValue === null) return null
@@ -101,6 +117,7 @@ function parseParameterRangeRow(row: SheetsCellValue[]): ParameterRange | null {
     maxValue,
     unit,
     status,
+    color,
   }
 }
 
@@ -109,6 +126,15 @@ export function useParameterRanges() {
 
   function normalizeParameterKey(value: string): string {
     return value.trim().toLowerCase()
+  }
+
+  function pickPreferredColor(ranges: ParameterRange[]): string | null {
+    const preferredOrder: ParameterRangeStatus[] = ["acceptable", "optimal", "critical"]
+    for (const status of preferredOrder) {
+      const match = ranges.find((range) => range.status === status && Boolean(range.color))
+      if (match?.color) return match.color
+    }
+    return ranges.find((range) => Boolean(range.color))?.color ?? null
   }
 
   function pickEffectiveRange(ranges: ParameterRange[]): ParameterRange | null {
@@ -131,7 +157,7 @@ export function useParameterRanges() {
 
     const response = await sheets.getValues({
       spreadsheetId: input.spreadsheetId,
-      range: "PARAMETER_RANGES!A:E",
+      range: "PARAMETER_RANGES!A:F",
       valueRenderOption: "UNFORMATTED_VALUE",
     })
 
@@ -154,7 +180,8 @@ export function useParameterRanges() {
     const effective: ParameterRange[] = []
     for (const list of allByParam.values()) {
       const selected = pickEffectiveRange(list)
-      if (selected) effective.push(selected)
+      if (!selected) continue
+      effective.push({ ...selected, color: selected.color ?? pickPreferredColor(list) })
     }
 
     effective.sort((a, b) => a.parameter.localeCompare(b.parameter))
@@ -169,7 +196,7 @@ export function useParameterRanges() {
 
     const response = await sheets.getValues({
       spreadsheetId: input.spreadsheetId,
-      range: "PARAMETER_RANGES!A:E",
+      range: "PARAMETER_RANGES!A:F",
       valueRenderOption: "UNFORMATTED_VALUE",
     })
 
@@ -203,7 +230,7 @@ export function useParameterRanges() {
 
     const existingSheet = await sheets.getValues({
       spreadsheetId: input.spreadsheetId,
-      range: "PARAMETER_RANGES!A:E",
+      range: "PARAMETER_RANGES!A:F",
       valueRenderOption: "UNFORMATTED_VALUE",
     })
 
@@ -217,19 +244,21 @@ export function useParameterRanges() {
       maxValue: number | null
       unit: string
       status: ParameterRangeStatus
+      color: string | null
     }> = []
     const seen = new Set<string>()
     for (const range of input.ranges) {
       const parameter = range.parameter.trim()
       const unit = range.unit.trim()
       const status = range.status ?? "acceptable"
+      const color = normalizeColor(normalizeOptionalText(range.color))
       if (!parameter || !unit) continue
       if (range.minValue === null && range.maxValue === null) continue
 
       const key = `${normalizeParameterKey(parameter)}:${status}`
       if (seen.has(key)) continue
       seen.add(key)
-      deduped.push({ parameter, minValue: range.minValue, maxValue: range.maxValue, unit, status })
+      deduped.push({ parameter, minValue: range.minValue, maxValue: range.maxValue, unit, status, color })
     }
 
     const statusOrder: Record<ParameterRangeStatus, number> = { optimal: 0, acceptable: 1, critical: 2 }
@@ -245,18 +274,19 @@ export function useParameterRanges() {
       range.maxValue,
       range.unit,
       range.status,
+      range.color,
     ])
 
     const extraBlankRows = Math.max(0, existingRowCount - finalDataRows.length)
-    const blanks: SheetsCellValue[][] = Array.from({ length: extraBlankRows }, () => [null, null, null, null, null])
+    const blanks: SheetsCellValue[][] = Array.from({ length: extraBlankRows }, () => [null, null, null, null, null, null])
 
     const values: SheetsCellValue[][] = [
-      ["parameter", "min_value", "max_value", "unit", "status"],
+      ["parameter", "min_value", "max_value", "unit", "status", "color"],
       ...finalDataRows,
       ...blanks,
     ]
 
-    const range = `PARAMETER_RANGES!A1:E${values.length}`
+    const range = `PARAMETER_RANGES!A1:F${values.length}`
     await sheets.updateValues({
       spreadsheetId: input.spreadsheetId,
       range,
