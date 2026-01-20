@@ -9,6 +9,7 @@
     "home": "Home",
     "tanks": "Vasche",
     "tank": "Vasca",
+    "overview": "Panoramica",
     "tests": "Test",
     "photos": "Foto",
     "events": "Eventi",
@@ -80,7 +81,7 @@
       "unknown": {
         "title": "Vasca sconosciuta",
         "descriptionPrefix": "Questo id vasca non è ancora riconosciuto:",
-        "body": "Per lo Sprint 1 stiamo usando una lista fittizia. Scegli una “Vasca attiva” dall’header per navigare verso una pagina valida."
+        "body": "Questa vasca non è stata trovata nella tua cartella TankLog. Torna alla Home e scegli una vasca valida."
       }
     },
     "tests": {
@@ -117,7 +118,7 @@
         },
         "hints": {
           "date": "Viene salvato come timestamp ISO nel foglio (UTC).",
-          "tank": "Usa la vasca attiva selezionata nell’header.",
+          "tank": "Il test verrà salvato nel foglio della vasca che hai aperto.",
           "parameters": "Compila solo ciò che hai misurato — i campi vuoti vengono ignorati."
         },
         "placeholders": {

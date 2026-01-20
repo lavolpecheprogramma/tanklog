@@ -1,50 +1,26 @@
 <script setup lang="ts">
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+const localePath = useLocalePath()
 
-const { t, tm } = useI18n()
+const { activeTank } = useActiveTank()
+const { status: tanksStatus } = useTanks()
 
-useHead(() => ({
-  title: t("pages.events.metaTitle"),
-}))
+watchEffect(() => {
+  if (!import.meta.client) return
+  if (tanksStatus.value === "loading") return
 
-const plannedBullets = computed(() => {
-  const value = tm("pages.events.plannedBullets")
-  return Array.isArray(value) ? value : []
+  if (activeTank.value?.id) {
+    navigateTo(localePath(`/tank/${activeTank.value.id}/events`), { replace: true })
+    return
+  }
+
+  navigateTo(localePath("/"), { replace: true })
 })
 </script>
 
 <template>
-  <section class="space-y-6">
-    <div class="space-y-2">
-      <h1 class="text-2xl font-semibold tracking-tight">{{ $t("pages.events.title") }}</h1>
-      <p class="max-w-prose text-muted-foreground">
-        {{ $t("pages.events.description") }}
-      </p>
-    </div>
-
-    <Card>
-      <CardHeader>
-        <CardTitle>{{ $t("pages.events.comingTitle") }}</CardTitle>
-        <CardDescription>{{ $t("pages.events.comingDescription") }}</CardDescription>
-      </CardHeader>
-      <CardContent class="text-sm text-muted-foreground">
-        {{ $t("pages.events.plannedLabel") }}
-        <ul class="mt-2 list-disc space-y-1 pl-5">
-          <li v-for="item in plannedBullets" :key="item">
-            {{ item }}
-          </li>
-        </ul>
-      </CardContent>
-      <CardFooter class="flex flex-wrap gap-2">
-        <Button as-child>
-          <NuxtLink to="/reminders">{{ $t("actions.goToReminders") }}</NuxtLink>
-        </Button>
-        <Button variant="secondary" as-child>
-          <NuxtLink to="/photos">{{ $t("actions.goToPhotos") }}</NuxtLink>
-        </Button>
-      </CardFooter>
-    </Card>
+  <section class="space-y-2">
+    <h1 class="text-2xl font-semibold tracking-tight">TankLog</h1>
+    <p class="text-sm text-muted-foreground">Redirecting…</p>
   </section>
 </template>
 

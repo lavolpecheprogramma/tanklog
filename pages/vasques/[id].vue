@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const route = useRoute()
+const localePath = useLocalePath()
 
 const tankId = computed(() => {
   const raw = route.params.id
@@ -7,12 +8,12 @@ const tankId = computed(() => {
 })
 
 watchEffect(() => {
-  if (!process.client) return
+  if (!import.meta.client) return
   if (!tankId.value) {
-    navigateTo("/tanks", { replace: true })
+    navigateTo(localePath("/"), { replace: true })
     return
   }
-  navigateTo(`/tanks/${tankId.value}`, { replace: true })
+  navigateTo(localePath(`/tank/${tankId.value}`), { replace: true })
 })
 </script>
 

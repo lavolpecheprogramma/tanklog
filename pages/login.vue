@@ -31,7 +31,7 @@ const redirectTarget = computed(() => {
 })
 
 watchEffect(() => {
-  if (!process.client) return
+  if (!import.meta.client) return
   if (!auth.isAuthenticated.value) return
   navigateTo(redirectTarget.value)
 })

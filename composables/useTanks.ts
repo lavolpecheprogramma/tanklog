@@ -9,6 +9,7 @@ export type Tank = {
   id: string
   name: string
   type: TankType
+  volumeLiters: number | null
   folderId: string
   spreadsheetId: string
 }
@@ -55,9 +56,9 @@ function normalizeTankType(value: string | undefined | null): TankType | null {
 
 function parseTankInfo(
   values: SheetsCellValue[][] | undefined
-): { tankId: string | null; tankName: string | null; tankType: TankType | null } {
-  if (!values?.length) return { tankId: null, tankName: null, tankType: null }
-  if (values.length < 2) return { tankId: null, tankName: null, tankType: null }
+): { tankId: string | null; tankName: string | null; tankType: TankType | null; volumeLiters: number | null } {
+  if (!values?.length) return { tankId: null, tankName: null, tankType: null, volumeLiters: null }
+  if (values.length < 2) return { tankId: null, tankName: null, tankType: null, volumeLiters: null }
 
   const header = values[0] ?? []
   const row = values[1] ?? []
@@ -73,15 +74,30 @@ function parseTankInfo(
   const tankIdCell = index.has("tank_id") ? row[index.get("tank_id")!] : null
   const tankNameCell = index.has("tank_name") ? row[index.get("tank_name")!] : null
   const tankTypeCell = index.has("tank_type") ? row[index.get("tank_type")!] : null
+  const volumeCell = index.has("volume_liters") ? row[index.get("volume_liters")!] : null
 
   const tankId = tankIdCell === null || tankIdCell === undefined ? null : String(tankIdCell)
   const tankName = tankNameCell === null || tankNameCell === undefined ? null : String(tankNameCell)
   const tankTypeRaw = tankTypeCell === null || tankTypeCell === undefined ? null : String(tankTypeCell)
 
+  const volumeLiters = (() => {
+    if (volumeCell === null || volumeCell === undefined) return null
+    if (typeof volumeCell === "number") return Number.isFinite(volumeCell) ? volumeCell : null
+    if (typeof volumeCell === "string") {
+      const trimmed = volumeCell.trim()
+      if (!trimmed) return null
+      const normalized = trimmed.replace(",", ".")
+      const parsed = Number(normalized)
+      return Number.isFinite(parsed) ? parsed : null
+    }
+    return null
+  })()
+
   return {
     tankId: tankId ? tankId.trim() : null,
     tankName: tankName ? tankName.trim() : null,
     tankType: normalizeTankType(tankTypeRaw),
+    volumeLiters,
   }
 }
 
@@ -194,6 +210,7 @@ export function useTanks() {
             const id = parsed.tankId ?? fallback.tankId ?? null
             const name = parsed.tankName ?? fallback.tankName ?? folder.name
             const type = parsed.tankType ?? "freshwater"
+            const volumeLiters = parsed.volumeLiters ?? null
 
             if (!id) return null
 
@@ -201,6 +218,7 @@ export function useTanks() {
               id,
               name,
               type,
+              volumeLiters,
               folderId: folder.id,
               spreadsheetId: sheet.id,
             } satisfies Tank
@@ -327,6 +345,7 @@ export function useTanks() {
       id: tankId,
       name,
       type,
+      volumeLiters: input.volumeLiters ?? null,
       folderId: tankFolder.id,
       spreadsheetId,
     }
@@ -402,10 +421,7 @@ export function useActiveTank() {
   })
 
   watchEffect(() => {
-    if (!tanks.value.length) {
-      if (activeTankId.value) activeTankId.value = ""
-      return
-    }
+    if (!tanks.value.length) return
 
     if (!activeTankId.value || !tanks.value.some((tank) => tank.id === activeTankId.value)) {
       activeTankId.value = tanks.value[0]!.id

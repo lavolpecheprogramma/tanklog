@@ -58,8 +58,8 @@
 ## Sprint 1 — Page skeletons + app navigation
 **Goal**: all main pages exist and feel coherent.
 
-- [x] Create pages: `/`, `/tanks`, `/tanks/[id]`, `/tests`, `/photos`, `/events`, `/reminders`, `/settings`
-- [x] Add active tank selector (temporary “mock” list)
+- [x] Create pages: `/`, `/tank/[id]`, `/tank/[id]/tests`, `/tank/[id]/photos`, `/tank/[id]/events`, `/tank/[id]/reminders`, `/settings`
+- [x] Tank navigation: dashboard tank list + per-tank sidebar
 - [x] Add simple UI primitives (Card, Button, Dialog) and consistent spacing
 
 **Done when**
@@ -149,7 +149,7 @@
 ## Sprint 9 — Tank detail page (bring it together)
 **Goal**: one place to understand the tank status.
 
-- [ ] `/tanks/[id]` shows: latest values, alerts, charts, recent events/photos placeholders
+- [ ] `/tank/[id]` shows: latest values, alerts, charts, recent events/photos placeholders
 - [ ] “Last 7/30/90 days” quick ranges for charts
 
 **Done when**
@@ -160,7 +160,7 @@
 
 - [ ] Events model + form (type, date, notes, tank)
 - [ ] Write to `EVENTS` tab
-- [ ] List events on tank detail + `/events` page
+- [ ] List events on tank detail + `/tank/[id]/events` page
 
 **Done when**
 - [ ] Events can be added and viewed per tank

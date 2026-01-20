@@ -2,52 +2,104 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-const { t, tm } = useI18n()
+const { t } = useI18n()
+const localePath = useLocalePath()
 
 useHead(() => ({
   title: t("pages.home.metaTitle"),
 }))
 
-const { activeTank } = useActiveTank()
+const storage = useTankLogRootFolderId()
+storage.hydrateFromStorage()
+const isStorageReady = computed(() => storage.hasRootFolderId.value)
 
-const sprint1Bullets = computed(() => {
-  const value = tm("pages.home.sprint1.bullets")
-  return Array.isArray(value) ? value : []
-})
+const { tanks, status: tanksStatus, error: tanksError, refresh: refreshTanks } = useTanks()
+
+function tankTypeLabel(type: string) {
+  if (type === "freshwater" || type === "marine" || type === "reef") {
+    return t(`pages.settings.tanks.types.${type}`)
+  }
+  return type
+}
+
+function formatVolume(volumeLiters: number | null) {
+  if (volumeLiters === null) return null
+  const rounded = Number.isInteger(volumeLiters) ? volumeLiters.toString() : volumeLiters.toFixed(1)
+  return `${rounded} L`
+}
 </script>
 
 <template>
   <section class="space-y-6">
     <div class="space-y-2">
       <h1 class="text-2xl font-semibold tracking-tight">{{ $t("pages.home.heroTitle") }}</h1>
-      <p class="max-w-prose text-muted-foreground">
-        {{ $t("pages.home.heroDescription") }}
-      </p>
+      <p class="max-w-prose text-muted-foreground">{{ $t("pages.home.heroDescription") }}</p>
     </div>
 
-    <Card>
+    <Card v-if="!isStorageReady">
       <CardHeader>
-        <CardTitle>{{ $t("pages.home.sprint1.title") }}</CardTitle>
-        <CardDescription>
-          {{ $t("pages.home.sprint1.description") }}
-        </CardDescription>
+        <CardTitle>{{ $t("pages.settings.storage.title") }}</CardTitle>
+        <CardDescription>{{ $t("pages.settings.storage.description") }}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-          <li v-for="item in sprint1Bullets" :key="item">
-            {{ item }}
-          </li>
-        </ul>
-      </CardContent>
-      <CardFooter class="flex gap-2">
+      <CardFooter>
         <Button as-child>
-          <NuxtLink :to="activeTank ? `/tanks/${activeTank.id}` : '/tanks'">{{ $t("actions.openActiveTank") }}</NuxtLink>
-        </Button>
-        <Button variant="secondary" as-child>
-          <NuxtLink to="/tests">{{ $t("actions.openWaterTests") }}</NuxtLink>
+          <NuxtLink to="/settings">{{ $t("actions.goToSettings") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>
+
+    <div v-else class="space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <div class="text-sm font-medium text-foreground">{{ $t("pages.settings.tanks.listTitle") }}</div>
+          <div class="text-xs text-muted-foreground">{{ $t("pages.settings.tanks.listHint") }}</div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+          <Button type="button" variant="secondary" size="sm" :disabled="tanksStatus === 'loading'" @click="refreshTanks">
+            {{ $t("pages.settings.tanks.refresh") }}
+          </Button>
+          <Button variant="secondary" size="sm" as-child>
+            <NuxtLink to="/settings">{{ $t("pages.settings.tanks.add") }}</NuxtLink>
+          </Button>
+        </div>
+      </div>
+
+      <div v-if="tanksError" class="text-sm text-destructive" role="alert">
+        {{ tanksError }}
+      </div>
+
+      <div v-else-if="tanksStatus === 'loading'" class="text-sm text-muted-foreground">
+        {{ $t("pages.settings.tanks.loading") }}
+      </div>
+
+      <div v-else-if="!tanks.length" class="space-y-2">
+        <p class="text-sm text-muted-foreground">{{ $t("pages.settings.tanks.empty") }}</p>
+        <Button as-child>
+          <NuxtLink to="/settings">{{ $t("pages.settings.tanks.add") }}</NuxtLink>
+        </Button>
+      </div>
+
+      <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card v-for="tank in tanks" :key="tank.id" class="flex flex-col">
+          <CardHeader>
+            <CardTitle class="truncate">{{ tank.name }}</CardTitle>
+            <CardDescription>
+              <span>{{ tankTypeLabel(tank.type) }}</span>
+              <span v-if="formatVolume(tank.volumeLiters)" class="text-muted-foreground"> · {{ formatVolume(tank.volumeLiters) }}</span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent class="text-xs text-muted-foreground">
+            <code class="rounded bg-muted px-1 py-0.5">{{ tank.id }}</code>
+          </CardContent>
+          <CardFooter class="mt-auto">
+            <Button as-child class="w-full">
+              <NuxtLink :to="localePath(`/tank/${tank.id}`)">{{ $t("pages.settings.tanks.open") }}</NuxtLink>
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
   </section>
 </template>
 

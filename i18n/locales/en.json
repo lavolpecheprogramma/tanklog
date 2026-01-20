@@ -9,6 +9,7 @@
     "home": "Home",
     "tanks": "Tanks",
     "tank": "Tank",
+    "overview": "Overview",
     "tests": "Tests",
     "photos": "Photos",
     "events": "Events",
@@ -80,7 +81,7 @@
       "unknown": {
         "title": "Unknown tank",
         "descriptionPrefix": "We don’t recognize this tank id yet:",
-        "body": "For Sprint 1 we’re using a temporary mock list. Pick an “Active tank” from the header to navigate to a valid tank page."
+        "body": "This tank wasn’t found in your TankLog folder. Go back to Home and pick a valid tank."
       }
     },
     "tests": {
@@ -117,7 +118,7 @@
         },
         "hints": {
           "date": "Saved as an ISO timestamp in the sheet (UTC).",
-          "tank": "Uses the active tank selected in the header.",
+          "tank": "This test will be saved to the tank you opened.",
           "parameters": "Fill only what you measured — empty fields are skipped."
         },
         "placeholders": {

@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import type { GoogleDriveFile } from "@/composables/useGoogleDrive"
 
 const { t, locale: activeLocale } = useI18n()
+const localePath = useLocalePath()
 
 useHead(() => ({
   title: t("pages.settings.metaTitle"),
@@ -125,6 +126,7 @@ async function onCreateTank() {
     setActiveTankId(created.id)
     isCreateTankDialogOpen.value = false
     resetNewTankForm()
+    await navigateTo(localePath(`/tank/${created.id}`))
   } catch (error) {
     createTankError.value = error instanceof Error ? error.message : t("pages.settings.tanks.errors.createFailed")
   } finally {
@@ -522,7 +524,7 @@ async function onLogout() {
                 </div>
 
                 <Button as-child size="sm">
-                  <NuxtLink :to="`/tanks/${tank.id}`">{{ $t("pages.settings.tanks.open") }}</NuxtLink>
+                  <NuxtLink :to="localePath(`/tank/${tank.id}`)">{{ $t("pages.settings.tanks.open") }}</NuxtLink>
                 </Button>
               </div>
             </li>

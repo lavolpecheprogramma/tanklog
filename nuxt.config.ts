@@ -39,7 +39,7 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'static',
     prerender: {
-      routes: ['/login', '/tanks', '/tanks/reef-300l', '/tanks/nano-40l', '/tanks/fresh-120l']
+      routes: [ '/login' ]
     }
   },
 

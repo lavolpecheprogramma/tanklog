@@ -244,14 +244,14 @@ TankLog stores water tests as an **event/measurement log**:
 
 ### Pages
 ```
-/                   -> Home / Dashboard overview
-/tanks              -> Tank list (create + select)
-/tanks/[id]         -> Tank detail page (tests, events, photos)
-/tests              -> Add/view water tests
-/photos             -> Photo timeline gallery
-/events             -> Event list and management
-/reminders          -> Custom reminders (create / upcoming / overdue)
+/                   -> Dashboard (tank grid)
+/tank/[id]          -> Tank overview (per-tank dashboard entry point)
+/tank/[id]/tests    -> Water tests (per tank)
+/tank/[id]/photos   -> Photo timeline gallery (per tank)
+/tank/[id]/events   -> Events (per tank)
+/tank/[id]/reminders -> Reminders (per tank)
 /settings           -> Account, language, preferences
+/login              -> Google login
 ```
 
 ### Components (shadcn-vue)
