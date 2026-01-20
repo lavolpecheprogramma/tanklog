@@ -1023,12 +1023,11 @@ async function onSubmit() {
                 </p>
 
                 <div class="flex flex-wrap gap-1">
-                  <span
+                  <div
                     v-for="measurement in session.measurements"
                     :key="measurement.id"
                     :title="getMeasurementExpectedLabel(measurement) ?? undefined"
-                    class="rounded px-2 py-1 text-xs"
-                    :class="isMeasurementOutOfRange(measurement) ? 'border border-destructive/40 bg-destructive/10 text-destructive' : 'bg-muted text-foreground'"
+                    class="rounded px-2 py-1 text-xs bg-muted text-foreground"
                   >
                     <span class="inline-flex items-center gap-1.5 font-medium">
                       <span
@@ -1038,15 +1037,16 @@ async function onSubmit() {
                       />
                       <span>{{ measurement.parameter }}</span>
                     </span>:
-                    {{ formatNumber(measurement.value) }} {{ getDisplayUnitForMeasurement(measurement) }}
-
-                    <span
-                      v-if="getOutOfRangeStatus(measurement)"
-                      class="ml-1 rounded border border-destructive/40 px-1 text-[10px] font-medium uppercase leading-none"
-                    >
-                      {{ getOutOfRangeStatus(measurement) === "low" ? $t("pages.tests.ranges.low") : $t("pages.tests.ranges.high") }}
-                    </span>
-                  </span>
+                    
+                      {{ formatNumber(measurement.value) }} {{ getDisplayUnitForMeasurement(measurement) }}
+  
+                      <span
+                        v-if="getOutOfRangeStatus(measurement)"
+                        class="ml-1 rounded border border-destructive/40 text-destructive px-1 text-[10px] font-medium uppercase leading-none"
+                      >
+                        {{ getOutOfRangeStatus(measurement) === "low" ? $t("pages.tests.ranges.low") : $t("pages.tests.ranges.high") }}
+                      </span>
+                  </div>
                 </div>
               </button>
             </li>
