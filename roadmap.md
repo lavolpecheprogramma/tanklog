@@ -119,12 +119,12 @@
 ## Sprint 6 — Water tests: list + detail
 **Goal**: history is usable.
 
-- [ ] List water tests for active tank (sorted by date)
-- [ ] Simple filters (date range / parameter presence)
-- [ ] Row detail view (dialog or page section)
+- [x] List water tests for active tank (sorted by date)
+- [x] Simple filters (date range / parameter presence)
+- [x] Row detail view (dialog or page section)
 
 **Done when**
-- [ ] Users can find and open past tests quickly
+- [x] Users can find and open past tests quickly
 
 ## Sprint 7 — Parameter ranges + out-of-range highlighting
 **Goal**: detect “bad values” immediately.

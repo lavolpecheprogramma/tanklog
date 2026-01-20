@@ -140,9 +140,42 @@
         }
       },
       "history": {
-        "title": "Storico (in arrivo)",
-        "description": "Lista, dettaglio e filtri arrivano nello Sprint 6.",
-        "body": "Per ora puoi già registrare i test qui sopra. Nel prossimo sprint aggiungeremo lo storico per vasca e una vista dettaglio semplice."
+        "title": "Storico",
+        "description": "Consulta le sessioni di test passate e apri i dettagli.",
+        "loadingTanks": "Caricamento vasche…",
+        "loading": "Caricamento storico test…",
+        "refresh": "Aggiorna storico",
+        "refreshing": "Aggiornamento…",
+        "results": "{count} sessione(i)",
+        "measurements": "{count} misurazione(i)",
+        "empty": "Nessun test acqua ancora.",
+        "emptyHint": "Aggiungi il primo test qui sopra — apparirà qui.",
+        "noResults": "Nessun risultato con questi filtri.",
+        "labels": {
+          "method": "Metodo",
+          "note": "Nota"
+        },
+        "filters": {
+          "from": "Da",
+          "to": "A",
+          "parameter": "Parametro",
+          "anyParameter": "Tutti i parametri",
+          "clear": "Rimuovi filtri"
+        },
+        "errors": {
+          "loadFailed": "Impossibile caricare i test acqua."
+        }
+      },
+      "detail": {
+        "title": "Dettaglio test acqua",
+        "description": "Apri una sessione di test per vedere tutte le misurazioni.",
+        "groupId": "ID sessione",
+        "tableCaption": "Misurazioni nella sessione di test acqua",
+        "columns": {
+          "parameter": "Parametro",
+          "value": "Valore",
+          "unit": "Unità"
+        }
       }
     },
     "photos": {

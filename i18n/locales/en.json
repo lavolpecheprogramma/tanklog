@@ -140,9 +140,42 @@
         }
       },
       "history": {
-        "title": "History (coming next)",
-        "description": "Listing, detail view, and filters arrive in Sprint 6.",
-        "body": "For now you can already log tests above. Next sprint we’ll add a per-tank history list and a simple detail view."
+        "title": "History",
+        "description": "Browse past test sessions and open details.",
+        "loadingTanks": "Loading tanks…",
+        "loading": "Loading test history…",
+        "refresh": "Refresh history",
+        "refreshing": "Refreshing…",
+        "results": "{count} session(s)",
+        "measurements": "{count} measurement(s)",
+        "empty": "No water tests yet.",
+        "emptyHint": "Add your first test above — it will appear here.",
+        "noResults": "No results match your filters.",
+        "labels": {
+          "method": "Method",
+          "note": "Note"
+        },
+        "filters": {
+          "from": "From",
+          "to": "To",
+          "parameter": "Parameter",
+          "anyParameter": "Any parameter",
+          "clear": "Clear filters"
+        },
+        "errors": {
+          "loadFailed": "Failed to load water tests."
+        }
+      },
+      "detail": {
+        "title": "Water test details",
+        "description": "Open a test session to see all measurements.",
+        "groupId": "Session id",
+        "tableCaption": "Measurements in this water test session",
+        "columns": {
+          "parameter": "Parameter",
+          "value": "Value",
+          "unit": "Unit"
+        }
       }
     },
     "photos": {
