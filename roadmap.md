@@ -170,9 +170,11 @@
 - [x] Events model + form (type, date, notes, tank)
 - [x] Write to `EVENTS` tab
 - [x] List events on tank detail + `/tank/[id]/events` page
+- [x] Edit and delete events (update/delete rows in `EVENTS`)
 
 **Done when**
 - [x] Events can be added and viewed per tank
+- [x] Events can be edited and deleted per tank
 
 ## Sprint 11 — Reminders: CRUD + upcoming/overdue (Sheets)
 **Goal**: track recurring tasks (water changes, dosing, batteries, etc).
@@ -183,6 +185,7 @@
 - [x] Reminder form (title, schedule, next due, notes)
 - [x] Write to / read from `REMINDERS` tab via Sheets API (CRUD)
 - [x] Upcoming + overdue views (global + per tank)
+- [x] Marking a reminder as done can log a matching event in `EVENTS`
 
 **Done when**
 - [x] A reminder can be created and appears in the upcoming list

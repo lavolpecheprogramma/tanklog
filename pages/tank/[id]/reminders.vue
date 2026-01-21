@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { EVENT_TYPES, type EventType } from "@/composables/useEvents"
 import type { TankReminder } from "@/composables/useReminders"
 
 definePageMeta({
@@ -28,6 +29,7 @@ const { tanks, status: tanksStatus, error: tanksError } = useTanks()
 const tank = computed(() => (tankId.value ? tanks.value.find((item) => item.id === tankId.value) ?? null : null))
 
 const remindersApi = useReminders()
+const eventsApi = useEvents()
 
 type LoadStatus = "idle" | "loading" | "ready" | "error"
 const listStatus = ref<LoadStatus>("idle")
@@ -43,16 +45,6 @@ function toDateOnlyValue(date: Date): string {
   const month = pad(date.getMonth() + 1)
   const day = pad(date.getDate())
   return `${year}-${month}-${day}`
-}
-
-function toDatetimeLocalValue(date: Date): string {
-  const pad = (value: number) => value.toString().padStart(2, "0")
-  const year = date.getFullYear()
-  const month = pad(date.getMonth() + 1)
-  const day = pad(date.getDate())
-  const hours = pad(date.getHours())
-  const minutes = pad(date.getMinutes())
-  return `${year}-${month}-${day}T${hours}:${minutes}`
 }
 
 function isDateOnly(value: string): boolean {
@@ -114,6 +106,14 @@ function formatDateTime(value: string): string {
     }).format(date)
   } catch {
     return date.toLocaleString()
+  }
+}
+
+function formatNumber(value: number): string {
+  try {
+    return new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 }).format(value)
+  } catch {
+    return String(value)
   }
 }
 
@@ -210,117 +210,76 @@ function reminderBadge(reminder: TankReminder): { label: string; className: stri
   }
 }
 
-const titleInput = ref("")
-const titleError = ref<string | null>(null)
-
-const nextDueInput = ref("")
-const nextDueError = ref<string | null>(null)
-
-const repeatEveryDaysInput = ref("")
-const repeatEveryDaysError = ref<string | null>(null)
-
-const notesInput = ref("")
-
 const actingReminderId = ref<string | null>(null)
 const actionError = ref<string | null>(null)
 const actionStatus = ref<string | null>(null)
 
-const isSubmitting = ref(false)
-const submitError = ref<string | null>(null)
-const submitStatus = ref<string | null>(null)
-
-onMounted(() => {
-  if (!nextDueInput.value) nextDueInput.value = toDatetimeLocalValue(new Date())
-})
-
-function resetFormErrors() {
-  titleError.value = null
-  nextDueError.value = null
-  repeatEveryDaysError.value = null
-  submitError.value = null
-  submitStatus.value = null
+type ReminderFormPayload = {
+  nextDue: string
+  repeatEveryDays: number | null
+  eventType: EventType
+  description: string
+  quantity: number | null
+  unit: string | null
+  product: string | null
+  note: string | null
 }
 
-function parsePositiveInteger(value: string): number | null {
-  const trimmed = value.toString().trim()
-  if (!trimmed) return null
-  const parsed = Number(trimmed)
-  if (!Number.isFinite(parsed)) return null
-  if (!Number.isInteger(parsed)) return null
-  if (parsed <= 0) return null
-  return parsed
+function isReminderFormPayload(value: unknown): value is ReminderFormPayload {
+  if (!value || typeof value !== "object") return false
+  const candidate = value as Record<string, unknown>
+  if (typeof candidate.nextDue !== "string") return false
+  if (candidate.repeatEveryDays !== null && candidate.repeatEveryDays !== undefined && typeof candidate.repeatEveryDays !== "number") return false
+
+  if (typeof candidate.eventType !== "string") return false
+  if (!EVENT_TYPES.includes(candidate.eventType as EventType)) return false
+  if (typeof candidate.description !== "string") return false
+
+  if (candidate.quantity !== null && candidate.quantity !== undefined) {
+    if (typeof candidate.quantity !== "number") return false
+    if (!Number.isFinite(candidate.quantity)) return false
+  }
+
+  if (candidate.unit !== null && candidate.unit !== undefined && typeof candidate.unit !== "string") return false
+  if (candidate.product !== null && candidate.product !== undefined && typeof candidate.product !== "string") return false
+  if (candidate.note !== null && candidate.note !== undefined && typeof candidate.note !== "string") return false
+
+  return true
 }
 
-function validate() {
-  resetFormErrors()
+async function handleCreateReminder(payload: unknown) {
+  if (!tank.value) throw new Error(t("pages.reminders.form.errors.noTank"))
+  if (!isReminderFormPayload(payload)) throw new Error(t("pages.reminders.form.errors.saveFailed"))
 
-  if (!tank.value) {
-    submitError.value = t("pages.reminders.form.errors.noTank")
-    return null
-  }
+  await remindersApi.createReminder({
+    spreadsheetId: tank.value.spreadsheetId,
+    title: payload.description,
+    nextDue: payload.nextDue,
+    eventType: payload.eventType,
+    repeatEveryDays: payload.repeatEveryDays,
+    quantity: payload.quantity,
+    unit: payload.unit,
+    product: payload.product,
+    notes: payload.note,
+  })
 
-  const title = titleInput.value.trim()
-  if (!title) {
-    titleError.value = t("pages.reminders.form.errors.missingTitle")
-    return null
-  }
-
-  const nextDue = nextDueInput.value.trim()
-  if (!nextDue) {
-    nextDueError.value = t("pages.reminders.form.errors.missingNextDue")
-    return null
-  }
-
-  const dueDate = new Date(nextDue)
-  if (Number.isNaN(dueDate.getTime())) {
-    nextDueError.value = t("pages.reminders.form.errors.invalidNextDue")
-    return null
-  }
-
-  const repeatEveryDays = parsePositiveInteger(repeatEveryDaysInput.value)
-  console.log(repeatEveryDays)
-  if (!Number.isFinite(repeatEveryDays) && repeatEveryDays !== null) {
-    repeatEveryDaysError.value = t("pages.reminders.form.errors.invalidRepeatEveryDays")
-    return null
-  }
-
-  return {
-    tank: tank.value,
-    title,
-    nextDue: dueDate.toISOString(),
-    repeatEveryDays,
-    notes: notesInput.value,
-  }
+  await loadReminders()
 }
 
-async function onSubmit() {
-  submitError.value = null
-  submitStatus.value = null
+async function logEventFromReminder(reminder: TankReminder, doneAt: Date) {
+  if (!tank.value) return
+  if (!reminder.eventType) return
 
-  const validated = validate()
-  if (!validated) return
-
-  isSubmitting.value = true
-  try {
-    await remindersApi.createReminder({
-      spreadsheetId: validated.tank.spreadsheetId,
-      title: validated.title,
-      nextDue: validated.nextDue,
-      repeatEveryDays: validated.repeatEveryDays,
-      notes: validated.notes,
-    })
-
-    await loadReminders()
-
-    titleInput.value = ""
-    repeatEveryDaysInput.value = ""
-    notesInput.value = ""
-    submitStatus.value = t("pages.reminders.form.success.saved")
-  } catch (error) {
-    submitError.value = error instanceof Error ? error.message : t("pages.reminders.form.errors.saveFailed")
-  } finally {
-    isSubmitting.value = false
-  }
+  await eventsApi.createEvent({
+    spreadsheetId: tank.value.spreadsheetId,
+    date: doneAt,
+    eventType: reminder.eventType,
+    description: reminder.title,
+    quantity: reminder.quantity,
+    unit: reminder.unit,
+    product: reminder.product,
+    note: reminder.notes,
+  })
 }
 
 async function onToggleDone(reminder: TankReminder) {
@@ -329,6 +288,9 @@ async function onToggleDone(reminder: TankReminder) {
   actionError.value = null
   actionStatus.value = null
   actingReminderId.value = reminder.reminderId
+
+  const doneAt = new Date()
+  const shouldLogEvent = reminder.repeatEveryDays !== null || reminder.lastDone === null
 
   try {
     if (reminder.repeatEveryDays === null) {
@@ -341,11 +303,23 @@ async function onToggleDone(reminder: TankReminder) {
       await remindersApi.markReminderDone({
         spreadsheetId: tank.value.spreadsheetId,
         reminderId: reminder.reminderId,
+        doneAt,
       })
     }
 
+    if (shouldLogEvent) {
+      try {
+        await logEventFromReminder(reminder, doneAt)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : t("pages.reminders.actions.errors.eventLogFailed")
+        actionError.value = t("pages.reminders.actions.errors.eventLogFailedWithMessage", { message })
+      }
+    }
+
     await loadReminders()
-    actionStatus.value = t("pages.reminders.actions.statusUpdated")
+    if (!actionError.value) {
+      actionStatus.value = shouldLogEvent && reminder.eventType ? t("pages.reminders.actions.statusUpdatedAndLogged") : t("pages.reminders.actions.statusUpdated")
+    }
   } catch (error) {
     actionError.value = error instanceof Error ? error.message : t("pages.reminders.actions.errors.updateFailed")
   } finally {
@@ -449,97 +423,20 @@ async function onDeleteReminder(reminder: TankReminder) {
             <CardDescription>{{ $t("pages.reminders.form.description") }}</CardDescription>
           </CardHeader>
           <CardContent class="text-sm text-muted-foreground">
-            <form class="space-y-5" @submit.prevent="onSubmit">
-              <div class="space-y-2">
-                <label for="reminder-title" class="text-foreground">{{ $t("pages.reminders.form.fields.title") }}</label>
-                <input
-                  id="reminder-title"
-                  v-model="titleInput"
-                  type="text"
-                  autocomplete="off"
-                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  :placeholder="$t('pages.reminders.form.placeholders.title')"
-                  :aria-invalid="titleError ? 'true' : 'false'"
-                  aria-describedby="reminder-title-feedback"
-                  required
-                />
-                <p v-if="titleError" id="reminder-title-feedback" class="text-sm text-destructive" role="alert">
-                  {{ titleError }}
-                </p>
-                <p v-else id="reminder-title-feedback" class="sr-only"> </p>
-              </div>
-
-              <div class="grid gap-4 sm:grid-cols-2">
-                <div class="space-y-2">
-                  <label for="reminder-next-due" class="text-foreground">{{ $t("pages.reminders.form.fields.nextDue") }}</label>
-                  <input
-                    id="reminder-next-due"
-                    v-model="nextDueInput"
-                    type="datetime-local"
-                    autocomplete="off"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    :aria-invalid="nextDueError ? 'true' : 'false'"
-                    aria-describedby="reminder-next-due-hint reminder-next-due-feedback"
-                    required
-                  />
-                  <p id="reminder-next-due-hint" class="text-xs text-muted-foreground">
-                    {{ $t("pages.reminders.form.hints.nextDue") }}
-                  </p>
-                  <p v-if="nextDueError" id="reminder-next-due-feedback" class="text-sm text-destructive" role="alert">
-                    {{ nextDueError }}
-                  </p>
-                  <p v-else id="reminder-next-due-feedback" class="sr-only"> </p>
-                </div>
-
-                <div class="space-y-2">
-                  <label for="reminder-repeat" class="text-foreground">{{ $t("pages.reminders.form.fields.repeatEveryDays") }}</label>
-                  <input
-                    id="reminder-repeat"
-                    v-model="repeatEveryDaysInput"
-                    type="number"
-                    inputmode="numeric"
-                    autocomplete="off"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    :placeholder="$t('pages.reminders.form.placeholders.repeatEveryDays')"
-                    :aria-invalid="repeatEveryDaysError ? 'true' : 'false'"
-                    aria-describedby="reminder-repeat-hint reminder-repeat-feedback"
-                  />
-                  <p id="reminder-repeat-hint" class="text-xs text-muted-foreground">
-                    {{ $t("pages.reminders.form.hints.repeatEveryDays") }}
-                  </p>
-                  <p v-if="repeatEveryDaysError" id="reminder-repeat-feedback" class="text-sm text-destructive" role="alert">
-                    {{ repeatEveryDaysError }}
-                  </p>
-                  <p v-else id="reminder-repeat-feedback" class="sr-only"> </p>
-                </div>
-              </div>
-
-              <div class="space-y-2">
-                <label for="reminder-notes" class="text-foreground">{{ $t("pages.reminders.form.fields.notes") }}</label>
-                <input
-                  id="reminder-notes"
-                  v-model="notesInput"
-                  type="text"
-                  autocomplete="off"
-                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  :placeholder="$t('pages.reminders.form.placeholders.notes')"
-                />
-              </div>
-
-              <p v-if="submitError" class="text-sm text-destructive" role="alert">{{ submitError }}</p>
-              <p v-else-if="submitStatus" class="text-sm text-foreground" role="status">{{ submitStatus }}</p>
-
-              <div class="flex flex-wrap gap-2">
-                <Button type="submit" :disabled="isSubmitting">
-                  <span v-if="isSubmitting">{{ $t("pages.reminders.form.saving") }}</span>
-                  <span v-else>{{ $t("pages.reminders.form.save") }}</span>
-                </Button>
+            <EventReminderForm
+              id-base="create-reminder"
+              mode="reminder"
+              :submit-label="$t('pages.reminders.form.save')"
+              :saving-label="$t('pages.reminders.form.saving')"
+              :submit-handler="handleCreateReminder"
+            >
+              <template #actions>
                 <Button variant="secondary" type="button" :disabled="listStatus === 'loading'" @click="loadReminders">
                   <span v-if="listStatus === 'loading'">{{ $t("pages.reminders.list.refreshing") }}</span>
                   <span v-else>{{ $t("pages.reminders.list.refresh") }}</span>
                 </Button>
-              </div>
-            </form>
+              </template>
+            </EventReminderForm>
           </CardContent>
         </Card>
 
@@ -585,6 +482,10 @@ async function onDeleteReminder(reminder: TankReminder) {
                         <div class="text-xs text-muted-foreground">{{ formatReminderDate(reminder.nextDue) }}</div>
                       </div>
                       <div class="flex flex-wrap items-center gap-2">
+                      <div v-if="reminder.quantity !== null" class="text-right text-sm text-foreground">
+                        {{ formatNumber(reminder.quantity) }}
+                        <span v-if="reminder.unit" class="text-muted-foreground">{{ reminder.unit }}</span>
+                      </div>
                         <span
                           class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
                           :class="reminderBadge(reminder).className"
@@ -648,6 +549,10 @@ async function onDeleteReminder(reminder: TankReminder) {
                         <div class="text-xs text-muted-foreground">{{ formatReminderDate(reminder.nextDue) }}</div>
                       </div>
                       <div class="flex flex-wrap items-center gap-2">
+                      <div v-if="reminder.quantity !== null" class="text-right text-sm text-foreground">
+                        {{ formatNumber(reminder.quantity) }}
+                        <span v-if="reminder.unit" class="text-muted-foreground">{{ reminder.unit }}</span>
+                      </div>
                         <span
                           class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
                           :class="reminderBadge(reminder).className"
@@ -711,6 +616,10 @@ async function onDeleteReminder(reminder: TankReminder) {
                         <div class="text-xs text-muted-foreground">{{ formatReminderDate(reminder.nextDue) }}</div>
                       </div>
                       <div class="flex flex-wrap items-center gap-2">
+                        <div v-if="reminder.quantity !== null" class="text-right text-sm text-foreground">
+                          {{ formatNumber(reminder.quantity) }}
+                          <span v-if="reminder.unit" class="text-muted-foreground">{{ reminder.unit }}</span>
+                        </div>
                         <span
                           class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
                           :class="reminderBadge(reminder).className"

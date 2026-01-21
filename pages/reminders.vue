@@ -18,6 +18,7 @@ const isStorageReady = computed(() => storage.hasRootFolderId.value)
 const { tanks, status: tanksStatus, error: tanksError } = useTanks()
 
 const remindersApi = useReminders()
+const eventsApi = useEvents()
 
 type ReminderWithTank = TankReminder & { tankId: string; tankName: string; spreadsheetId: string }
 
@@ -103,6 +104,14 @@ function formatReminderDate(value: string): string {
   return isDateOnly(value) ? formatDateOnly(value) : formatDateTime(value)
 }
 
+function formatNumber(value: number): string {
+  try {
+    return new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 }).format(value)
+  } catch {
+    return String(value)
+  }
+}
+
 function reminderDueDateOnly(reminder: ReminderWithTank): string {
   if (isDateOnly(reminder.nextDue)) return reminder.nextDue.trim()
   const date = new Date(reminder.nextDue)
@@ -166,6 +175,21 @@ const actingReminderKey = ref<string | null>(null)
 const actionError = ref<string | null>(null)
 const actionStatus = ref<string | null>(null)
 
+async function logEventFromReminder(reminder: ReminderWithTank, doneAt: Date) {
+  if (!reminder.eventType) return
+
+  await eventsApi.createEvent({
+    spreadsheetId: reminder.spreadsheetId,
+    date: doneAt,
+    eventType: reminder.eventType,
+    description: reminder.title,
+    quantity: reminder.quantity,
+    unit: reminder.unit,
+    product: reminder.product,
+    note: reminder.notes,
+  })
+}
+
 async function loadAllReminders() {
   if (!import.meta.client) return
 
@@ -204,6 +228,9 @@ async function onToggleDone(reminder: ReminderWithTank) {
   actionStatus.value = null
   actingReminderKey.value = `${reminder.tankId}-${reminder.reminderId}`
 
+  const doneAt = new Date()
+  const shouldLogEvent = reminder.repeatEveryDays !== null || reminder.lastDone === null
+
   try {
     if (reminder.repeatEveryDays === null) {
       await remindersApi.setReminderDone({
@@ -215,11 +242,23 @@ async function onToggleDone(reminder: ReminderWithTank) {
       await remindersApi.markReminderDone({
         spreadsheetId: reminder.spreadsheetId,
         reminderId: reminder.reminderId,
+        doneAt,
       })
     }
 
+    if (shouldLogEvent) {
+      try {
+        await logEventFromReminder(reminder, doneAt)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : t("pages.reminders.actions.errors.eventLogFailed")
+        actionError.value = t("pages.reminders.actions.errors.eventLogFailedWithMessage", { message })
+      }
+    }
+
     await loadAllReminders()
-    actionStatus.value = t("pages.reminders.actions.statusUpdated")
+    if (!actionError.value) {
+      actionStatus.value = shouldLogEvent && reminder.eventType ? t("pages.reminders.actions.statusUpdatedAndLogged") : t("pages.reminders.actions.statusUpdated")
+    }
   } catch (error) {
     actionError.value = error instanceof Error ? error.message : t("pages.reminders.actions.errors.updateFailed")
   } finally {
@@ -360,6 +399,10 @@ watchEffect(() => {
                       <div class="text-xs text-muted-foreground">{{ formatReminderDate(reminder.nextDue) }}</div>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
+                      <div v-if="reminder.quantity !== null" class="text-right text-sm text-foreground">
+                        {{ formatNumber(reminder.quantity) }}
+                        <span v-if="reminder.unit" class="text-muted-foreground">{{ reminder.unit }}</span>
+                      </div>
                       <span
                         class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
                         :class="reminderBadge(reminder).className"
@@ -431,6 +474,10 @@ watchEffect(() => {
                       <div class="text-xs text-muted-foreground">{{ formatReminderDate(reminder.nextDue) }}</div>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
+                      <div v-if="reminder.quantity !== null" class="text-right text-sm text-foreground">
+                        {{ formatNumber(reminder.quantity) }}
+                        <span v-if="reminder.unit" class="text-muted-foreground">{{ reminder.unit }}</span>
+                      </div>
                       <span
                         class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
                         :class="reminderBadge(reminder).className"
@@ -502,6 +549,10 @@ watchEffect(() => {
                       <div class="text-xs text-muted-foreground">{{ formatReminderDate(reminder.nextDue) }}</div>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
+                      <div v-if="reminder.quantity !== null" class="text-right text-sm text-foreground">
+                        {{ formatNumber(reminder.quantity) }}
+                        <span v-if="reminder.unit" class="text-muted-foreground">{{ reminder.unit }}</span>
+                      </div>
                       <span
                         class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
                         :class="reminderBadge(reminder).className"

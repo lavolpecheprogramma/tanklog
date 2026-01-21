@@ -170,26 +170,38 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 ### SHEET: `REMINDERS`
 
 **Purpose**: track recurring or one-time tasks (water changes, dosing, maintenance) and their next due date.
+When a reminder is marked **done**, TankLog can automatically create a matching row in `EVENTS` (client-side).
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
 | `id` | string | yes | Unique reminder id (client-generated) |
-| `title` | string | yes | Short human title |
+| `title` | string | yes | Short human title (used as the event `description` when logging) |
 | `next_due` | string | yes | ISO timestamp (`YYYY-MM-DDTHH:mm:ss.sssZ`) |
 | `repeat_every_days` | number | no | Blank = one-time reminder; if set must be > 0 |
 | `last_done` | string | no | ISO timestamp (`YYYY-MM-DDTHH:mm:ss.sssZ`) |
-| `notes` | string | no | Optional free text |
+| `notes` | string | no | Optional free text (used as the event `note` when logging) |
+| `event_type` | string | yes | One of: `water_change`, `dosing`, `maintenance`, `livestock_addition`, `livestock_removal` |
+| `quantity` | number | no | Numeric quantity (if applicable) |
+| `unit` | string | no | Unit for `quantity` (example: `L`, `ml`, `g`) |
+| `product` | string | no | Product name (if dosing/maintenance) |
 
 **Behavior**
 
 - A reminder is **overdue** if `next_due` is before now.
 - A reminder is **due today** if `next_due` is today (user’s local date).
 - A reminder is **upcoming** if `next_due` is after today.
+- If `event_type` is set, marking a reminder as **done** SHOULD create one row in `EVENTS` with:
+  - `date`: the done timestamp
+  - `type`: `REMINDERS.event_type`
+  - `description`: `REMINDERS.title`
+  - `quantity`, `unit`, `product`: from the reminder row
+  - `note`: `REMINDERS.notes`
 
 **Legacy note**
 
 - Older spreadsheets may contain `next_due` / `last_done` as date-only (`YYYY-MM-DD`).
 - TankLog reads both formats; new reminders are saved as full ISO timestamps (UTC).
+- Older spreadsheets may be missing the `event_type` / `quantity` / `unit` / `product` columns; TankLog will add the headers and treat missing values as empty.
 
 ---
 

@@ -557,6 +557,23 @@
           "loadFailed": "Impossibile caricare gli eventi."
         }
       },
+      "actions": {
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "saveChanges": "Salva modifiche",
+        "savingChanges": "Salvataggio…",
+        "confirmDelete": "Eliminare l’evento “{description}”?",
+        "statusUpdated": "Evento aggiornato.",
+        "statusDeleted": "Evento eliminato.",
+        "errors": {
+          "updateFailed": "Impossibile aggiornare l’evento.",
+          "deleteFailed": "Impossibile eliminare l’evento."
+        }
+      },
+      "editDialog": {
+        "title": "Modifica evento",
+        "description": "Aggiorna i dettagli di questo evento."
+      },
       "comingTitle": "Eventi",
       "comingDescription": "Gli eventi vengono salvati nel foglio della vasca su Google Sheets.",
       "plannedLabel": "Include:",
@@ -581,10 +598,13 @@
         "delete": "Elimina",
         "confirmDelete": "Eliminare il promemoria “{title}”?",
         "statusUpdated": "Promemoria aggiornato.",
+        "statusUpdatedAndLogged": "Promemoria aggiornato. Evento registrato.",
         "statusDeleted": "Promemoria eliminato.",
         "errors": {
           "updateFailed": "Impossibile aggiornare il promemoria.",
-          "deleteFailed": "Impossibile eliminare il promemoria."
+          "deleteFailed": "Impossibile eliminare il promemoria.",
+          "eventLogFailed": "Impossibile creare l’evento collegato.",
+          "eventLogFailedWithMessage": "Promemoria aggiornato, ma impossibile creare l’evento collegato. ({message})"
         }
       },
       "form": {

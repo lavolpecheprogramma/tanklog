@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { EVENT_TYPES, type EventType, type TankEvent } from "@/composables/useEvents"
 
 definePageMeta({
@@ -34,23 +35,19 @@ const listStatus = ref<LoadStatus>("idle")
 const listError = ref<string | null>(null)
 const events = ref<TankEvent[]>([])
 
-function toDatetimeLocalValue(date: Date): string {
-  const pad = (value: number) => value.toString().padStart(2, "0")
-  const year = date.getFullYear()
-  const month = pad(date.getMonth() + 1)
-  const day = pad(date.getDate())
-  const hours = pad(date.getHours())
-  const minutes = pad(date.getMinutes())
-  return `${year}-${month}-${day}T${hours}:${minutes}`
-}
+const actingEventId = ref<string | null>(null)
+const actionError = ref<string | null>(null)
+const actionStatus = ref<string | null>(null)
 
-function parseNumberInput(value: string | number): number | null {
-  if (typeof value === "number") return value
-  const normalized = value.trim().replace(",", ".")
-  if (!normalized) return null
-  const parsed = Number(normalized)
-  if (!Number.isFinite(parsed)) return null
-  return parsed
+const isEditOpen = ref(false)
+const editingEvent = ref<TankEvent | null>(null)
+
+watch(isEditOpen, (open) => {
+  if (!open) editingEvent.value = null
+})
+
+function coerceEventType(value: string): EventType | null {
+  return EVENT_TYPES.includes(value as EventType) ? (value as EventType) : null
 }
 
 function formatEventDate(value: string): string {
@@ -116,126 +113,104 @@ watch(
   { immediate: true }
 )
 
-const dateInput = ref("")
-const dateError = ref<string | null>(null)
-
-const eventTypeInput = ref<EventType | "">("")
-const eventTypeError = ref<string | null>(null)
-
-const descriptionInput = ref("")
-const descriptionError = ref<string | null>(null)
-
-const quantityInput = ref("")
-const quantityError = ref<string | null>(null)
-
-const unitInput = ref("")
-const productInput = ref("")
-const noteInput = ref("")
-
-const isSubmitting = ref(false)
-const submitError = ref<string | null>(null)
-const submitStatus = ref<string | null>(null)
-
-onMounted(() => {
-  if (!dateInput.value) dateInput.value = toDatetimeLocalValue(new Date())
-})
-
-watch(eventTypeInput, (value) => {
-  if (value === "water_change" && !unitInput.value.trim()) unitInput.value = "L"
-  if (value === "dosing" && !unitInput.value.trim()) unitInput.value = "ml"
-})
-
-function resetFormErrors() {
-  dateError.value = null
-  eventTypeError.value = null
-  descriptionError.value = null
-  quantityError.value = null
-  submitError.value = null
-  submitStatus.value = null
+type EventFormPayload = {
+  date: Date
+  eventType: EventType
+  description: string
+  quantity: number | null
+  unit: string | null
+  product: string | null
+  note: string | null
 }
 
-function validate() {
-  resetFormErrors()
+function isEventFormPayload(value: unknown): value is EventFormPayload {
+  if (!value || typeof value !== "object") return false
+  const candidate = value as Record<string, unknown>
+  if (!(candidate.date instanceof Date)) return false
+  if (typeof candidate.eventType !== "string") return false
+  if (!EVENT_TYPES.includes(candidate.eventType as EventType)) return false
+  if (typeof candidate.description !== "string") return false
 
-  if (!tank.value) {
-    submitError.value = t("pages.events.form.errors.noTank")
-    return null
+  if (candidate.quantity !== null && candidate.quantity !== undefined) {
+    if (typeof candidate.quantity !== "number") return false
+    if (!Number.isFinite(candidate.quantity)) return false
   }
 
-  if (!dateInput.value) {
-    dateError.value = t("pages.events.form.errors.missingDate")
-    return null
-  }
+  if (candidate.unit !== null && candidate.unit !== undefined && typeof candidate.unit !== "string") return false
+  if (candidate.product !== null && candidate.product !== undefined && typeof candidate.product !== "string") return false
+  if (candidate.note !== null && candidate.note !== undefined && typeof candidate.note !== "string") return false
 
-  const date = new Date(dateInput.value)
-  if (Number.isNaN(date.getTime())) {
-    dateError.value = t("pages.events.form.errors.invalidDate")
-    return null
-  }
-
-  const eventType = eventTypeInput.value
-  if (!eventType) {
-    eventTypeError.value = t("pages.events.form.errors.missingType")
-    return null
-  }
-
-  const description = descriptionInput.value.trim()
-  if (!description) {
-    descriptionError.value = t("pages.events.form.errors.missingDescription")
-    return null
-  }
-
-  const quantity = parseNumberInput(quantityInput.value)
-  if (quantity !== null && quantity < 0) {
-    quantityError.value = t("pages.events.form.errors.invalidQuantity")
-    return null
-  }
-
-  return {
-    tank: tank.value,
-    date,
-    eventType,
-    description,
-    quantity,
-    unit: unitInput.value,
-    product: productInput.value,
-    note: noteInput.value,
-  }
+  return true
 }
 
-async function onSubmit() {
-  submitError.value = null
-  submitStatus.value = null
+async function handleCreateEvent(payload: unknown) {
+  if (!tank.value) throw new Error(t("pages.events.form.errors.noTank"))
+  if (!isEventFormPayload(payload)) throw new Error(t("pages.events.form.errors.saveFailed"))
 
-  const validated = validate()
-  if (!validated) return
+  await eventsApi.createEvent({
+    spreadsheetId: tank.value.spreadsheetId,
+    date: payload.date,
+    eventType: payload.eventType,
+    description: payload.description,
+    quantity: payload.quantity,
+    unit: payload.unit,
+    product: payload.product,
+    note: payload.note,
+  })
 
-  isSubmitting.value = true
-  try {
-    await eventsApi.createEvent({
-      spreadsheetId: validated.tank.spreadsheetId,
-      date: validated.date,
-      eventType: validated.eventType,
-      description: validated.description,
-      quantity: validated.quantity,
-      unit: validated.unit,
-      product: validated.product,
-      note: validated.note,
+  await loadEvents()
+}
+
+function startEdit(event: TankEvent) {
+  actionError.value = null
+  actionStatus.value = null
+  editingEvent.value = event
+  isEditOpen.value = true
+}
+
+async function handleUpdateEvent(payload: unknown) {
+  if (!tank.value) throw new Error(t("pages.events.form.errors.noTank"))
+  if (!editingEvent.value) throw new Error(t("pages.events.actions.errors.updateFailed"))
+  if (!isEventFormPayload(payload)) throw new Error(t("pages.events.actions.errors.updateFailed"))
+
+  await eventsApi.updateEvent({
+    spreadsheetId: tank.value.spreadsheetId,
+    eventId: editingEvent.value.eventId,
+    date: payload.date,
+    eventType: payload.eventType,
+    description: payload.description,
+    quantity: payload.quantity,
+    unit: payload.unit,
+    product: payload.product,
+    note: payload.note,
+  })
+
+  await loadEvents()
+  actionStatus.value = t("pages.events.actions.statusUpdated")
+}
+
+async function onDeleteEvent(event: TankEvent) {
+  if (!tank.value) return
+
+  actionError.value = null
+  actionStatus.value = null
+
+  const confirmed = confirm(
+    t("pages.events.actions.confirmDelete", {
+      description: event.description,
     })
+  )
+  if (!confirmed) return
 
+  actingEventId.value = event.eventId
+  try {
+    await eventsApi.deleteEvent({ spreadsheetId: tank.value.spreadsheetId, eventId: event.eventId })
     await loadEvents()
-
-    eventTypeInput.value = ""
-    descriptionInput.value = ""
-    quantityInput.value = ""
-    unitInput.value = ""
-    productInput.value = ""
-    noteInput.value = ""
-    submitStatus.value = t("pages.events.form.success.saved")
+    actionStatus.value = t("pages.events.actions.statusDeleted")
   } catch (error) {
-    submitError.value = error instanceof Error ? error.message : t("pages.events.form.errors.saveFailed")
+    actionError.value = error instanceof Error ? error.message : t("pages.events.actions.errors.deleteFailed")
   } finally {
-    isSubmitting.value = false
+    actingEventId.value = null
   }
 }
 </script>
@@ -304,151 +279,63 @@ async function onSubmit() {
       </Card>
 
       <template v-else>
+        <Dialog v-model:open="isEditOpen">
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{{ $t("pages.events.editDialog.title") }}</DialogTitle>
+              <DialogDescription>{{ $t("pages.events.editDialog.description") }}</DialogDescription>
+            </DialogHeader>
+
+            <div v-if="editingEvent" class="text-sm text-muted-foreground">
+              <EventReminderForm
+                :id-base="`edit-event-${editingEvent.eventId}`"
+                mode="event"
+                :submit-label="$t('pages.events.actions.saveChanges')"
+                :saving-label="$t('pages.events.actions.savingChanges')"
+                :success-message="$t('pages.events.actions.statusUpdated')"
+                :reset-after-submit="false"
+                :initial-values="{
+                  date: editingEvent.date,
+                  eventType: coerceEventType(editingEvent.eventType),
+                  description: editingEvent.description,
+                  quantity: editingEvent.quantity,
+                  unit: editingEvent.unit,
+                  product: editingEvent.product,
+                  note: editingEvent.note,
+                }"
+                :submit-handler="handleUpdateEvent"
+                @success="isEditOpen = false"
+              >
+                <template #actions>
+                  <DialogClose as-child>
+                    <Button variant="secondary" type="button">{{ $t("actions.cancel") }}</Button>
+                  </DialogClose>
+                </template>
+              </EventReminderForm>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Card>
           <CardHeader>
             <CardTitle>{{ $t("pages.events.form.title") }}</CardTitle>
             <CardDescription>{{ $t("pages.events.form.description") }}</CardDescription>
           </CardHeader>
           <CardContent class="text-sm text-muted-foreground">
-            <form class="space-y-5" @submit.prevent="onSubmit">
-              <div class="grid gap-4 sm:grid-cols-2">
-                <div class="space-y-2">
-                  <label for="event-date" class="text-foreground">{{ $t("pages.events.form.fields.date") }}</label>
-                  <input
-                    id="event-date"
-                    v-model="dateInput"
-                    type="datetime-local"
-                    autocomplete="off"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    :aria-invalid="dateError ? 'true' : 'false'"
-                    aria-describedby="event-date-hint event-date-feedback"
-                    required
-                  />
-                  <p id="event-date-hint" class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.date") }}</p>
-                  <p v-if="dateError" id="event-date-feedback" class="text-sm text-destructive" role="alert">
-                    {{ dateError }}
-                  </p>
-                  <p v-else id="event-date-feedback" class="sr-only"> </p>
-                </div>
-
-                <div class="space-y-2">
-                  <label for="event-type" class="text-foreground">{{ $t("pages.events.form.fields.type") }}</label>
-                  <select
-                    id="event-type"
-                    v-model="eventTypeInput"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    :aria-invalid="eventTypeError ? 'true' : 'false'"
-                    aria-describedby="event-type-hint event-type-feedback"
-                    required
-                  >
-                    <option value="">{{ $t("pages.events.form.placeholders.type") }}</option>
-                    <option v-for="type in EVENT_TYPES" :key="type" :value="type">
-                      {{ $t(`pages.events.types.${type}`) }}
-                    </option>
-                  </select>
-                  <p id="event-type-hint" class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.type") }}</p>
-                  <p v-if="eventTypeError" id="event-type-feedback" class="text-sm text-destructive" role="alert">
-                    {{ eventTypeError }}
-                  </p>
-                  <p v-else id="event-type-feedback" class="sr-only"> </p>
-                </div>
-              </div>
-
-              <div class="space-y-2">
-                <label for="event-description" class="text-foreground">{{ $t("pages.events.form.fields.description") }}</label>
-                <input
-                  id="event-description"
-                  v-model="descriptionInput"
-                  type="text"
-                  autocomplete="off"
-                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  :placeholder="$t('pages.events.form.placeholders.description')"
-                  :aria-invalid="descriptionError ? 'true' : 'false'"
-                  aria-describedby="event-description-hint event-description-feedback"
-                  required
-                />
-                <p id="event-description-hint" class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.description") }}</p>
-                <p v-if="descriptionError" id="event-description-feedback" class="text-sm text-destructive" role="alert">
-                  {{ descriptionError }}
-                </p>
-                <p v-else id="event-description-feedback" class="sr-only"> </p>
-              </div>
-
-              <div class="grid gap-4 sm:grid-cols-2">
-                <div class="space-y-2">
-                  <label for="event-quantity" class="text-foreground">{{ $t("pages.events.form.fields.quantity") }}</label>
-                  <input
-                    id="event-quantity"
-                    v-model="quantityInput"
-                    type="number"
-                    inputmode="decimal"
-                    autocomplete="off"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    :placeholder="$t('pages.events.form.placeholders.quantity')"
-                    :aria-invalid="quantityError ? 'true' : 'false'"
-                    aria-describedby="event-quantity-hint event-quantity-feedback"
-                  />
-                  <p id="event-quantity-hint" class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.quantity") }}</p>
-                  <p v-if="quantityError" id="event-quantity-feedback" class="text-sm text-destructive" role="alert">
-                    {{ quantityError }}
-                  </p>
-                  <p v-else id="event-quantity-feedback" class="sr-only"> </p>
-                </div>
-
-                <div class="space-y-2">
-                  <label for="event-unit" class="text-foreground">{{ $t("pages.events.form.fields.unit") }}</label>
-                  <input
-                    id="event-unit"
-                    v-model="unitInput"
-                    type="text"
-                    autocomplete="off"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    :placeholder="$t('pages.events.form.placeholders.unit')"
-                  />
-                  <p class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.unit") }}</p>
-                </div>
-              </div>
-
-              <div class="grid gap-4 sm:grid-cols-2">
-                <div class="space-y-2">
-                  <label for="event-product" class="text-foreground">{{ $t("pages.events.form.fields.product") }}</label>
-                  <input
-                    id="event-product"
-                    v-model="productInput"
-                    type="text"
-                    autocomplete="off"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    :placeholder="$t('pages.events.form.placeholders.product')"
-                  />
-                </div>
-
-                <div class="space-y-2">
-                  <label for="event-note" class="text-foreground">{{ $t("pages.events.form.fields.note") }}</label>
-                  <input
-                    id="event-note"
-                    v-model="noteInput"
-                    type="text"
-                    autocomplete="off"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    :placeholder="$t('pages.events.form.placeholders.note')"
-                  />
-                </div>
-              </div>
-
-              <p v-if="submitError" class="text-sm text-destructive" role="alert">{{ submitError }}</p>
-              <p v-else-if="submitStatus" class="text-sm text-foreground" role="status">{{ submitStatus }}</p>
-
-              <div class="flex flex-wrap gap-2">
-                <Button type="submit" :disabled="isSubmitting">
-                  <span v-if="isSubmitting">{{ $t("pages.events.form.saving") }}</span>
-                  <span v-else>{{ $t("pages.events.form.save") }}</span>
-                </Button>
+            <EventReminderForm
+              id-base="create-event"
+              mode="event"
+              :submit-label="$t('pages.events.form.save')"
+              :saving-label="$t('pages.events.form.saving')"
+              :submit-handler="handleCreateEvent"
+            >
+              <template #actions>
                 <Button variant="secondary" type="button" :disabled="listStatus === 'loading'" @click="loadEvents">
                   <span v-if="listStatus === 'loading'">{{ $t("pages.events.list.refreshing") }}</span>
                   <span v-else>{{ $t("pages.events.list.refresh") }}</span>
                 </Button>
-              </div>
-            </form>
+              </template>
+            </EventReminderForm>
           </CardContent>
         </Card>
 
@@ -458,6 +345,9 @@ async function onSubmit() {
             <CardDescription>{{ $t("pages.events.list.description") }}</CardDescription>
           </CardHeader>
           <CardContent class="space-y-4 text-sm text-muted-foreground">
+            <p v-if="actionError" class="text-sm text-destructive" role="alert">{{ actionError }}</p>
+            <p v-else-if="actionStatus" class="text-sm text-foreground" role="status">{{ actionStatus }}</p>
+
             <div v-if="listStatus === 'loading'">{{ $t("pages.events.list.loading") }}</div>
 
             <div v-else-if="listStatus === 'error'" class="space-y-2">
@@ -489,9 +379,18 @@ async function onSubmit() {
                     </div>
                   </div>
 
-                  <div v-if="event.quantity !== null" class="text-right text-sm text-foreground">
-                    {{ formatNumber(event.quantity) }}
-                    <span v-if="event.unit" class="text-muted-foreground">{{ event.unit }}</span>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <div v-if="event.quantity !== null" class="text-right text-sm text-foreground">
+                      {{ formatNumber(event.quantity) }}
+                      <span v-if="event.unit" class="text-muted-foreground">{{ event.unit }}</span>
+                    </div>
+
+                    <Button size="xs" variant="secondary" type="button" :disabled="actingEventId === event.eventId" @click="startEdit(event)">
+                      {{ $t("pages.events.actions.edit") }}
+                    </Button>
+                    <Button size="xs" variant="destructive" type="button" :disabled="actingEventId === event.eventId" @click="onDeleteEvent(event)">
+                      {{ $t("pages.events.actions.delete") }}
+                    </Button>
                   </div>
                 </div>
 

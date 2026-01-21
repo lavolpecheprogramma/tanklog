@@ -322,8 +322,8 @@ export function useTanks() {
       }),
       sheets.updateValues({
         spreadsheetId,
-        range: "REMINDERS!A1:F1",
-        values: [["id", "title", "next_due", "repeat_every_days", "last_done", "notes"]],
+        range: "REMINDERS!A1:J1",
+        values: [["id", "title", "next_due", "repeat_every_days", "last_done", "notes", "event_type", "quantity", "unit", "product"]],
       }),
       sheets.updateValues({
         spreadsheetId,

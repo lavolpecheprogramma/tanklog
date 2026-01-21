@@ -557,6 +557,23 @@
           "loadFailed": "Failed to load events."
         }
       },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "saveChanges": "Save changes",
+        "savingChanges": "Saving…",
+        "confirmDelete": "Delete event “{description}”?",
+        "statusUpdated": "Event updated.",
+        "statusDeleted": "Event deleted.",
+        "errors": {
+          "updateFailed": "Failed to update the event.",
+          "deleteFailed": "Failed to delete the event."
+        }
+      },
+      "editDialog": {
+        "title": "Edit event",
+        "description": "Update the details of this event."
+      },
       "comingTitle": "Events",
       "comingDescription": "Events are saved in your tank spreadsheet in Google Sheets.",
       "plannedLabel": "Includes:",
@@ -581,10 +598,13 @@
         "delete": "Delete",
         "confirmDelete": "Delete reminder “{title}”?",
         "statusUpdated": "Reminder updated.",
+        "statusUpdatedAndLogged": "Reminder updated. Event logged.",
         "statusDeleted": "Reminder deleted.",
         "errors": {
           "updateFailed": "Failed to update the reminder.",
-          "deleteFailed": "Failed to delete the reminder."
+          "deleteFailed": "Failed to delete the reminder.",
+          "eventLogFailed": "Failed to create the linked event.",
+          "eventLogFailedWithMessage": "Reminder updated, but failed to create the linked event. ({message})"
         }
       },
       "form": {
