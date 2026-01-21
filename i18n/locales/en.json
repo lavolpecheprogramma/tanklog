@@ -36,7 +36,8 @@
     }
   },
   "footer": {
-    "tagline": "TankLog — frontend-only, static, user-controlled data."
+    "tagline": "TankLog — frontend-only, static, user-controlled data.",
+    "privacy": "Privacy policy"
   },
   "actions": {
     "logout": "Logout",
@@ -944,6 +945,11 @@
           "created": "Tank created."
         }
       },
+      "legal": {
+        "title": "Legal",
+        "description": "Privacy information for TankLog.",
+        "privacyLink": "Read the Privacy Policy"
+      },
       "reset": {
         "title": "Reset",
         "description": "Clear TankLog’s local settings from this device. This does not delete anything from Google Drive or Sheets.",
@@ -966,6 +972,12 @@
         "loginFailed": "Login failed."
       },
       "sessionNote": "Session is stored in this browser tab (session storage)."
+    },
+    "privacy": {
+      "metaTitle": "Privacy policy",
+      "title": "Privacy policy",
+      "cardDescription": "How TankLog handles your data (frontend-only, user-controlled storage).",
+      "lastUpdatedLabel": "Last updated: {date}"
     }
   }
 }

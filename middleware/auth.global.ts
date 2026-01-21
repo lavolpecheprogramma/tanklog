@@ -13,10 +13,12 @@ export default defineNuxtRouteMiddleware((to) => {
   const auth = useAuth()
   auth.hydrateFromStorage()
 
+  const publicRoutes = new Set(["/login", "/privacy"])
+  const isPublicRoute = publicRoutes.has(to.path)
   const isLoginRoute = to.path === "/login"
   const isAuthed = auth.isAuthenticated.value
 
-  if (!isAuthed && !isLoginRoute) {
+  if (!isAuthed && !isPublicRoute) {
     return navigateTo({
       path: "/login",
       query: { redirect: to.fullPath },
@@ -30,12 +32,13 @@ export default defineNuxtRouteMiddleware((to) => {
   // Sprint 4+ storage gate: until the TankLog Drive folder is connected, lock the app.
   if (!isAuthed) return
   const isSettingsRoute = to.path === "/settings"
+  const isPrivacyRoute = to.path === "/privacy"
 
   const storage = useTankLogRootFolderId()
   storage.hydrateFromStorage()
   const hasStorage = storage.hasRootFolderId.value
 
-  if (!hasStorage && !isSettingsRoute) {
+  if (!hasStorage && !isSettingsRoute && !isPrivacyRoute) {
     return navigateTo("/settings")
   }
 })

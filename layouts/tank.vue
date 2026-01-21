@@ -242,7 +242,17 @@ async function onLogout() {
 
         <footer class="border-t border-border/60">
           <div class="mx-auto w-full max-w-6xl px-4 py-6">
-            <small class="text-muted-foreground">{{ $t("footer.tagline") }}</small>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <small class="text-muted-foreground">{{ $t("footer.tagline") }}</small>
+              <nav aria-label="Footer" class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                <NuxtLink
+                  class="underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  :to="localePath('/privacy')"
+                >
+                  {{ $t("footer.privacy") }}
+                </NuxtLink>
+              </nav>
+            </div>
           </div>
         </footer>
       </div>

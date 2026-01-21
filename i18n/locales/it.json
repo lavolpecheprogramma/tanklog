@@ -36,7 +36,8 @@
     }
   },
   "footer": {
-    "tagline": "TankLog — solo frontend, statico, dati sotto il tuo controllo."
+    "tagline": "TankLog — solo frontend, statico, dati sotto il tuo controllo.",
+    "privacy": "Informativa privacy"
   },
   "actions": {
     "logout": "Esci",
@@ -944,6 +945,11 @@
           "created": "Vasca creata."
         }
       },
+      "legal": {
+        "title": "Informazioni legali",
+        "description": "Informazioni sulla privacy per TankLog.",
+        "privacyLink": "Leggi l’Informativa privacy"
+      },
       "reset": {
         "title": "Reset",
         "description": "Cancella le impostazioni locali di TankLog su questo dispositivo. Non elimina nulla da Google Drive o Sheets.",
@@ -966,6 +972,12 @@
         "loginFailed": "Accesso non riuscito."
       },
       "sessionNote": "La sessione è salvata in questa scheda del browser (session storage)."
+    },
+    "privacy": {
+      "metaTitle": "Informativa privacy",
+      "title": "Informativa privacy",
+      "cardDescription": "Come TankLog gestisce i tuoi dati (solo frontend, storage sotto il tuo controllo).",
+      "lastUpdatedLabel": "Ultimo aggiornamento: {date}"
     }
   }
 }

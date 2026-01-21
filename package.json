@@ -2,6 +2,7 @@
   "name": "tanklog",
   "type": "module",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "build": "nuxt build",
     "clean": "rm -rf .output .data .nuxt .nitro .cache dist",

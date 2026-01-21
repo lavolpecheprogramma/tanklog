@@ -7,6 +7,11 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@vite-pwa/nuxt', '@nuxtjs/i18n'],
   css: ['~/assets/css/tailwind.css'],
   ssr: false,
+  router: {
+    options: {
+      hashMode: true,
+    },
+  },
   runtimeConfig: {
     public: {
       // Google Identity Services OAuth client id (Web application)

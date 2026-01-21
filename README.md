@@ -19,6 +19,7 @@ npm run dev
 TankLog uses Google OAuth (client-side) via Google Identity Services.
 
 - Set `NUXT_PUBLIC_GOOGLE_CLIENT_ID` (see `docs/google-setup.md`)
+- See `docs/environment.md` for the full list of environment variables
 - Then reload the dev server
 
 ## Static build (SSG)
@@ -51,3 +52,19 @@ After a successful first visit, the app shell can load offline (best-effort, bro
 ### Netlify / Cloudflare Pages
 - **Build command**: `npm run generate`
 - **Publish directory**: `.output/public`
+
+## Open source
+
+TankLog is open source and provided **as-is**. It is not affiliated with Google.
+
+## Contributing
+
+See `CONTRIBUTING.md`.
+
+## Security
+
+See `SECURITY.md`.
+
+## License
+
+MIT — see `LICENSE`.
