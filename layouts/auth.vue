@@ -26,7 +26,7 @@ const localePath = useLocalePath()
           </NuxtLink>
 
           <div class="flex items-center gap-2">
-            <LanguageSwitcher />
+            <LanguageSwitcher class="max-lg:hidden" />
             <ThemeToggle />
           </div>
         </div>

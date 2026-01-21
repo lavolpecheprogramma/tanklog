@@ -1353,15 +1353,19 @@ async function onSubmit() {
                   </ul>
                 </AlertBanner>
 
-                <div class="overflow-x-auto">
+                <div class="max-w-full overflow-x-auto">
                   <table class="w-full text-sm">
                     <caption class="sr-only">{{ $t("pages.tests.detail.tableCaption") }}</caption>
                     <thead class="text-xs text-muted-foreground">
                       <tr class="border-b border-border">
                         <th scope="col" class="px-2 py-2 text-left font-medium">{{ $t("pages.tests.detail.columns.parameter") }}</th>
                         <th scope="col" class="px-2 py-2 text-right font-medium">{{ $t("pages.tests.detail.columns.value") }}</th>
-                        <th scope="col" class="px-2 py-2 text-left font-medium">{{ $t("pages.tests.detail.columns.unit") }}</th>
-                        <th scope="col" class="px-2 py-2 text-left font-medium">{{ $t("pages.tests.detail.columns.range") }}</th>
+                        <th scope="col" class="hidden px-2 py-2 text-left font-medium sm:table-cell">
+                          {{ $t("pages.tests.detail.columns.unit") }}
+                        </th>
+                        <th scope="col" class="hidden px-2 py-2 text-left font-medium md:table-cell">
+                          {{ $t("pages.tests.detail.columns.range") }}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1399,11 +1403,17 @@ async function onSubmit() {
                               </span>
                             </span>
                           </div>
+                          <div class="mt-1 text-xs text-muted-foreground sm:hidden">
+                            {{ getDisplayUnitForMeasurement(measurement) }}
+                          </div>
+                          <div class="mt-1 text-xs text-muted-foreground md:hidden">
+                            {{ $t("pages.tests.detail.columns.range") }}: {{ getMeasurementRangeText(measurement) ?? "—" }}
+                          </div>
                         </td>
-                        <td class="px-2 py-2 text-left text-muted-foreground">
+                        <td class="hidden px-2 py-2 text-left text-muted-foreground sm:table-cell">
                           {{ getDisplayUnitForMeasurement(measurement) }}
                         </td>
-                        <td class="px-2 py-2 text-left text-muted-foreground">
+                        <td class="hidden px-2 py-2 text-left text-muted-foreground md:table-cell">
                           {{ getMeasurementRangeText(measurement) ?? "—" }}
                         </td>
                       </tr>

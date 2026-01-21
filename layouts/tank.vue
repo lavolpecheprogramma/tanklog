@@ -151,8 +151,8 @@ async function onLogout() {
               >
                 TankLog
               </NuxtLink>
-              <span class="text-muted-foreground">/</span>
-              <div class="flex min-w-0 items-center gap-2">
+              <span class="max-lg:hidden text-muted-foreground">/</span>
+              <div class="max-lg:hidden flex min-w-0 items-center gap-2">
                 <div v-if="featuredPhoto && featuredStatus === 'ready'" class="size-8 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
                   <DrivePhoto
                     :file-id="featuredPhoto.driveFileId"
@@ -166,7 +166,7 @@ async function onLogout() {
             </div>
 
             <div class="flex items-center gap-2">
-              <LanguageSwitcher />
+              <LanguageSwitcher class="max-lg:hidden" />
               <ThemeToggle />
 
               <Button variant="secondary" size="sm" as-child>

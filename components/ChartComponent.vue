@@ -19,9 +19,12 @@ const props = withDefaults(
   }
 )
 
+const containerRef = ref<HTMLDivElement | null>(null)
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const chartRef = ref<ChartInstance | null>(null)
 let createToken = 0
+let resizeObserver: ResizeObserver | null = null
+let pendingResize = false
 
 async function loadChartModule(): Promise<ChartModule> {
   return await import("chart.js/auto")
@@ -30,6 +33,15 @@ async function loadChartModule(): Promise<ChartModule> {
 function destroyChart() {
   chartRef.value?.destroy()
   chartRef.value = null
+}
+
+function scheduleResize() {
+  if (pendingResize) return
+  pendingResize = true
+  requestAnimationFrame(() => {
+    pendingResize = false
+    chartRef.value?.resize()
+  })
 }
 
 function cloneDeepForChart<T>(value: T, seen = new Map<any, any>()): T {
@@ -87,17 +99,28 @@ watch(
 
 onMounted(() => {
   void recreateChart()
+
+  const container = containerRef.value
+  if (!container) return
+  if (typeof ResizeObserver === "undefined") return
+
+  resizeObserver = new ResizeObserver(() => {
+    scheduleResize()
+  })
+  resizeObserver.observe(container)
 })
 
 onBeforeUnmount(() => {
   createToken++
+  resizeObserver?.disconnect()
+  resizeObserver = null
   destroyChart()
 })
 </script>
 
 <template>
-  <div :class="['relative w-full', containerClass]">
-    <canvas ref="canvasRef" role="img" :aria-label="ariaLabel" class="h-full w-full">
+  <div ref="containerRef" :class="['relative w-full min-w-0 max-w-full', containerClass]">
+    <canvas ref="canvasRef" role="img" :aria-label="ariaLabel" class="block h-full w-full max-w-full">
       {{ ariaLabel }}
     </canvas>
   </div>

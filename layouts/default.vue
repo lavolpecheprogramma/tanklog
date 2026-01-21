@@ -34,7 +34,7 @@ async function onLogout() {
         </NuxtLink>
 
         <div class="flex items-center gap-2">
-          <LanguageSwitcher />
+          <LanguageSwitcher class="max-lg:hidden" />
           <ThemeToggle />
 
           <Button variant="secondary" size="sm" as-child>

@@ -263,7 +263,7 @@
                     <NuxtLink :to="localePath('/')">{{ $t("pages.settings.onboarding.steps.next.ctaHome") }}</NuxtLink>
                   </Button>
                   <Button v-if="activeTank" size="sm" as-child>
-                    <NuxtLink :to="localePath(`/tank/${activeTank.id}`)">
+                    <NuxtLink :to="localePath(`dashboard/tank/${activeTank.id}`)">
                       {{ $t("pages.settings.onboarding.steps.next.ctaTank") }}
                     </NuxtLink>
                   </Button>
@@ -333,9 +333,9 @@
   
             <div>
               <div class="text-foreground">{{ $t("pages.settings.account.scopesLabel") }}</div>
-              <ul class="mt-1 list-disc space-y-1 pl-5">
+              <ul class="mt-1 max-w-full list-inside list-disc space-y-1 overflow-x-auto">
                 <li v-for="scope in scopes" :key="scope">
-                  <code class="rounded bg-muted px-1 py-0.5">{{ scope }}</code>
+                  <code class="whitespace-nowrap rounded bg-muted px-1 py-0.5">{{ scope }}</code>
                 </li>
               </ul>
             </div>
@@ -518,7 +518,7 @@
                   </div>
   
                   <Button as-child size="sm">
-                    <NuxtLink :to="localePath(`/tank/${tank.id}`)">{{ $t("pages.settings.tanks.open") }}</NuxtLink>
+                    <NuxtLink :to="localePath(`/dashboard/tank/${tank.id}`)">{{ $t("pages.settings.tanks.open") }}</NuxtLink>
                   </Button>
                 </div>
               </li>
