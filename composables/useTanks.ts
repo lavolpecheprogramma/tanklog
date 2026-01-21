@@ -262,7 +262,7 @@ export function useTanks() {
 
     const photosFolder = await drive.createFolder({ name: "photos", parentId: tankFolder.id })
     await Promise.all(
-      ["tank", "fish", "corals", "others"].map((folderName) => drive.createFolder({ name: folderName, parentId: photosFolder.id }))
+      ["tank", "livestock"].map((folderName) => drive.createFolder({ name: folderName, parentId: photosFolder.id }))
     )
 
     const spreadsheetFile = await drive.createSpreadsheetFile({ name: "tank_data.xlsx", parentId: tankFolder.id })
@@ -274,7 +274,7 @@ export function useTanks() {
       throw new Error("Failed to initialize the tank spreadsheet.")
     }
 
-    const sheetTitles = ["WATER_TESTS", "EVENTS", "REMINDERS", "ANIMALS", "PHOTOS", "EQUIPMENT", "PARAMETER_RANGES"] as const
+    const sheetTitles = ["WATER_TESTS", "EVENTS", "REMINDERS", "LIVESTOCK", "PHOTOS", "EQUIPMENT", "PARAMETER_RANGES"] as const
 
     await sheets.batchUpdate({
       spreadsheetId,
@@ -327,8 +327,20 @@ export function useTanks() {
       }),
       sheets.updateValues({
         spreadsheetId,
-        range: "ANIMALS!A1:H1",
-        values: [["id", "name_common", "name_scientific", "category", "date_added", "date_removed", "status", "notes"]],
+        range: "LIVESTOCK!A1:K1",
+        values: [[
+          "livestock_id",
+          "name_common",
+          "name_scientific",
+          "category",
+          "sub_category",
+          "tank_zone",
+          "origin",
+          "date_added",
+          "date_removed",
+          "status",
+          "notes",
+        ]],
       }),
       sheets.updateValues({
         spreadsheetId,

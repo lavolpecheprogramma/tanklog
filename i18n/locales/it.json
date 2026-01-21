@@ -12,8 +12,9 @@
     "tanks": "Vasche",
     "tank": "Vasca",
     "overview": "Panoramica",
-    "tests": "Test",
+    "tests": "Test acqua",
     "photos": "Foto",
+    "livestock": "Fauna e flora",
     "events": "Eventi",
     "reminders": "Promemoria",
     "configuration": "Configurazione",
@@ -48,13 +49,26 @@
     "goToWaterTests": "Vai a Test acqua",
     "openActiveTank": "Apri vasca attiva",
     "openWaterTests": "Apri Test acqua",
-    "previewAddTest": "Anteprima “Aggiungi test”",
+    "previewAddTest": "Anteprima “Aggiungi test acqua”",
     "signInWithGoogle": "Accedi con Google",
     "signIn": "Accedi",
     "signingIn": "Accesso…",
     "editRanges": "Modifica range",
     "cancel": "Annulla",
     "close": "Chiudi"
+  },
+  "components": {
+    "drivePhoto": {
+      "loading": "Caricamento foto…",
+      "idle": "Anteprima foto non ancora caricata.",
+      "actions": {
+        "retry": "Riprova"
+      },
+      "errors": {
+        "missingFileId": "ID file Drive mancante.",
+        "loadFailed": "Impossibile caricare la foto."
+      }
+    }
   },
   "errors": {
     "auth": {
@@ -85,6 +99,7 @@
     },
     "tank": {
       "metaTitle": "Vasca",
+      "featuredPhotoAlt": "Foto in evidenza per {tank}",
       "title": "Vasca",
       "description": "Questa diventerà la dashboard principale per vasca (ultimi valori, avvisi, grafici, foto ed eventi).",
       "sprint1": {
@@ -102,7 +117,7 @@
           "description": "Le misurazioni più recenti e gli avvisi per questa vasca.",
           "loading": "Caricamento ultimi valori…",
           "emptyHint": "Aggiungi un test acqua per vedere qui ultimi valori e avvisi.",
-          "lastTestLabel": "Ultimo test"
+        "lastTestLabel": "Ultimo test acqua"
         },
         "trends": {
           "rangeLabel": "Periodo",
@@ -281,7 +296,7 @@
           "note": "I preset sono solo un punto di partenza. Regola sempre in base a fauna e gestione."
         },
         "actions": {
-          "backToTests": "Torna ai test",
+          "backToTests": "Torna ai test acqua",
           "reload": "Ricarica dal foglio",
           "addRow": "Aggiungi parametro",
           "removeRow": "Rimuovi",
@@ -397,7 +412,7 @@
         "fields": {
           "date": "Data e ora",
           "file": "Foto",
-          "note": "Nota (opzionale)"
+          "note": "Descrizione (opzionale)"
         },
         "hints": {
           "date": "Viene salvata come timestamp ISO nel foglio (UTC).",
@@ -427,7 +442,7 @@
         "empty": "Nessuna foto ancora.",
         "emptyHint": "Carica la prima foto qui sopra — apparirà qui.",
         "labels": {
-          "note": "Nota",
+          "note": "Descrizione",
           "openInDrive": "Apri su Drive"
         },
         "errors": {
@@ -479,6 +494,140 @@
         },
         "errors": {
           "needTwo": "Seleziona due foto da confrontare."
+        }
+      }
+    },
+    "livestock": {
+      "metaTitle": "Fauna e flora",
+      "title": "Fauna e flora",
+      "description": "Gestisci fauna e flora di questa vasca (pesci, coralli, invertebrati, piante).",
+      "actions": {
+        "add": "Aggiungi fauna e flora",
+        "open": "Apri",
+        "backToList": "Torna a fauna e flora"
+      },
+      "filters": {
+        "all": "Tutti",
+        "fish": "Pesci",
+        "coral": "Coralli",
+        "invertebrate": "Invertebrati",
+        "plant": "Piante",
+        "searchPlaceholder": "Cerca fauna e flora…"
+      },
+      "list": {
+        "title": "Elenco fauna e flora",
+        "description": "Tutte le righe del foglio LIVESTOCK per questa vasca.",
+        "loading": "Caricamento fauna e flora…",
+        "refresh": "Aggiorna",
+        "refreshing": "Aggiornamento…",
+        "results": "{count} elemento(i)",
+        "empty": "Nessun elemento ancora.",
+        "emptyHint": "Aggiungi il primo elemento per iniziare a tracciarlo.",
+        "errors": {
+          "loadFailed": "Impossibile caricare fauna e flora."
+        }
+      },
+      "detail": {
+        "title": "Dettaglio fauna e flora",
+        "description": "Modifica le proprietà e salvale su Google Sheets.",
+        "loading": "Caricamento fauna e flora…",
+        "notFound": "Elemento non trovato."
+      },
+      "photos": {
+        "metaTitle": "Foto",
+        "metaTitleWithName": "Foto — {name}",
+        "title": "Foto",
+        "titleWithName": "Foto — {name}",
+        "description": "Carica foto per questo elemento e sfogliale nel tempo.",
+        "uploadDescription": "Carica una foto dell’elemento su Google Drive e salva i metadati nella tab PHOTOS per questa vasca.",
+        "timelineDescription": "Sfoglia le foto di questo elemento nel tempo. Clicca una foto per aprirla a schermo intero.",
+        "cardTitle": "Foto",
+        "cardDescription": "L’ultima foto caricata diventa l’immagine in evidenza per questo elemento.",
+        "loading": "Caricamento foto…",
+        "empty": "Nessuna foto ancora.",
+        "emptyHint": "Carica la prima foto qui sopra — apparirà qui.",
+        "actions": {
+          "open": "Foto",
+          "openTimeline": "Apri timeline",
+          "addFirst": "Aggiungi prima foto",
+          "refresh": "Aggiorna"
+        },
+        "errors": {
+          "loadFailed": "Impossibile caricare le foto dell’elemento."
+        },
+        "alt": {
+          "featured": "Foto in evidenza per {name}",
+          "noPhoto": "Nessuna foto per {name}",
+          "photo": "Foto di {name} del {date}"
+        }
+      },
+      "form": {
+        "title": "Fauna e flora",
+        "description": "Questi campi sono salvati nella tab LIVESTOCK di tank_data.xlsx.",
+        "save": "Salva",
+        "saving": "Salvataggio…",
+        "success": {
+          "saved": "Salvato."
+        },
+        "fields": {
+          "nameCommon": "Nome comune",
+          "nameScientific": "Nome scientifico (opzionale)",
+          "category": "Categoria",
+          "subCategory": "Sottocategoria (opzionale)",
+          "tankZone": "Zona vasca (opzionale)",
+          "origin": "Origine (opzionale)",
+          "dateAdded": "Data inserimento",
+          "dateRemoved": "Data rimozione (opzionale)",
+          "status": "Stato",
+          "notes": "Note (opzionale)"
+        },
+        "placeholders": {
+          "nameCommon": "es. Pesce pagliaccio",
+          "nameScientific": "es. Amphiprion ocellaris",
+          "category": "Seleziona una categoria…",
+          "subCategory": "es. SPS, shrimp, snail…",
+          "tankZone": "Seleziona una zona…",
+          "origin": "Seleziona un'origine…",
+          "status": "Seleziona uno stato…",
+          "notes": "Opzionale"
+        },
+        "errors": {
+          "missingNameCommon": "Inserisci un nome comune.",
+          "missingCategory": "Seleziona una categoria.",
+          "invalidCategory": "Seleziona una categoria valida.",
+          "missingDateAdded": "Seleziona la data di inserimento.",
+          "invalidDateAdded": "Inserisci una data valida (YYYY-MM-DD).",
+          "missingStatus": "Seleziona uno stato.",
+          "invalidStatus": "Seleziona uno stato valido.",
+          "invalidDateRemoved": "Inserisci una data rimozione valida (YYYY-MM-DD).",
+          "dateRemovedMustBeEmptyForActive": "La data rimozione deve essere vuota quando lo stato è attivo.",
+          "dateRemovedRequiredForInactive": "La data rimozione è obbligatoria quando lo stato è rimosso o morto.",
+          "saveFailed": "Salvataggio non riuscito."
+        }
+      },
+      "options": {
+        "category": {
+          "fish": "Pesce",
+          "coral": "Corallo",
+          "invertebrate": "Invertebrato",
+          "plant": "Pianta"
+        },
+        "status": {
+          "active": "Attivo",
+          "removed": "Rimosso",
+          "dead": "Morto"
+        },
+        "tankZone": {
+          "top": "Alto",
+          "mid": "Centro",
+          "bottom": "Basso",
+          "rock": "Roccia",
+          "sand": "Sabbia"
+        },
+        "origin": {
+          "wild": "Cattura",
+          "captive": "Allevamento",
+          "frag": "Frag"
         }
       }
     },

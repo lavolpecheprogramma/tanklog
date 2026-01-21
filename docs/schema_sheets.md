@@ -41,9 +41,7 @@ The expected Drive layout is:
      │    ├── tank_data.xlsx (Google Sheet)
      │    ├── photos/
      │    │    ├── tank/
-     │    │    ├── fish/
-     │    │    ├── corals/
-     │    │    └── others/
+     │    │    └── livestock/
      │    └── README.txt (optional, human-readable notes)
      └── Tank_<tank_id>_<tank_name>/
           └── ...
@@ -205,16 +203,20 @@ When a reminder is marked **done**, TankLog can automatically create a matching 
 
 ---
 
-### SHEET: `ANIMALS`
+### SHEET: `LIVESTOCK`
 
-**Purpose**: track fish, corals, invertebrates, plants.
+**Purpose**: unified biological inventory (fish, corals, invertebrates, plants).
+One row = one living entity (or colony / specimen).
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `id` | string | yes | Unique animal id (client-generated) |
+| `livestock_id` | string | yes | Unique livestock id (client-generated) |
 | `name_common` | string | yes | Common name |
-| `name_scientific` | string | no | Scientific name |
+| `name_scientific` | string | no | Scientific name (optional) |
 | `category` | string | yes | One of: `fish`, `coral`, `invertebrate`, `plant` |
+| `sub_category` | string | no | Optional sub-type (examples: coral `SPS`/`LPS`/`soft`; invertebrate `shrimp`/`snail`/`crab`) |
+| `tank_zone` | string | no | Optional placement zone: `top`, `mid`, `bottom`, `rock`, `sand` |
+| `origin` | string | no | Optional origin: `wild`, `captive`, `frag` |
 | `date_added` | string | yes | Date-only (`YYYY-MM-DD`) |
 | `date_removed` | string | no | Date-only (`YYYY-MM-DD`) |
 | `status` | string | yes | One of: `active`, `removed`, `dead` |
@@ -222,8 +224,20 @@ When a reminder is marked **done**, TankLog can automatically create a matching 
 
 **Invariants**
 
+- There MUST be only **one** `LIVESTOCK` sheet per tank (no separate tabs for fish/corals/invertebrates/plants).
+- `category` is used for filtering and UI grouping only (it does not change the storage model).
 - If `status` is `active`, `date_removed` SHOULD be blank.
 - If `status` is `removed` or `dead`, `date_removed` SHOULD be set.
+
+**Future-proofing (non-breaking)**
+
+- Future optional fields MAY be added as additional columns **after** `notes` without requiring migrations.
+- Examples: `growth_rate`, `light_requirement`, `flow_requirement`.
+
+**Rationale: why livestock is unified**
+
+- A single sheet avoids duplicated logic and keeps the inventory consistent (one lifecycle, one photo model, one events model).
+- Categories remain a **filter** only — the storage model stays stable even as new livestock types are added.
 
 ---
 
@@ -231,12 +245,17 @@ When a reminder is marked **done**, TankLog can automatically create a matching 
 
 **Purpose**: store metadata for photos saved in Google Drive.
 
+**Drive folders**
+
+- Tank photos: `Tank_<tank_id>_<tank_name>/photos/tank/`
+- Livestock photos (all categories): `Tank_<tank_id>_<tank_name>/photos/livestock/`
+
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
 | `id` | string | yes | Unique photo id (client-generated) |
 | `date` | string | yes | ISO timestamp (`YYYY-MM-DDTHH:mm:ss.sssZ`) |
-| `related_type` | string | yes | One of: `tank`, `animal` |
-| `related_id` | string | no | Required when `related_type = animal` (must match `ANIMALS.id`) |
+| `related_type` | string | yes | One of: `tank`, `livestock` |
+| `related_id` | string | no | Required when `related_type = livestock` (must match `LIVESTOCK.livestock_id`) |
 | `drive_file_id` | string | yes | Google Drive file id of the uploaded photo |
 | `drive_url` | string | yes | Shareable/view URL stored for convenience |
 | `note` | string | no | Optional caption / notes |
@@ -244,7 +263,7 @@ When a reminder is marked **done**, TankLog can automatically create a matching 
 **Invariants**
 
 - If `related_type = tank`, `related_id` MUST be blank.
-- If `related_type = animal`, `related_id` MUST be present and valid.
+- If `related_type = livestock`, `related_id` MUST be present and valid.
 
 ---
 

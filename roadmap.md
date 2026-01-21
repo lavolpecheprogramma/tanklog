@@ -59,7 +59,7 @@
 ## Sprint 1 — Page skeletons + app navigation
 **Goal**: all main pages exist and feel coherent.
 
-- [x] Create pages: `/`, `/tank/[id]`, `/tank/[id]/tests`, `/tank/[id]/photos`, `/tank/[id]/events`, `/tank/[id]/reminders`, `/settings`
+- [x] Create pages: `/`, `/tank/[id]`, `/tank/[id]/water-test`, `/tank/[id]/photos`, `/tank/[id]/events`, `/tank/[id]/reminders`, `/settings`
 - [x] Tank navigation: dashboard tank list + per-tank sidebar
 - [x] Add simple UI primitives (Card, Button, Dialog) and consistent spacing
 

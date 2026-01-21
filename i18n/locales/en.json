@@ -12,8 +12,9 @@
     "tanks": "Tanks",
     "tank": "Tank",
     "overview": "Overview",
-    "tests": "Tests",
+    "tests": "Water tests",
     "photos": "Photos",
+    "livestock": "Livestock",
     "events": "Events",
     "reminders": "Reminders",
     "configuration": "Configuration",
@@ -48,13 +49,26 @@
     "goToWaterTests": "Go to Water tests",
     "openActiveTank": "Open active tank",
     "openWaterTests": "Open Water tests",
-    "previewAddTest": "Preview “Add test”",
+    "previewAddTest": "Preview “Add water test”",
     "signInWithGoogle": "Sign in with Google",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
     "editRanges": "Edit ranges",
     "cancel": "Cancel",
     "close": "Close"
+  },
+  "components": {
+    "drivePhoto": {
+      "loading": "Loading photo…",
+      "idle": "Photo preview not loaded yet.",
+      "actions": {
+        "retry": "Retry"
+      },
+      "errors": {
+        "missingFileId": "Missing Drive file id.",
+        "loadFailed": "Failed to load photo."
+      }
+    }
   },
   "errors": {
     "auth": {
@@ -85,6 +99,7 @@
     },
     "tank": {
       "metaTitle": "Tank",
+      "featuredPhotoAlt": "Featured photo for {tank}",
       "title": "Tank",
       "description": "This will become the main per-tank dashboard (latest values, alerts, charts, photos, and events).",
       "sprint1": {
@@ -102,7 +117,7 @@
           "description": "Your most recent measurements and alerts for this tank.",
           "loading": "Loading latest values…",
           "emptyHint": "Add a water test to see latest values and alerts here.",
-          "lastTestLabel": "Last test"
+        "lastTestLabel": "Last water test"
         },
         "trends": {
           "rangeLabel": "Range",
@@ -281,7 +296,7 @@
           "note": "Presets are starting points only. Always adjust based on livestock and husbandry."
         },
         "actions": {
-          "backToTests": "Back to tests",
+          "backToTests": "Back to water tests",
           "reload": "Reload from sheet",
           "addRow": "Add parameter",
           "removeRow": "Remove",
@@ -397,7 +412,7 @@
         "fields": {
           "date": "Date & time",
           "file": "Photo",
-          "note": "Note (optional)"
+          "note": "Description (optional)"
         },
         "hints": {
           "date": "Saved as an ISO timestamp in the sheet (UTC).",
@@ -427,7 +442,7 @@
         "empty": "No photos yet.",
         "emptyHint": "Upload your first photo above — it will appear here.",
         "labels": {
-          "note": "Note",
+          "note": "Description",
           "openInDrive": "Open in Drive"
         },
         "errors": {
@@ -479,6 +494,140 @@
         },
         "errors": {
           "needTwo": "Select two photos to compare."
+        }
+      }
+    },
+    "livestock": {
+      "metaTitle": "Livestock",
+      "title": "Livestock",
+      "description": "Manage the livestock for this tank (fish, corals, invertebrates, plants).",
+      "actions": {
+        "add": "Add livestock",
+        "open": "Open",
+        "backToList": "Back to livestock"
+      },
+      "filters": {
+        "all": "All",
+        "fish": "Fish",
+        "coral": "Corals",
+        "invertebrate": "Invertebrates",
+        "plant": "Plants",
+        "searchPlaceholder": "Search livestock…"
+      },
+      "list": {
+        "title": "Livestock list",
+        "description": "All livestock rows stored in the LIVESTOCK sheet for this tank.",
+        "loading": "Loading livestock…",
+        "refresh": "Refresh",
+        "refreshing": "Refreshing…",
+        "results": "{count} item(s)",
+        "empty": "No livestock yet.",
+        "emptyHint": "Add your first livestock to start tracking it.",
+        "errors": {
+          "loadFailed": "Failed to load livestock."
+        }
+      },
+      "detail": {
+        "title": "Livestock details",
+        "description": "Edit the livestock properties and save them to Google Sheets.",
+        "loading": "Loading livestock…",
+        "notFound": "Livestock not found."
+      },
+      "photos": {
+        "metaTitle": "Photos",
+        "metaTitleWithName": "Photos — {name}",
+        "title": "Photos",
+        "titleWithName": "Photos — {name}",
+        "description": "Upload photos for this livestock and browse them over time.",
+        "uploadDescription": "Upload a livestock photo to Google Drive and save its metadata in the PHOTOS sheet for this tank.",
+        "timelineDescription": "Browse photos for this livestock over time. Click a photo to open it full screen.",
+        "cardTitle": "Photos",
+        "cardDescription": "The latest uploaded photo becomes the featured image for this livestock.",
+        "loading": "Loading photos…",
+        "empty": "No photos yet.",
+        "emptyHint": "Upload your first livestock photo above — it will appear here.",
+        "actions": {
+          "open": "Photos",
+          "openTimeline": "Open timeline",
+          "addFirst": "Add first photo",
+          "refresh": "Refresh"
+        },
+        "errors": {
+          "loadFailed": "Failed to load livestock photos."
+        },
+        "alt": {
+          "featured": "Featured photo for {name}",
+          "noPhoto": "No photo for {name}",
+          "photo": "{name} photo from {date}"
+        }
+      },
+      "form": {
+        "title": "Livestock",
+        "description": "These fields are stored in the LIVESTOCK tab of tank_data.xlsx.",
+        "save": "Save livestock",
+        "saving": "Saving…",
+        "success": {
+          "saved": "Saved."
+        },
+        "fields": {
+          "nameCommon": "Common name",
+          "nameScientific": "Scientific name (optional)",
+          "category": "Category",
+          "subCategory": "Sub-category (optional)",
+          "tankZone": "Tank zone (optional)",
+          "origin": "Origin (optional)",
+          "dateAdded": "Date added",
+          "dateRemoved": "Date removed (optional)",
+          "status": "Status",
+          "notes": "Notes (optional)"
+        },
+        "placeholders": {
+          "nameCommon": "e.g. Ocellaris clownfish",
+          "nameScientific": "e.g. Amphiprion ocellaris",
+          "category": "Select a category…",
+          "subCategory": "e.g. SPS, shrimp, snail…",
+          "tankZone": "Select a zone…",
+          "origin": "Select an origin…",
+          "status": "Select a status…",
+          "notes": "Optional"
+        },
+        "errors": {
+          "missingNameCommon": "Enter a common name.",
+          "missingCategory": "Select a category.",
+          "invalidCategory": "Select a valid category.",
+          "missingDateAdded": "Pick a date added.",
+          "invalidDateAdded": "Enter a valid date added (YYYY-MM-DD).",
+          "missingStatus": "Select a status.",
+          "invalidStatus": "Select a valid status.",
+          "invalidDateRemoved": "Enter a valid date removed (YYYY-MM-DD).",
+          "dateRemovedMustBeEmptyForActive": "Date removed must be empty when status is active.",
+          "dateRemovedRequiredForInactive": "Date removed is required when status is removed or dead.",
+          "saveFailed": "Failed to save livestock."
+        }
+      },
+      "options": {
+        "category": {
+          "fish": "Fish",
+          "coral": "Coral",
+          "invertebrate": "Invertebrate",
+          "plant": "Plant"
+        },
+        "status": {
+          "active": "Active",
+          "removed": "Removed",
+          "dead": "Dead"
+        },
+        "tankZone": {
+          "top": "Top",
+          "mid": "Mid",
+          "bottom": "Bottom",
+          "rock": "Rock",
+          "sand": "Sand"
+        },
+        "origin": {
+          "wild": "Wild",
+          "captive": "Captive",
+          "frag": "Frag"
         }
       }
     },

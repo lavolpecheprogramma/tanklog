@@ -1,15 +1,21 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: "tank",
+})
+
+const route = useRoute()
 const localePath = useLocalePath()
 
-const { activeTank } = useActiveTank()
-const { status: tanksStatus } = useTanks()
+const tankId = computed(() => {
+  const raw = route.params.id
+  return Array.isArray(raw) ? raw[0] : raw
+})
 
 watchEffect(() => {
   if (!import.meta.client) return
-  if (tanksStatus.value === "loading") return
 
-  if (activeTank.value?.id) {
-    navigateTo(localePath(`/tank/${activeTank.value.id}/water-test`), { replace: true })
+  if (tankId.value) {
+    navigateTo(localePath(`/tank/${tankId.value}/water-test`), { replace: true })
     return
   }
 

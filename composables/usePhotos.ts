@@ -1,8 +1,10 @@
+import { readonly } from "vue"
+
 import type { GoogleDriveUploadedFile } from "@/composables/useGoogleDrive"
 import type { SheetsCellValue } from "@/composables/useGoogleSheets"
 import { normalizeImageBlobForBrowser } from "@/lib/images"
 
-export type PhotoRelatedType = "tank" | "animal"
+export type PhotoRelatedType = "tank" | "livestock"
 
 export type TankPhoto = {
   photoId: string
@@ -22,8 +24,26 @@ export type UploadTankPhotoInput = {
   note?: string | null
 }
 
+export type UploadLivestockPhotoInput = {
+  spreadsheetId: string
+  tankFolderId: string
+  livestockId: string
+  file: File
+  date: Date
+  note?: string | null
+}
+
 export type ListTankPhotosInput = {
   spreadsheetId: string
+}
+
+export type ListAllPhotosInput = {
+  spreadsheetId: string
+}
+
+export type ListLivestockPhotosInput = {
+  spreadsheetId: string
+  livestockId: string
 }
 
 const PHOTOS_HEADERS = ["id", "date", "related_type", "related_id", "drive_file_id", "drive_url", "note"] as const
@@ -79,7 +99,8 @@ function isRowEmpty(row: SheetsCellValue[] | undefined): boolean {
 
 function normalizeRelatedType(value: string): PhotoRelatedType | null {
   const trimmed = value.trim()
-  if (trimmed === "tank" || trimmed === "animal") return trimmed
+  if (trimmed === "tank") return "tank"
+  if (trimmed === "livestock") return "livestock"
   return null
 }
 
@@ -97,7 +118,7 @@ function parsePhotoRow(row: SheetsCellValue[]): TankPhoto | null {
   if (!relatedType) return null
 
   if (relatedType === "tank" && relatedId) return null
-  if (relatedType === "animal" && !relatedId) return null
+  if (relatedType === "livestock" && !relatedId) return null
 
   return {
     photoId,
@@ -148,6 +169,13 @@ function toDriveViewUrl(fileId: string): string {
 export function usePhotos() {
   const sheets = useGoogleSheets()
   const drive = useGoogleDrive()
+  const revisions = useState<Record<string, number>>("photos.revisionBySpreadsheetId", () => ({}))
+
+  function bumpPhotosRevision(spreadsheetId: string) {
+    const id = spreadsheetId?.trim()
+    if (!id) return
+    revisions.value[id] = (revisions.value[id] ?? 0) + 1
+  }
 
   async function ensurePhotosSheet(spreadsheetId: string) {
     if (!spreadsheetId) throw new Error("Missing spreadsheet id.")
@@ -196,6 +224,18 @@ export function usePhotos() {
       = (await findChildFolderIdByName(photosFolderId, "tank")) ?? (await drive.createFolder({ name: "tank", parentId: photosFolderId })).id
 
     return tankPhotosFolderId
+  }
+
+  async function ensureLivestockPhotosFolder(tankFolderId: string): Promise<string> {
+    if (!tankFolderId) throw new Error("Missing tank folder id.")
+
+    const photosFolderId
+      = (await findChildFolderIdByName(tankFolderId, "photos")) ?? (await drive.createFolder({ name: "photos", parentId: tankFolderId })).id
+
+    const livestockPhotosFolderId
+      = (await findChildFolderIdByName(photosFolderId, "livestock")) ?? (await drive.createFolder({ name: "livestock", parentId: photosFolderId })).id
+
+    return livestockPhotosFolderId
   }
 
   async function uploadTankPhoto(input: UploadTankPhotoInput): Promise<TankPhoto> {
@@ -261,10 +301,86 @@ export function usePhotos() {
       insertDataOption: "INSERT_ROWS",
     })
 
+    bumpPhotosRevision(input.spreadsheetId)
+    return photo
+  }
+
+  async function uploadLivestockPhoto(input: UploadLivestockPhotoInput): Promise<TankPhoto> {
+    if (!input.spreadsheetId) throw new Error("Missing spreadsheet id.")
+    if (!input.tankFolderId) throw new Error("Missing tank folder id.")
+
+    const livestockId = input.livestockId?.trim()
+    if (!livestockId) throw new Error("Missing livestock id.")
+
+    const file = input.file
+    if (!file) throw new Error("Missing photo file.")
+    if (!file.size) throw new Error("Photo file is empty.")
+    if (!file.type || !file.type.startsWith("image/")) {
+      throw new Error("Please select an image file.")
+    }
+
+    const date = input.date
+    if (!date || Number.isNaN(date.getTime())) {
+      throw new Error("Invalid photo date.")
+    }
+
+    const note = normalizeOptionalText(input.note)
+
+    await ensurePhotosSheet(input.spreadsheetId)
+    const livestockPhotosFolderId = await ensureLivestockPhotosFolder(input.tankFolderId)
+
+    let uploadBlob: Blob = file
+    try {
+      const normalized = await normalizeImageBlobForBrowser(file)
+      uploadBlob = normalized.blob
+    } catch (error) {
+      throw error instanceof Error ? error : new Error("Failed to process the image file.")
+    }
+
+    const uploadMimeType = uploadBlob.type || file.type
+    const photoId = generateId("p")
+    const ext = extensionFromMimeType(uploadMimeType) ?? fileExtensionFromName(file.name) ?? extensionFromMimeType(file.type) ?? "jpg"
+    const name = `livestock_${toUtcFileStamp(date)}_${photoId.slice(0, 8)}.${ext}`
+
+    const uploaded: GoogleDriveUploadedFile = await drive.uploadFile({
+      parentId: livestockPhotosFolderId,
+      name,
+      file: uploadBlob,
+      mimeType: uploadMimeType,
+    })
+
+    if (!uploaded.id) throw new Error("Google Drive did not return a file id.")
+
+    const driveUrl = uploaded.webViewLink || toDriveViewUrl(uploaded.id)
+
+    const photo: TankPhoto = {
+      photoId,
+      date: date.toISOString(),
+      relatedType: "livestock",
+      relatedId: livestockId,
+      driveFileId: uploaded.id,
+      driveUrl,
+      note,
+    }
+
+    await sheets.appendValues({
+      spreadsheetId: input.spreadsheetId,
+      range: "PHOTOS!A:G",
+      values: [[photo.photoId, photo.date, photo.relatedType, photo.relatedId, photo.driveFileId, photo.driveUrl, photo.note]],
+      valueInputOption: "RAW",
+      insertDataOption: "INSERT_ROWS",
+    })
+
+    bumpPhotosRevision(input.spreadsheetId)
     return photo
   }
 
   async function listTankPhotos(input: ListTankPhotosInput): Promise<TankPhoto[]> {
+    const all = await listAllPhotos({ spreadsheetId: input.spreadsheetId })
+    return all.filter((photo) => photo.relatedType === "tank")
+  }
+
+  async function listAllPhotos(input: ListAllPhotosInput): Promise<TankPhoto[]> {
     if (!input.spreadsheetId) throw new Error("Missing spreadsheet id.")
     await ensurePhotosSheet(input.spreadsheetId)
 
@@ -284,7 +400,6 @@ export function usePhotos() {
       if (isRowEmpty(row)) continue
       const photo = parsePhotoRow(row)
       if (!photo) continue
-      if (photo.relatedType !== "tank") continue
       photos.push(photo)
     }
 
@@ -292,9 +407,20 @@ export function usePhotos() {
     return photos
   }
 
+  async function listLivestockPhotos(input: ListLivestockPhotosInput): Promise<TankPhoto[]> {
+    const livestockId = input.livestockId?.trim()
+    if (!livestockId) throw new Error("Missing livestock id.")
+    const all = await listAllPhotos({ spreadsheetId: input.spreadsheetId })
+    return all.filter((photo) => photo.relatedType === "livestock" && photo.relatedId === livestockId)
+  }
+
   return {
     uploadTankPhoto,
     listTankPhotos,
+    listAllPhotos,
+    uploadLivestockPhoto,
+    listLivestockPhotos,
+    photoRevisions: readonly(revisions),
   }
 }
 

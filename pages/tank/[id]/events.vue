@@ -411,7 +411,7 @@ async function onDeleteEvent(event: TankEvent) {
               <NuxtLink :to="localePath(`/tank/${tankId}`)">{{ $t("nav.overview") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tankId}/tests`)">{{ $t("actions.goToWaterTests") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/tank/${tankId}/water-test`)">{{ $t("actions.goToWaterTests") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
               <NuxtLink :to="localePath(`/tank/${tankId}/photos`)">{{ $t("actions.goToPhotos") }}</NuxtLink>

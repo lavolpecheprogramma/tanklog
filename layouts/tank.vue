@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import type { TankPhoto } from "@/composables/usePhotos"
 import { Menu } from "lucide-vue-next"
 
 const route = useRoute()
@@ -23,11 +24,50 @@ const tank = computed(() => (tankId.value ? tanks.value.find((item) => item.id =
 
 const tankLabel = computed(() => tank.value?.name ?? (tankId.value ? String(tankId.value) : ""))
 
+const photosApi = usePhotos()
+type LoadStatus = "idle" | "loading" | "ready" | "error"
+const featuredStatus = ref<LoadStatus>("idle")
+const featuredPhoto = ref<TankPhoto | null>(null)
+
+const photoRevision = computed(() => {
+  const spreadsheetId = tank.value?.spreadsheetId
+  if (!spreadsheetId) return 0
+  return photosApi.photoRevisions.value[spreadsheetId] ?? 0
+})
+
+async function loadFeaturedPhoto() {
+  if (!import.meta.client) return
+
+  if (!tank.value) {
+    featuredPhoto.value = null
+    featuredStatus.value = "idle"
+    return
+  }
+
+  featuredStatus.value = "loading"
+  try {
+    const list = await photosApi.listTankPhotos({ spreadsheetId: tank.value.spreadsheetId })
+    featuredPhoto.value = list[0] ?? null
+    featuredStatus.value = "ready"
+  } catch {
+    featuredPhoto.value = null
+    featuredStatus.value = "error"
+  }
+}
+
 watchEffect(() => {
   if (!tankId.value) return
   if (!tank.value) return
   if (activeTankId.value !== tankId.value) setActiveTankId(tankId.value)
 })
+
+watch(
+  [() => tank.value?.spreadsheetId, photoRevision],
+  () => {
+    loadFeaturedPhoto()
+  },
+  { immediate: true }
+)
 
 const tankNavItems = computed(() => {
   const id = tankId.value
@@ -38,6 +78,7 @@ const tankNavItems = computed(() => {
     { to: base, labelKey: "nav.overview", isActive: route.path === base },
     { to: `${base}/water-test`, labelKey: "nav.tests", isActive: route.path.startsWith(`${base}/water-test`) },
     { to: `${base}/photos`, labelKey: "nav.photos", isActive: route.path.startsWith(`${base}/photos`) },
+    { to: `${base}/livestock`, labelKey: "nav.livestock", isActive: route.path.startsWith(`${base}/livestock`) },
     { to: `${base}/events`, labelKey: "nav.events", isActive: route.path.startsWith(`${base}/events`) },
     { to: `${base}/reminders`, labelKey: "nav.reminders", isActive: route.path.startsWith(`${base}/reminders`) },
     { to: `${base}/configuration`, labelKey: "nav.configuration", isActive: route.path.startsWith(`${base}/configuration`) },
@@ -109,7 +150,17 @@ async function onLogout() {
                 TankLog
               </NuxtLink>
               <span class="text-muted-foreground">/</span>
-              <div class="min-w-0 truncate text-sm font-medium text-foreground">{{ tankLabel }}</div>
+              <div class="flex min-w-0 items-center gap-2">
+                <div v-if="featuredPhoto && featuredStatus === 'ready'" class="size-8 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
+                  <DrivePhoto
+                    :file-id="featuredPhoto.driveFileId"
+                    :alt="$t('pages.tank.featuredPhotoAlt', { tank: tankLabel })"
+                    fit="cover"
+                    :lazy="false"
+                  />
+                </div>
+                <div class="min-w-0 truncate text-sm font-medium text-foreground">{{ tankLabel }}</div>
+              </div>
             </div>
 
             <div class="flex items-center gap-2">

@@ -2,80 +2,17 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches:
+      - master
+      - main
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install
-        run: npm ci
-
-      - name: Compute base URL
-        shell: bash
-        run: |
-          repo_name="${{ github.event.repository.name }}"
-          owner="${{ github.repository_owner }}"
-          if [[ "$repo_name" == "$owner.github.io" ]]; then
-            echo "NUXT_APP_BASE_URL=/" >> "$GITHUB_ENV"
-          else
-            echo "NUXT_APP_BASE_URL=/$repo_name/" >> "$GITHUB_ENV"
-          fi
-
-      - name: Generate
-        run: npm run generate
-        env:
-          NUXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NUXT_PUBLIC_GOOGLE_CLIENT_ID }}
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .output/public
-
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   build:
@@ -93,26 +30,30 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Generate (SSG)
-        run: npm run generate
+      - name: Build (Nuxt) for GitHub Pages
+        run: npx nuxt build --preset github_pages
         env:
-          # For project pages, assets must be served from /<repo>/.
-          # If deploying to <owner>.github.io, this should be "/".
+          # If deploying to a project page (<owner>.github.io/<repo>/), assets must be served from /<repo>/.
+          # If deploying to a user/organization page (<owner>.github.io/), this should be "/".
           NUXT_APP_BASE_URL: ${{ github.event.repository.name == format('{0}.github.io', github.repository_owner) && '/' || format('/{0}/', github.event.repository.name) }}
+          NUXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NUXT_PUBLIC_GOOGLE_CLIENT_ID }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .output/public
+          path: ./.output/public
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
-        name: Deploy
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
 

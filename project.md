@@ -14,7 +14,7 @@ The project is designed as:
 
 - Enter and view **water test results**
 - Display **time-series charts** of parameters
-- Upload and compare **tank and animal photos**
+- Upload and compare **tank and livestock photos**
 - Record **events and interventions** (water changes, dosing, maintenance)
 - Create **custom reminders** (e.g. water change, dosing, replace batteries) with notifications
 - Fully **frontend-based static app**
@@ -64,7 +64,7 @@ Used as a database for:
 - Water tests
 - Events
 - Reminders
-- Animals
+- Livestock
 - Equipment
 
 Accessed via **Google Sheets API** (client-side, OAuth)
@@ -72,7 +72,7 @@ Accessed via **Google Sheets API** (client-side, OAuth)
 #### Google Drive
 Used for:
 - Tank photos
-- Fish and coral photos
+- Livestock photos
 
 Accessed via **Google Drive API**
 
@@ -246,10 +246,11 @@ TankLog stores water tests as an **event/measurement log**:
 ```
 /                   -> Dashboard (tank grid)
 /tank/[id]          -> Tank overview (per-tank dashboard entry point)
-/tank/[id]/tests    -> Water tests (per tank)
+/tank/[id]/water-test -> Water tests (per tank)
 /tank/[id]/photos   -> Photo timeline gallery (per tank)
 /tank/[id]/events   -> Events (per tank)
 /tank/[id]/reminders -> Reminders (per tank)
+/tank/[id]/livestock -> Livestock inventory (per tank)
 /settings           -> Account, language, preferences
 /login              -> Google login
 ```

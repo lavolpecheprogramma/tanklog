@@ -37,7 +37,9 @@ export default defineNuxtConfig({
 
   // TankLog constraint: Static Site Generation (SSG), frontend-only
   nitro: {
-    preset: 'static',
+    // GitHub Pages serves static output and needs `.nojekyll` for `_nuxt/` assets.
+    // We also support setting a base URL (NUXT_APP_BASE_URL) for project pages (/<repo>/).
+    preset: 'github_pages',
     prerender: {
       routes: [ '/login' ]
     }
@@ -49,7 +51,7 @@ export default defineNuxtConfig({
       titleTemplate: '%s · TankLog',
       meta: [
         { name: 'description', content: 'TankLog — frontend-only aquarium logbook and trends dashboard.' },
-        { name: 'theme-color', content: '#09090b' }
+        { name: 'theme-color', content: '#09090b' },
       ],
       script: [{ src: 'https://accounts.google.com/gsi/client', async: true, defer: true }],
       link: [

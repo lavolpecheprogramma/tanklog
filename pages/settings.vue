@@ -291,7 +291,7 @@ async function onLogout() {
               <li><code class="rounded bg-muted px-1 py-0.5">REMINDERS</code></li>
               <li><code class="rounded bg-muted px-1 py-0.5">PHOTOS</code></li>
               <li><code class="rounded bg-muted px-1 py-0.5">PARAMETER_RANGES</code></li>
-              <li><code class="rounded bg-muted px-1 py-0.5">ANIMALS</code></li>
+              <li><code class="rounded bg-muted px-1 py-0.5">LIVESTOCK</code></li>
               <li><code class="rounded bg-muted px-1 py-0.5">EQUIPMENT</code></li>
             </ul>
           </div>
