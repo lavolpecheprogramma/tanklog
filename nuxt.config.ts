@@ -7,11 +7,6 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@vite-pwa/nuxt', '@nuxtjs/i18n'],
   css: ['~/assets/css/tailwind.css'],
   ssr: false,
-  router: {
-    options: {
-      hashMode: true,
-    },
-  },
   runtimeConfig: {
     public: {
       // Google Identity Services OAuth client id (Web application)
@@ -44,9 +39,9 @@ export default defineNuxtConfig({
   nitro: {
     // GitHub Pages serves static output and needs `.nojekyll` for `_nuxt/` assets.
     // We also support setting a base URL (NUXT_APP_BASE_URL) for project pages (/<repo>/).
-    preset: 'github_pages',
+    preset: 'static',
     prerender: {
-      routes: [ '/login' ]
+      routes: [ '/', '/privacy', '/dashboard', '/dashboard/login' ]
     }
   },
 

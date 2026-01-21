@@ -84,6 +84,40 @@
     }
   },
   "pages": {
+    "landing": {
+      "metaTitle": "Welcome",
+      "kicker": "Frontend-only aquarium logbook",
+      "title": "TankLog",
+      "description": "Track water tests, events, reminders and photos. Your data stays in your Google account (Drive + Sheets).",
+      "actions": {
+        "openDashboard": "Open dashboard",
+        "privacy": "Privacy"
+      },
+      "cards": {
+        "what": {
+          "title": "What you can do",
+          "description": "Everything you log stays in your Google Drive/Sheets.",
+          "bullets": {
+            "tests": "Log water tests (one session, multiple measurements)",
+            "trends": "See trends and spot out-of-range values",
+            "events": "Track events (water changes, dosing, maintenance)",
+            "reminders": "Create reminders and due tasks",
+            "photos": "Upload photos to Drive and browse timelines"
+          }
+        },
+        "how": {
+          "title": "How it works",
+          "description": "No backend server: it’s a static app that talks directly to Google APIs from your browser.",
+          "steps": {
+            "signIn": "Sign in with Google",
+            "connectDrive": "Connect (or create) your TankLog folder in Google Drive",
+            "createTank": "Create a tank (or pick an existing one)",
+            "startLogging": "Start logging tests, events, reminders, and photos"
+          }
+        }
+      },
+      "footerNote": "Tip: TankLog can be installed as a PWA and cached for offline navigation."
+    },
     "home": {
       "metaTitle": "Home",
       "heroTitle": "TankLog",

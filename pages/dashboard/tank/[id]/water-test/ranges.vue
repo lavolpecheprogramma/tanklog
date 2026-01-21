@@ -384,7 +384,7 @@ async function onSave() {
       <CardContent class="space-y-2 text-sm text-muted-foreground">
           <p>{{ $t("pages.tests.form.locked") }}</p>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
       </CardContent>
     </Card>
@@ -399,7 +399,7 @@ async function onSave() {
       <CardContent class="space-y-2 text-sm text-muted-foreground">
           <p class="text-sm text-destructive" role="alert">{{ tanksError }}</p>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
       </CardContent>
     </Card>
@@ -408,7 +408,7 @@ async function onSave() {
       <CardContent class="space-y-2 text-sm text-muted-foreground">
           <p>{{ $t("pages.tests.form.noTanks") }}</p>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
       </CardContent>
     </Card>
@@ -420,7 +420,7 @@ async function onSave() {
             <code class="rounded bg-muted px-1 py-0.5">{{ tankId }}</code>
           </p>
         <Button as-child variant="secondary">
-            <NuxtLink :to="localePath('/')">{{ $t("actions.backToHome") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard')">{{ $t("actions.backToHome") }}</NuxtLink>
           </Button>
       </CardContent>
     </Card>
@@ -672,7 +672,7 @@ async function onSave() {
 
       <CardFooter class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button as-child variant="secondary">
-          <NuxtLink :to="localePath(`/tank/${tankId}/water-test`)">{{ $t("pages.tests.rangesEditor.actions.backToTests") }}</NuxtLink>
+          <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/water-test`)">{{ $t("pages.tests.rangesEditor.actions.backToTests") }}</NuxtLink>
         </Button>
 
         <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">

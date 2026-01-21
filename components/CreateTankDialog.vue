@@ -93,7 +93,7 @@ async function onCreateTank() {
     setActiveTankId(created.id)
     isOpen.value = false
     resetNewTankForm()
-    await navigateTo(localePath(`/tank/${created.id}`))
+    await navigateTo(localePath(`/dashboard/tank/${created.id}`))
   } catch (error) {
     createTankError.value = error instanceof Error ? error.message : t("pages.settings.tanks.errors.createFailed")
   } finally {

@@ -147,7 +147,7 @@ const altForTankPhoto = (photo: TankPhoto) => t("pages.photos.timeline.alt.tankP
       </CardContent>
       <CardFooter>
         <Button as-child>
-          <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+          <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>
@@ -168,7 +168,7 @@ const altForTankPhoto = (photo: TankPhoto) => t("pages.photos.timeline.alt.tankP
         </CardHeader>
         <CardFooter>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
         </CardFooter>
       </Card>
@@ -186,7 +186,7 @@ const altForTankPhoto = (photo: TankPhoto) => t("pages.photos.timeline.alt.tankP
         </CardContent>
         <CardFooter>
           <Button as-child>
-            <NuxtLink :to="localePath('/')">{{ $t("actions.backToHome") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard')">{{ $t("actions.backToHome") }}</NuxtLink>
           </Button>
         </CardFooter>
       </Card>

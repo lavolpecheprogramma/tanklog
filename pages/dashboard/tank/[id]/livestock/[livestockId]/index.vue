@@ -224,7 +224,7 @@ async function handleUpdate(payload: LivestockFormPayload) {
 
       <div class="flex flex-wrap gap-2">
         <Button variant="secondary" as-child>
-          <NuxtLink :to="localePath(`/tank/${tankId}/livestock`)">{{ $t("pages.livestock.actions.backToList") }}</NuxtLink>
+          <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/livestock`)">{{ $t("pages.livestock.actions.backToList") }}</NuxtLink>
         </Button>
       </div>
     </div>
@@ -239,7 +239,7 @@ async function handleUpdate(payload: LivestockFormPayload) {
       </CardContent>
       <CardFooter>
         <Button as-child>
-          <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+          <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>
@@ -260,7 +260,7 @@ async function handleUpdate(payload: LivestockFormPayload) {
         </CardHeader>
         <CardFooter>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
         </CardFooter>
       </Card>
@@ -278,7 +278,7 @@ async function handleUpdate(payload: LivestockFormPayload) {
         </CardContent>
         <CardFooter>
           <Button as-child>
-            <NuxtLink :to="localePath('/')">{{ $t("actions.backToHome") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard')">{{ $t("actions.backToHome") }}</NuxtLink>
           </Button>
         </CardFooter>
       </Card>

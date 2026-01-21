@@ -10,10 +10,10 @@ export default defineNuxtPlugin(() => {
     () => auth.isAuthenticated.value,
     (isAuthed, wasAuthed) => {
       if (!wasAuthed || isAuthed) return
-      if (route.path === "/login") return
+      if (route.path === "/dashboard/login") return
 
       navigateTo({
-        path: "/login",
+        path: "/dashboard/login",
         query: { redirect: route.fullPath },
       })
     }

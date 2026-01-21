@@ -84,6 +84,40 @@
     }
   },
   "pages": {
+    "landing": {
+      "metaTitle": "Benvenuto",
+      "kicker": "Registro acquariofilo solo frontend",
+      "title": "TankLog",
+      "description": "Registra test acqua, eventi, promemoria e foto. I dati restano nel tuo account Google (Drive + Sheets).",
+      "actions": {
+        "openDashboard": "Apri dashboard",
+        "privacy": "Privacy"
+      },
+      "cards": {
+        "what": {
+          "title": "Cosa puoi fare",
+          "description": "Tutto ciò che registri resta in Google Drive/Sheets.",
+          "bullets": {
+            "tests": "Registra test acqua (una sessione, più misurazioni)",
+            "trends": "Vedi trend e individua valori fuori range",
+            "events": "Tieni traccia degli eventi (cambi acqua, dosaggi, manutenzione)",
+            "reminders": "Crea promemoria e attività in scadenza",
+            "photos": "Carica foto su Drive e sfoglia la timeline"
+          }
+        },
+        "how": {
+          "title": "Come funziona",
+          "description": "Nessun backend: è un’app statica che parla direttamente con le API Google dal browser.",
+          "steps": {
+            "signIn": "Accedi con Google",
+            "connectDrive": "Collega (o crea) la cartella TankLog su Google Drive",
+            "createTank": "Crea una vasca (o scegli una esistente)",
+            "startLogging": "Inizia a registrare test, eventi, promemoria e foto"
+          }
+        }
+      },
+      "footerNote": "Suggerimento: TankLog può essere installata come PWA e usare la cache per la navigazione offline."
+    },
     "home": {
       "metaTitle": "Home",
       "heroTitle": "TankLog",

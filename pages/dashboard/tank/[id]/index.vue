@@ -478,7 +478,7 @@ const trendChartOptions = computed(() => ({
       </CardHeader>
       <CardFooter>
         <Button as-child>
-          <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+          <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>
@@ -505,7 +505,7 @@ const trendChartOptions = computed(() => ({
         </CardContent>
         <CardFooter>
           <Button as-child>
-            <NuxtLink :to="localePath('/')">{{ $t("actions.backToHome") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard')">{{ $t("actions.backToHome") }}</NuxtLink>
           </Button>
         </CardFooter>
       </Card>
@@ -527,16 +527,16 @@ const trendChartOptions = computed(() => ({
           </CardContent>
           <CardFooter class="flex flex-wrap gap-2">
             <Button as-child>
-              <NuxtLink :to="localePath(`/tank/${tank.id}/water-test`)">{{ $t("nav.tests") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tank.id}/water-test`)">{{ $t("nav.tests") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tank.id}/photos`)">{{ $t("nav.photos") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tank.id}/photos`)">{{ $t("nav.photos") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tank.id}/events`)">{{ $t("nav.events") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tank.id}/events`)">{{ $t("nav.events") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tank.id}/reminders`)">{{ $t("nav.reminders") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tank.id}/reminders`)">{{ $t("nav.reminders") }}</NuxtLink>
             </Button>
           </CardFooter>
         </Card>
@@ -554,7 +554,7 @@ const trendChartOptions = computed(() => ({
                 <p class="text-sm text-muted-foreground">{{ $t("pages.tests.history.empty") }}</p>
                 <p class="text-xs text-muted-foreground">{{ $t("pages.tank.dashboard.latest.emptyHint") }}</p>
                 <Button as-child>
-                  <NuxtLink :to="localePath(`/tank/${tank.id}/water-test`)">{{ $t("actions.openWaterTests") }}</NuxtLink>
+                  <NuxtLink :to="localePath(`/dashboard/tank/${tank.id}/water-test`)">{{ $t("actions.openWaterTests") }}</NuxtLink>
                 </Button>
               </div>
 
@@ -579,7 +579,7 @@ const trendChartOptions = computed(() => ({
                       {{ $t("pages.tests.history.refresh") }}
                     </Button>
                     <Button variant="secondary" size="sm" as-child>
-                      <NuxtLink :to="localePath(`/tank/${tank.id}/water-test`)">{{ $t("actions.openWaterTests") }}</NuxtLink>
+                      <NuxtLink :to="localePath(`/dashboard/tank/${tank.id}/water-test`)">{{ $t("actions.openWaterTests") }}</NuxtLink>
                     </Button>
                   </div>
                 </div>
@@ -798,7 +798,7 @@ const trendChartOptions = computed(() => ({
             </CardContent>
             <CardFooter>
               <Button variant="secondary" as-child>
-                <NuxtLink :to="localePath(`/tank/${tank.id}/photos`)">{{ $t("actions.goToPhotos") }}</NuxtLink>
+                <NuxtLink :to="localePath(`/dashboard/tank/${tank.id}/photos`)">{{ $t("actions.goToPhotos") }}</NuxtLink>
               </Button>
             </CardFooter>
           </Card>
@@ -840,7 +840,7 @@ const trendChartOptions = computed(() => ({
             </CardContent>
             <CardFooter>
               <Button variant="secondary" as-child>
-                <NuxtLink :to="localePath(`/tank/${tank.id}/events`)">{{ $t("actions.goToEvents") }}</NuxtLink>
+                <NuxtLink :to="localePath(`/dashboard/tank/${tank.id}/events`)">{{ $t("actions.goToEvents") }}</NuxtLink>
               </Button>
             </CardFooter>
           </Card>

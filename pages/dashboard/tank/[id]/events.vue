@@ -234,7 +234,7 @@ async function onDeleteEvent(event: TankEvent) {
       </CardContent>
       <CardFooter>
         <Button as-child>
-          <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+          <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>
@@ -255,7 +255,7 @@ async function onDeleteEvent(event: TankEvent) {
         </CardHeader>
         <CardFooter>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
         </CardFooter>
       </Card>
@@ -273,7 +273,7 @@ async function onDeleteEvent(event: TankEvent) {
         </CardContent>
         <CardFooter>
           <Button as-child>
-            <NuxtLink :to="localePath('/')">{{ $t("actions.backToHome") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard')">{{ $t("actions.backToHome") }}</NuxtLink>
           </Button>
         </CardFooter>
       </Card>
@@ -408,16 +408,16 @@ async function onDeleteEvent(event: TankEvent) {
           </CardContent>
           <CardFooter class="flex flex-wrap gap-2">
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tankId}`)">{{ $t("nav.overview") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tankId}`)">{{ $t("nav.overview") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tankId}/water-test`)">{{ $t("actions.goToWaterTests") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/water-test`)">{{ $t("actions.goToWaterTests") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tankId}/photos`)">{{ $t("actions.goToPhotos") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/photos`)">{{ $t("actions.goToPhotos") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tankId}/reminders`)">{{ $t("actions.goToReminders") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/reminders`)">{{ $t("actions.goToReminders") }}</NuxtLink>
             </Button>
           </CardFooter>
         </Card>

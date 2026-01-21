@@ -73,7 +73,7 @@ const tankNavItems = computed(() => {
   const id = tankId.value
   if (!id) return []
 
-  const base = `/tank/${id}`
+  const base = `/dashboard/tank/${id}`
   return [
     { to: base, labelKey: "nav.overview", isActive: route.path === base },
     { to: `${base}/water-test`, labelKey: "nav.tests", isActive: route.path.startsWith(`${base}/water-test`) },
@@ -96,7 +96,7 @@ watch(
 
 async function onLogout() {
   await auth.logout({ revoke: true })
-  await navigateTo("/login")
+  await navigateTo("/dashboard/login")
 }
 </script>
 
@@ -119,9 +119,11 @@ async function onLogout() {
         <nav class="grid gap-1 px-2 py-4" aria-label="Tank navigation">
           <NuxtLink
             class="rounded-md px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            :class="route.path === '/' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'"
-            :to="localePath('/')"
-            :aria-current="route.path === '/' ? 'page' : undefined"
+            :class="
+              route.path === '/dashboard' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+            "
+            :to="localePath('/dashboard')"
+            :aria-current="route.path === '/dashboard' ? 'page' : undefined"
           >
             {{ $t("nav.home") }}
           </NuxtLink>
@@ -145,7 +147,7 @@ async function onLogout() {
             <div class="flex min-w-0 items-center gap-2">
               <NuxtLink
                 class="font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                :to="localePath('/')"
+                :to="localePath('/dashboard')"
               >
                 TankLog
               </NuxtLink>
@@ -168,7 +170,7 @@ async function onLogout() {
               <ThemeToggle />
 
               <Button variant="secondary" size="sm" as-child>
-                <NuxtLink :to="localePath('/settings')">{{ $t("nav.settings") }}</NuxtLink>
+                <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("nav.settings") }}</NuxtLink>
               </Button>
 
               <div class="hidden items-center gap-2 sm:flex">
@@ -205,12 +207,12 @@ async function onLogout() {
                     <NuxtLink
                       class="rounded-md px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       :class="
-                        route.path === '/'
+                        route.path === '/dashboard'
                           ? 'bg-accent text-accent-foreground'
                           : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                       "
-                      :to="localePath('/')"
-                      :aria-current="route.path === '/' ? 'page' : undefined"
+                      :to="localePath('/dashboard')"
+                      :aria-current="route.path === '/dashboard' ? 'page' : undefined"
                     >
                       {{ $t("nav.home") }}
                     </NuxtLink>

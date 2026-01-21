@@ -2,113 +2,78 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
+definePageMeta({
+  layout: "auth",
+})
+
 const { t } = useI18n()
 const localePath = useLocalePath()
 
 useHead(() => ({
-  title: t("pages.home.metaTitle"),
+  title: t("pages.landing.metaTitle"),
 }))
-
-const storage = useTankLogRootFolderId()
-storage.hydrateFromStorage()
-const isStorageReady = computed(() => storage.hasRootFolderId.value)
-
-const { tanks, status: tanksStatus, error: tanksError, refresh: refreshTanks } = useTanks()
-const isCreateTankDialogOpen = ref(false)
-
-function tankTypeLabel(type: string) {
-  if (type === "freshwater" || type === "marine" || type === "reef") {
-    return t(`pages.settings.tanks.types.${type}`)
-  }
-  return type
-}
-
-function formatVolume(volumeLiters: number | null) {
-  if (volumeLiters === null) return null
-  const rounded = Number.isInteger(volumeLiters) ? volumeLiters.toString() : volumeLiters.toFixed(1)
-  return `${rounded} L`
-}
 </script>
 
 <template>
-  <section class="space-y-6">
-    <div class="space-y-2">
-      <h1 class="text-2xl font-semibold tracking-tight">{{ $t("pages.home.heroTitle") }}</h1>
-      <p class="max-w-prose text-muted-foreground">{{ $t("pages.home.heroDescription") }}</p>
-    </div>
+  <section class="mx-auto w-full max-w-5xl space-y-8">
+    <header class="space-y-3">
+      <p class="text-sm font-medium text-muted-foreground">{{ $t("pages.landing.kicker") }}</p>
+      <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">
+        {{ $t("pages.landing.title") }}
+      </h1>
+      <p class="max-w-prose text-base text-muted-foreground sm:text-lg">
+        {{ $t("pages.landing.description") }}
+      </p>
 
-    <Card v-if="!isStorageReady">
-      <CardHeader>
-        <CardTitle>{{ $t("pages.settings.storage.title") }}</CardTitle>
-        <CardDescription>{{ $t("pages.settings.storage.description") }}</CardDescription>
-      </CardHeader>
-      <CardFooter>
+      <div class="flex flex-wrap gap-3 pt-2">
         <Button as-child>
-          <NuxtLink to="/settings">{{ $t("actions.goToSettings") }}</NuxtLink>
+          <NuxtLink :to="localePath('/dashboard')">{{ $t("pages.landing.actions.openDashboard") }}</NuxtLink>
         </Button>
-      </CardFooter>
-    </Card>
-
-    <div v-else class="space-y-4">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <div class="text-sm font-medium text-foreground">{{ $t("pages.settings.tanks.listTitle") }}</div>
-          <div class="text-xs text-muted-foreground">{{ $t("pages.settings.tanks.listHint") }}</div>
-        </div>
-
-        <div class="flex flex-wrap gap-2">
-          <Button type="button" variant="secondary" size="sm" :disabled="tanksStatus === 'loading'" @click="refreshTanks">
-            {{ $t("pages.settings.tanks.refresh") }}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            :disabled="isCreateTankDialogOpen"
-            @click="isCreateTankDialogOpen = true"
-          >
-            {{ $t("pages.settings.tanks.add") }}
-          </Button>
-        </div>
-      </div>
-
-      <CreateTankDialog v-model:open="isCreateTankDialogOpen" />
-
-      <div v-if="tanksError" class="text-sm text-destructive" role="alert">
-        {{ tanksError }}
-      </div>
-
-      <div v-else-if="tanksStatus === 'loading'" class="text-sm text-muted-foreground">
-        {{ $t("pages.settings.tanks.loading") }}
-      </div>
-
-      <div v-else-if="!tanks.length" class="space-y-2">
-        <p class="text-sm text-muted-foreground">{{ $t("pages.settings.tanks.empty") }}</p>
-        <Button type="button" :disabled="isCreateTankDialogOpen" @click="isCreateTankDialogOpen = true">
-          {{ $t("pages.settings.tanks.add") }}
+        <Button variant="secondary" as-child>
+          <NuxtLink :to="localePath('/privacy')">{{ $t("pages.landing.actions.privacy") }}</NuxtLink>
         </Button>
       </div>
+    </header>
 
-      <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card v-for="tank in tanks" :key="tank.id" class="flex flex-col">
-          <CardHeader>
-            <CardTitle class="truncate">{{ tank.name }}</CardTitle>
-            <CardDescription>
-              <span>{{ tankTypeLabel(tank.type) }}</span>
-              <span v-if="formatVolume(tank.volumeLiters)" class="text-muted-foreground"> · {{ formatVolume(tank.volumeLiters) }}</span>
-            </CardDescription>
-          </CardHeader>
-          <CardContent class="text-xs text-muted-foreground">
-            <code class="rounded bg-muted px-1 py-0.5">{{ tank.id }}</code>
-          </CardContent>
-          <CardFooter class="mt-auto">
-            <Button as-child class="w-full">
-              <NuxtLink :to="localePath(`/tank/${tank.id}`)">{{ $t("pages.settings.tanks.open") }}</NuxtLink>
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
+    <div class="grid gap-4 lg:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>{{ $t("pages.landing.cards.what.title") }}</CardTitle>
+          <CardDescription>{{ $t("pages.landing.cards.what.description") }}</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-3 text-sm text-muted-foreground">
+          <ul class="list-disc space-y-1 pl-5">
+            <li>{{ $t("pages.landing.cards.what.bullets.tests") }}</li>
+            <li>{{ $t("pages.landing.cards.what.bullets.trends") }}</li>
+            <li>{{ $t("pages.landing.cards.what.bullets.events") }}</li>
+            <li>{{ $t("pages.landing.cards.what.bullets.reminders") }}</li>
+            <li>{{ $t("pages.landing.cards.what.bullets.photos") }}</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{{ $t("pages.landing.cards.how.title") }}</CardTitle>
+          <CardDescription>{{ $t("pages.landing.cards.how.description") }}</CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-3 text-sm text-muted-foreground">
+          <ol class="list-decimal space-y-1 pl-5">
+            <li>{{ $t("pages.landing.cards.how.steps.signIn") }}</li>
+            <li>{{ $t("pages.landing.cards.how.steps.connectDrive") }}</li>
+            <li>{{ $t("pages.landing.cards.how.steps.createTank") }}</li>
+            <li>{{ $t("pages.landing.cards.how.steps.startLogging") }}</li>
+          </ol>
+        </CardContent>
+        <CardFooter class="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-xs text-muted-foreground">
+            {{ $t("pages.landing.footerNote") }}
+          </p>
+          <Button variant="secondary" size="sm" as-child>
+            <NuxtLink :to="localePath('/dashboard/login')">{{ $t("actions.signInWithGoogle") }}</NuxtLink>
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   </section>
 </template>
-

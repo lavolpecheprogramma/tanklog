@@ -23,10 +23,11 @@ const hasClientId = computed(() => Boolean(config.public.googleClientId))
 
 const redirectTarget = computed(() => {
   const raw = route.query.redirect
-  if (typeof raw !== "string") return "/"
-  if (!raw.startsWith("/")) return "/"
-  if (raw.startsWith("//")) return "/"
-  if (raw.startsWith("/login")) return "/"
+  if (typeof raw !== "string") return "/dashboard"
+  if (!raw.startsWith("/")) return "/dashboard"
+  if (raw.startsWith("//")) return "/dashboard"
+  if (raw.startsWith("/login")) return "/dashboard"
+  if (raw.startsWith("/dashboard/login")) return "/dashboard"
   return raw
 })
 

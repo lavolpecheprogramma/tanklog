@@ -852,7 +852,7 @@ async function onSubmit() {
         <div v-if="!isStorageReady" class="space-y-2">
           <p>{{ $t("pages.tests.form.locked") }}</p>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
         </div>
 
@@ -863,14 +863,14 @@ async function onSubmit() {
         <div v-else-if="tanksError" class="space-y-2">
           <p class="text-sm text-destructive" role="alert">{{ tanksError }}</p>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
         </div>
 
         <div v-else-if="!tanks.length" class="space-y-2">
           <p>{{ $t("pages.tests.form.noTanks") }}</p>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
         </div>
 
@@ -880,7 +880,7 @@ async function onSubmit() {
             <code class="rounded bg-muted px-1 py-0.5">{{ tankId }}</code>
           </p>
           <Button as-child>
-            <NuxtLink :to="localePath('/')">{{ $t("actions.backToHome") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard')">{{ $t("actions.backToHome") }}</NuxtLink>
           </Button>
         </div>
 
@@ -928,7 +928,7 @@ async function onSubmit() {
                 {{ $t("pages.tests.ranges.emptyHint") }}
               </p>
               <Button as-child variant="secondary" size="sm">
-                <NuxtLink :to="localePath(`/tank/${tankId}/water-test/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
+                <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/water-test/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
               </Button>
             </div>
             <div v-else class="grid gap-4 sm:grid-cols-2">
@@ -1043,7 +1043,7 @@ async function onSubmit() {
         <div v-if="!isStorageReady" class="space-y-2">
           <p>{{ $t("pages.tests.form.locked") }}</p>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
         </div>
 
@@ -1054,14 +1054,14 @@ async function onSubmit() {
         <div v-else-if="tanksError" class="space-y-2">
           <p class="text-sm text-destructive" role="alert">{{ tanksError }}</p>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
         </div>
 
         <div v-else-if="!tanks.length" class="space-y-2">
           <p>{{ $t("pages.tests.form.noTanks") }}</p>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
         </div>
 
@@ -1071,7 +1071,7 @@ async function onSubmit() {
             <code class="rounded bg-muted px-1 py-0.5">{{ tankId }}</code>
           </p>
           <Button as-child>
-            <NuxtLink :to="localePath('/')">{{ $t("actions.backToHome") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard')">{{ $t("actions.backToHome") }}</NuxtLink>
           </Button>
         </div>
 
@@ -1417,13 +1417,13 @@ async function onSubmit() {
       </CardContent>
       <CardFooter class="flex flex-wrap gap-2">
         <Button as-child variant="secondary">
-          <NuxtLink :to="localePath(`/tank/${tankId}/water-test/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
+          <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/water-test/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
         </Button>
         <Button as-child variant="secondary">
-          <NuxtLink :to="localePath(`/tank/${tankId}/photos`)">{{ $t("actions.goToPhotos") }}</NuxtLink>
+          <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/photos`)">{{ $t("actions.goToPhotos") }}</NuxtLink>
         </Button>
         <Button as-child variant="secondary">
-          <NuxtLink :to="localePath(`/tank/${tankId}/events`)">{{ $t("actions.goToEvents") }}</NuxtLink>
+          <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/events`)">{{ $t("actions.goToEvents") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>

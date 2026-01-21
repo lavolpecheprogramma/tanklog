@@ -15,11 +15,11 @@ watchEffect(() => {
   if (!import.meta.client) return
 
   if (tankId.value) {
-    navigateTo(localePath(`/tank/${tankId.value}/water-test`), { replace: true })
+    navigateTo(localePath(`/dashboard/tank/${tankId.value}/water-test`), { replace: true })
     return
   }
 
-  navigateTo(localePath("/"), { replace: true })
+  navigateTo(localePath("/dashboard"), { replace: true })
 })
 </script>
 

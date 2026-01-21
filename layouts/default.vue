@@ -11,7 +11,7 @@ const userLabel = computed(() => userEmail.value || userName.value || null)
 
 async function onLogout() {
   await auth.logout({ revoke: true })
-  await navigateTo("/login")
+  await navigateTo("/dashboard/login")
 }
 </script>
 
@@ -28,7 +28,7 @@ async function onLogout() {
       <div class="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-3">
         <NuxtLink
           class="font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          to="/"
+          :to="localePath('/dashboard')"
         >
           TankLog
         </NuxtLink>
@@ -38,7 +38,7 @@ async function onLogout() {
           <ThemeToggle />
 
           <Button variant="secondary" size="sm" as-child>
-            <NuxtLink to="/settings">{{ $t("nav.settings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("nav.settings") }}</NuxtLink>
           </Button>
 
           <div class="hidden items-center gap-2 sm:flex">

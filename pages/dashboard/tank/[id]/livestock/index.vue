@@ -234,7 +234,7 @@ async function handleCreateLivestock(payload: LivestockFormPayload) {
   isCreateOpen.value = false
   actionStatus.value = t("pages.livestock.form.success.saved")
 
-  await navigateTo(localePath(`/tank/${tank.value.id}/livestock/${created.livestockId}`))
+  await navigateTo(localePath(`/dashboard/tank/${tank.value.id}/livestock/${created.livestockId}`))
 }
 </script>
 
@@ -257,7 +257,7 @@ async function handleCreateLivestock(payload: LivestockFormPayload) {
       </CardContent>
       <CardFooter>
         <Button as-child>
-          <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+          <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
         </Button>
       </CardFooter>
     </Card>
@@ -278,7 +278,7 @@ async function handleCreateLivestock(payload: LivestockFormPayload) {
         </CardHeader>
         <CardFooter>
           <Button as-child>
-            <NuxtLink :to="localePath('/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
           </Button>
         </CardFooter>
       </Card>
@@ -296,7 +296,7 @@ async function handleCreateLivestock(payload: LivestockFormPayload) {
         </CardContent>
         <CardFooter>
           <Button as-child>
-            <NuxtLink :to="localePath('/')">{{ $t("actions.backToHome") }}</NuxtLink>
+            <NuxtLink :to="localePath('/dashboard')">{{ $t("actions.backToHome") }}</NuxtLink>
           </Button>
         </CardFooter>
       </Card>
@@ -432,7 +432,7 @@ async function handleCreateLivestock(payload: LivestockFormPayload) {
                         <div class="flex flex-wrap items-center gap-2">
                           <NuxtLink
                             class="truncate font-medium underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                            :to="localePath(`/tank/${tankId}/livestock/${item.livestockId}`)"
+                            :to="localePath(`/dashboard/tank/${tankId}/livestock/${item.livestockId}`)"
                           >
                             {{ item.nameCommon }}
                           </NuxtLink>
@@ -460,7 +460,7 @@ async function handleCreateLivestock(payload: LivestockFormPayload) {
                         {{ formatDateOnly(item.dateAdded) }}
                       </div>
                       <Button size="xs" variant="secondary" as-child>
-                        <NuxtLink :to="localePath(`/tank/${tankId}/livestock/${item.livestockId}`)">
+                        <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/livestock/${item.livestockId}`)">
                           {{ $t("pages.livestock.actions.open") }}
                         </NuxtLink>
                       </Button>
@@ -473,13 +473,13 @@ async function handleCreateLivestock(payload: LivestockFormPayload) {
 
           <CardFooter class="flex flex-wrap gap-2">
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tankId}`)">{{ $t("nav.overview") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tankId}`)">{{ $t("nav.overview") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tankId}/photos`)">{{ $t("actions.goToPhotos") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/photos`)">{{ $t("actions.goToPhotos") }}</NuxtLink>
             </Button>
             <Button variant="secondary" as-child>
-              <NuxtLink :to="localePath(`/tank/${tankId}/events`)">{{ $t("actions.goToEvents") }}</NuxtLink>
+              <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/events`)">{{ $t("actions.goToEvents") }}</NuxtLink>
             </Button>
           </CardFooter>
         </Card>
