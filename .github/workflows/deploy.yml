@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Build (Nuxt) for GitHub Pages
-        run: npx nuxt build --preset github_pages
+        run: npx nuxt build
         env:
           # If deploying to a project page (<owner>.github.io/<repo>/), assets must be served from /<repo>/.
           # If deploying to a user/organization page (<owner>.github.io/), this should be "/".
