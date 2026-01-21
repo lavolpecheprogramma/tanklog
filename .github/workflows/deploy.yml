@@ -35,7 +35,7 @@ jobs:
         env:
           # If deploying to a project page (<owner>.github.io/<repo>/), assets must be served from /<repo>/.
           # If deploying to a user/organization page (<owner>.github.io/), this should be "/".
-          NUXT_APP_BASE_URL: ${{ github.event.repository.name == format('{0}.github.io', github.repository_owner) && '/' || format('/{0}/', github.event.repository.name) }}
+          NUXT_APP_BASE_URL: ${{ secrets.NUXT_APP_BASE_URL }}
           NUXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NUXT_PUBLIC_GOOGLE_CLIENT_ID }}
 
       - name: Upload Pages artifact
