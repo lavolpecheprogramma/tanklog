@@ -35,15 +35,15 @@ export default defineNuxtConfig({
     vueI18n: './i18n.config.ts',
   },
 
-  // TankLog constraint: Static Site Generation (SSG), frontend-only
-  nitro: {
-    // GitHub Pages serves static output and needs `.nojekyll` for `_nuxt/` assets.
-    // We also support setting a base URL (NUXT_APP_BASE_URL) for project pages (/<repo>/).
-    preset: 'static',
-    prerender: {
-      routes: [ '/', '/privacy', '/dashboard', '/dashboard/login' ]
-    }
-  },
+  // // TankLog constraint: Static Site Generation (SSG), frontend-only
+  // nitro: {
+  //   // GitHub Pages serves static output and needs `.nojekyll` for `_nuxt/` assets.
+  //   // We also support setting a base URL (NUXT_APP_BASE_URL) for project pages (/<repo>/).
+  //   preset: 'static',
+  //   prerender: {
+  //     routes: [ '/', '/privacy', '/dashboard', '/dashboard/login' ]
+  //   }
+  // },
 
   app: {
     baseURL,
