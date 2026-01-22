@@ -38,6 +38,51 @@
     }
   })
   
+  const googleClient = useTankLogGoogleClientId()
+  googleClient.hydrateFromStorage()
+
+  const configuredGoogleClientId = googleClient.googleClientId
+  const hasGoogleClientId = googleClient.hasGoogleClientId
+  const googleClientIdInput = ref(configuredGoogleClientId.value ?? "")
+  const googleClientIdError = ref<string | null>(null)
+  const googleClientIdStatus = ref<string | null>(null)
+
+  watch(
+    configuredGoogleClientId,
+    (value) => {
+      googleClientIdInput.value = value ?? ""
+    },
+    { immediate: true }
+  )
+
+  function onSaveGoogleClientId() {
+    googleClientIdError.value = null
+    googleClientIdStatus.value = null
+
+    if (!googleClientIdInput.value.trim()) {
+      googleClientIdError.value = t("pages.settings.googleClientId.errors.required")
+      return
+    }
+
+    const normalized = googleClient.setGoogleClientIdFromInput(googleClientIdInput.value)
+    if (!normalized) {
+      googleClientIdError.value = t("pages.settings.googleClientId.errors.required")
+      return
+    }
+
+    googleClientIdInput.value = normalized
+    googleClientIdStatus.value = t("pages.settings.googleClientId.success.saved")
+  }
+
+  function onRemoveGoogleClientId() {
+    googleClientIdError.value = null
+    googleClientIdStatus.value = null
+
+    googleClient.clearGoogleClientId()
+    googleClientIdInput.value = ""
+    googleClientIdStatus.value = t("pages.settings.googleClientId.success.removed")
+  }
+
   const storage = useTankLogRootFolderId()
   storage.hydrateFromStorage()
   
@@ -102,6 +147,7 @@
   
   function onResetLocalData() {
     onDisconnectTankLogFolder()
+    onRemoveGoogleClientId()
     isResetDialogOpen.value = false
   }
   
@@ -350,6 +396,65 @@
         </CardContent>
       </Card>
   
+      <Card id="settings-google-client-id">
+        <CardHeader>
+          <CardTitle>{{ $t("pages.settings.googleClientId.title") }}</CardTitle>
+          <CardDescription>{{ $t("pages.settings.googleClientId.description") }}</CardDescription>
+        </CardHeader>
+        <CardContent class="text-sm text-muted-foreground">
+          <form class="space-y-4" @submit.prevent="onSaveGoogleClientId">
+            <div>
+              <div class="text-foreground">{{ $t("pages.settings.googleClientId.statusLabel") }}</div>
+              <div>
+                <span v-if="hasGoogleClientId">{{ $t("pages.settings.googleClientId.statusConfigured") }}</span>
+                <span v-else>{{ $t("pages.settings.googleClientId.statusNotConfigured") }}</span>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="settings-google-client-id-input" class="text-foreground">
+                {{ $t("pages.settings.googleClientId.label") }}
+              </label>
+              <input
+                id="settings-google-client-id-input"
+                v-model="googleClientIdInput"
+                type="text"
+                inputmode="text"
+                autocomplete="off"
+                spellcheck="false"
+                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                :placeholder="$t('pages.settings.googleClientId.placeholder')"
+                :aria-invalid="googleClientIdError ? 'true' : 'false'"
+                aria-describedby="settings-google-client-id-hint settings-google-client-id-feedback"
+              />
+              <p id="settings-google-client-id-hint" class="text-xs text-muted-foreground">
+                {{ $t("pages.settings.googleClientId.hint") }}
+              </p>
+
+              <p v-if="googleClientIdError" id="settings-google-client-id-feedback" class="text-sm text-destructive" role="alert">
+                {{ googleClientIdError }}
+              </p>
+              <p
+                v-else-if="googleClientIdStatus"
+                id="settings-google-client-id-feedback"
+                class="text-sm text-foreground"
+                role="status"
+              >
+                {{ googleClientIdStatus }}
+              </p>
+              <p v-else id="settings-google-client-id-feedback" class="sr-only"> </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <Button type="submit">{{ $t("pages.settings.googleClientId.actions.save") }}</Button>
+              <Button type="button" variant="secondary" :disabled="!hasGoogleClientId" @click="onRemoveGoogleClientId">
+                {{ $t("pages.settings.googleClientId.actions.remove") }}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
       <Card id="settings-storage">
         <CardHeader>
           <CardTitle>{{ $t("pages.settings.storage.title") }}</CardTitle>

@@ -14,12 +14,17 @@ useHead(() => ({
 
 const route = useRoute()
 const auth = useAuth()
+const googleClientId = useTankLogGoogleClientId()
+googleClientId.hydrateFromStorage()
 
 const isSubmitting = ref(false)
 const errorMessage = ref<string | null>(null)
 
-const config = useRuntimeConfig()
-const hasClientId = computed(() => Boolean(config.public.googleClientId))
+const hasClientId = computed(() => googleClientId.hasGoogleClientId.value)
+
+const clientIdInput = ref(googleClientId.googleClientId.value ?? "")
+const clientIdError = ref<string | null>(null)
+const clientIdStatus = ref<string | null>(null)
 
 const redirectTarget = computed(() => {
   const raw = route.query.redirect
@@ -36,6 +41,36 @@ watchEffect(() => {
   if (!auth.isAuthenticated.value) return
   navigateTo(redirectTarget.value)
 })
+
+function onSaveClientId() {
+  clientIdError.value = null
+  clientIdStatus.value = null
+  errorMessage.value = null
+
+  if (!clientIdInput.value.trim()) {
+    clientIdError.value = t("pages.login.clientId.errors.required")
+    return
+  }
+
+  const normalized = googleClientId.setGoogleClientIdFromInput(clientIdInput.value)
+  if (!normalized) {
+    clientIdError.value = t("pages.login.clientId.errors.required")
+    return
+  }
+
+  clientIdInput.value = normalized
+  clientIdStatus.value = t("pages.login.clientId.success.saved")
+}
+
+function onRemoveClientId() {
+  clientIdError.value = null
+  clientIdStatus.value = null
+  errorMessage.value = null
+
+  googleClientId.clearGoogleClientId()
+  clientIdInput.value = ""
+  clientIdStatus.value = t("pages.login.clientId.success.removed")
+}
 
 async function onLogin() {
   errorMessage.value = null
@@ -73,12 +108,59 @@ async function onLogin() {
       </CardHeader>
 
       <CardContent class="space-y-4">
-        <p v-if="!hasClientId" class="text-sm text-destructive" role="alert">
-          {{ $t("pages.login.missingClientIdPrefix") }}
-          <code class="rounded bg-muted px-1 py-0.5">NUXT_PUBLIC_GOOGLE_CLIENT_ID</code>.
-          {{ $t("pages.login.missingClientIdSuffix") }}
-          <code class="rounded bg-muted px-1 py-0.5">docs/google-setup.md</code>.
-        </p>
+        <div class="space-y-3 rounded-md border border-border/60 bg-background p-3">
+          <div class="space-y-1">
+            <div class="text-sm font-medium text-foreground">
+              {{ $t("pages.login.clientId.title") }}
+            </div>
+            <p class="text-xs text-muted-foreground">
+              {{ $t("pages.login.clientId.description") }}
+            </p>
+            <ul class="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+              <li>{{ $t("pages.login.clientId.steps.create") }}</li>
+              <li>{{ $t("pages.login.clientId.steps.origins") }}</li>
+              <li>{{ $t("pages.login.clientId.steps.paste") }}</li>
+            </ul>
+          </div>
+
+          <form class="space-y-2" @submit.prevent="onSaveClientId">
+            <label for="google-client-id" class="text-sm text-foreground">
+              {{ $t("pages.login.clientId.label") }}
+            </label>
+            <input
+              id="google-client-id"
+              v-model="clientIdInput"
+              type="text"
+              inputmode="text"
+              autocomplete="off"
+              spellcheck="false"
+              class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              :placeholder="$t('pages.login.clientId.placeholder')"
+              :aria-invalid="clientIdError ? 'true' : 'false'"
+              aria-describedby="google-client-id-hint google-client-id-feedback"
+            />
+            <p id="google-client-id-hint" class="text-xs text-muted-foreground">
+              {{ $t("pages.login.clientId.hint") }}
+            </p>
+
+            <p v-if="clientIdError" id="google-client-id-feedback" class="text-sm text-destructive" role="alert">
+              {{ clientIdError }}
+            </p>
+            <p v-else-if="clientIdStatus" id="google-client-id-feedback" class="text-sm text-foreground" role="status">
+              {{ clientIdStatus }}
+            </p>
+            <p v-else id="google-client-id-feedback" class="sr-only"> </p>
+
+            <div class="flex flex-wrap gap-2 pt-1">
+              <Button type="submit" size="sm">
+                {{ $t("pages.login.clientId.actions.save") }}
+              </Button>
+              <Button type="button" size="sm" variant="secondary" :disabled="!hasClientId" @click="onRemoveClientId">
+                {{ $t("pages.login.clientId.actions.remove") }}
+              </Button>
+            </div>
+          </form>
+        </div>
 
         <p v-if="errorMessage" class="text-sm text-destructive" role="alert">
           {{ errorMessage }}

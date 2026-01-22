@@ -29,10 +29,10 @@ npm run generate
 
 ## Google setup (for features that need it)
 
-Some features require a Google OAuth client ID:
+Some features require Google OAuth (client-side) to access Drive/Sheets:
 
-- Follow `docs/google-setup.md`
-- Set `NUXT_PUBLIC_GOOGLE_CLIENT_ID` in your environment (do **not** commit secrets)
+- Follow `docs/google-setup.md` to create your own OAuth **Client ID** (Web application)
+- Paste the Client ID into TankLog’s Login screen and save it (stored locally on your device)
 
 ## i18n (English + Italian)
 

@@ -11,7 +11,7 @@ useHead(() => ({
   title: t("pages.privacy.metaTitle"),
 }))
 
-const lastUpdated = "2026-01-21"
+const lastUpdated = "2026-01-22"
 </script>
 
 <template>
@@ -74,6 +74,7 @@ const lastUpdated = "2026-01-21"
             <p class="max-w-prose">Per comodità, TankLog salva alcune preferenze nel tuo browser (local storage), ad esempio:</p>
             <ul class="list-disc space-y-1 pl-5">
               <li>ID della cartella TankLog su Google Drive (per riconnettersi più velocemente).</li>
+              <li>Client ID OAuth Google configurato dall’utente (identificativo pubblico).</li>
               <li>Vasca attiva selezionata.</li>
               <li>Lingua e tema (chiaro/scuro).</li>
             </ul>
@@ -172,6 +173,7 @@ const lastUpdated = "2026-01-21"
             <p class="max-w-prose">For convenience, TankLog stores some preferences in your browser (local storage), such as:</p>
             <ul class="list-disc space-y-1 pl-5">
               <li>Your TankLog Google Drive folder id (to reconnect faster).</li>
+              <li>Your user-provided Google OAuth Client ID (public identifier).</li>
               <li>Your selected active tank.</li>
               <li>Language and theme (light/dark).</li>
             </ul>

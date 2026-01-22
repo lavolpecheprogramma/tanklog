@@ -2,13 +2,12 @@
 
 TankLog is a static (SSG) Nuxt app. Some values are injected at build time.
 
-## `NUXT_PUBLIC_GOOGLE_CLIENT_ID`
+## Google OAuth Client ID
 
-**Required** to enable Google login.
+TankLog uses Google Identity Services (OAuth) in the browser.
+The OAuth **Client ID is user-provided at runtime** (stored locally on the device) and is **not** configured via environment variables.
 
-- Used by Google Identity Services in the browser
-- Safe to expose in the client bundle (it is a public identifier, not a secret)
-- Setup guide: `docs/google-setup.md`
+See: `docs/google-setup.md`
 
 ## `NUXT_APP_BASE_URL`
 

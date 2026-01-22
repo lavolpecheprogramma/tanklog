@@ -53,7 +53,7 @@ let tokenRequestPromise: Promise<AuthSession> | null = null
 let idClientInitialized = false
 
 function getSessionStorage(): Storage | null {
-  if (!process.client) return null
+  if (!import.meta.client) return null
   try {
     return window.sessionStorage
   } catch {
@@ -124,7 +124,7 @@ function decodeGoogleIdTokenProfile(credential: string): GoogleUserProfile | nul
 }
 
 async function ensureGoogleIdentityReady(timeoutMs = 10_000): Promise<void> {
-  if (!process.client) throw new Error("Google Identity can only run in the browser.")
+  if (!import.meta.client) throw new Error("Google Identity can only run in the browser.")
   if (window.google?.accounts?.oauth2?.initTokenClient && window.google?.accounts?.id?.initialize) return
 
   if (!gsiLoadPromise) {
@@ -242,10 +242,11 @@ export function useAuth() {
   async function requestAccessToken(options: { prompt: LoginOptions["prompt"]; hint?: string }): Promise<AuthSession> {
     hydrateFromStorage()
 
-    const config = useRuntimeConfig()
-    const clientId = config.public.googleClientId
+    const googleClientId = useTankLogGoogleClientId()
+    googleClientId.hydrateFromStorage()
+    const clientId = googleClientId.googleClientId.value
     if (!clientId) {
-      throw new Error("Missing Google Client ID. Set NUXT_PUBLIC_GOOGLE_CLIENT_ID.")
+      throw new Error("Missing Google Client ID. Configure it before signing in.")
     }
 
     await ensureGoogleIdentityReady()
@@ -357,13 +358,14 @@ export function useAuth() {
   }
 
   async function bootstrap(): Promise<void> {
-    if (!process.client) return
+    if (!import.meta.client) return
     if (bootstrapPromise) return bootstrapPromise
 
     bootstrapPromise = (async () => {
       hydrateFromStorage()
-      const config = useRuntimeConfig()
-      if (!config.public.googleClientId) return
+      const googleClientId = useTankLogGoogleClientId()
+      googleClientId.hydrateFromStorage()
+      if (!googleClientId.googleClientId.value) return
 
       try {
         await ensureGoogleIdentityReady()
@@ -381,10 +383,11 @@ export function useAuth() {
   }
 
   async function initializeGoogleSignIn() {
-    if (!process.client) return
+    if (!import.meta.client) return
 
-    const config = useRuntimeConfig()
-    const clientId = config.public.googleClientId
+    const googleClientId = useTankLogGoogleClientId()
+    googleClientId.hydrateFromStorage()
+    const clientId = googleClientId.googleClientId.value
     if (!clientId) return
 
     await ensureGoogleIdentityReady()
@@ -428,7 +431,7 @@ export function useAuth() {
     setSession(null)
     profile.value = null
 
-    if (!options.revoke || !token || !process.client) return
+    if (!options.revoke || !token || !import.meta.client) return
 
     try {
       await ensureGoogleIdentityReady()

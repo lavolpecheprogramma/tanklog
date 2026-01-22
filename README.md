@@ -18,9 +18,10 @@ npm run dev
 
 TankLog uses Google OAuth (client-side) via Google Identity Services.
 
-- Set `NUXT_PUBLIC_GOOGLE_CLIENT_ID` (see `docs/google-setup.md`)
-- See `docs/environment.md` for the full list of environment variables
-- Then reload the dev server
+- TankLog does **not** ship with a default OAuth Client ID.
+- Each user provides their own Google OAuth **Client ID** in the Login screen (stored locally on the device).
+- Setup guide: `docs/google-setup.md`
+- See `docs/environment.md` for build-time environment variables (for example `NUXT_APP_BASE_URL`)
 
 ## Static build (SSG)
 
@@ -47,7 +48,6 @@ After a successful first visit, the app shell can load offline (best-effort, bro
 - The workflow sets `NUXT_APP_BASE_URL` automatically for:
   - User/Org pages (`<owner>.github.io`) → `/`
   - Project pages (`/<repo>/`) → `/<repo>/`
-- Optional (recommended): set `NUXT_PUBLIC_GOOGLE_CLIENT_ID` as a repository secret so the deployed build has Google Login enabled.
 
 ### Netlify / Cloudflare Pages
 - **Build command**: `npm run generate`

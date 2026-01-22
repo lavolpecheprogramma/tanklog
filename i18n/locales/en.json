@@ -899,6 +899,27 @@
         "tokenExpiresLabel": "Token expires",
         "scopesLabel": "Scopes"
       },
+      "googleClientId": {
+        "title": "Google OAuth Client ID",
+        "description": "TankLog uses your personal OAuth Client ID (stored locally) to sign in with Google.",
+        "statusLabel": "Status",
+        "statusConfigured": "Configured",
+        "statusNotConfigured": "Not configured",
+        "label": "Client ID",
+        "placeholder": "1234-abc.apps.googleusercontent.com",
+        "hint": "Only the Client ID is needed (no client secret). Stored locally on this device.",
+        "actions": {
+          "save": "Save",
+          "remove": "Remove"
+        },
+        "errors": {
+          "required": "Enter a Client ID."
+        },
+        "success": {
+          "saved": "Client ID saved.",
+          "removed": "Client ID removed."
+        }
+      },
       "storage": {
         "title": "Storage (Google Drive)",
         "description": "Select your TankLog folder in Google Drive. Until it’s connected, the rest of the app is locked.",
@@ -989,7 +1010,7 @@
         "description": "Clear TankLog’s local settings from this device. This does not delete anything from Google Drive or Sheets.",
         "action": "Reset local settings",
         "confirmTitle": "Reset local settings?",
-        "confirmDescription": "This will disconnect the TankLog folder and clear the active tank from this device. Your data in Google Drive/Sheets will not be deleted.",
+        "confirmDescription": "This will disconnect the TankLog folder, clear the active tank, and remove the saved Google OAuth Client ID from this device. Your data in Google Drive/Sheets will not be deleted.",
         "confirmAction": "Reset"
       }
     },
@@ -999,10 +1020,31 @@
       "description": "TankLog uses Google to access your own Google Sheets + Drive (no backend, no proprietary DB).",
       "cardTitle": "Continue with Google",
       "cardDescription": "We’ll request access to Sheets and Drive (folder discovery + files created by TankLog).",
-      "missingClientIdPrefix": "Missing",
-      "missingClientIdSuffix": "See",
+      "clientId": {
+        "title": "Google OAuth Client ID",
+        "description": "TankLog is frontend-only and cannot ship a shared OAuth Client ID. Paste your own Client ID to enable Google sign-in.",
+        "steps": {
+          "create": "Create an OAuth Client ID (Web application) in Google Cloud Console.",
+          "origins": "Add this site to “Authorized JavaScript origins” (for dev: http://localhost:3000).",
+          "paste": "Paste the Client ID here and save."
+        },
+        "label": "Client ID",
+        "placeholder": "1234-abc.apps.googleusercontent.com",
+        "hint": "Only the Client ID is needed (no client secret). Stored locally on this device.",
+        "actions": {
+          "save": "Save Client ID",
+          "remove": "Remove"
+        },
+        "errors": {
+          "required": "Enter a Client ID."
+        },
+        "success": {
+          "saved": "Client ID saved.",
+          "removed": "Client ID removed."
+        }
+      },
       "errors": {
-        "missingClientId": "Missing Google Client ID. Set NUXT_PUBLIC_GOOGLE_CLIENT_ID and reload.",
+        "missingClientId": "Missing Google Client ID. Save your Client ID above to continue.",
         "loginFailed": "Login failed."
       },
       "sessionNote": "Session is stored in this browser tab (session storage)."

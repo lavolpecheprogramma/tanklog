@@ -57,6 +57,15 @@ The project is designed as:
 - **Google OAuth (client-side)**
 - Login via Google Identity Services
 
+#### Authentication: Custom Google Client ID
+
+TankLog does **not** ship with a default Google OAuth Client ID.
+Each user provides their own Google OAuth **Client ID** (“Bring Your Own Client ID”) and TankLog stores it **locally on the device** (localStorage), where it can be edited or removed by the user.
+
+- The OAuth flow is **unchanged** (Google Identity Services in the browser).
+- Token handling is **unchanged** (session-only; no persistent token storage).
+- Only the **source of `client_id`** is user-defined at runtime.
+
 ### Data Storage
 
 #### Google Sheets

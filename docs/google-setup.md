@@ -39,21 +39,15 @@ Copy the **Client ID**.
 
 ## 5) Configure TankLog
 
-TankLog reads the client id from an env var:
+TankLog does **not** ship with a default Google OAuth Client ID.
+Each user must provide their own Client ID (“Bring Your Own Client ID”).
 
-- `NUXT_PUBLIC_GOOGLE_CLIENT_ID="<your-client-id>"`
+- Open TankLog
+- Go to **Login**
+- Paste your **Client ID** when prompted and save it
+- Then click **Sign in with Google**
 
-For local dev, create a `.env` file (do not commit it):
-
-```bash
-NUXT_PUBLIC_GOOGLE_CLIENT_ID="1234-abc.apps.googleusercontent.com"
-```
-
-Then run:
-
-```bash
-npm run dev
-```
+The Client ID is stored **locally on your device** (localStorage) and can be edited or removed from the app settings.
 
 ## Notes
 

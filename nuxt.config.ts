@@ -7,13 +7,6 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@vite-pwa/nuxt', '@nuxtjs/i18n'],
   css: ['~/assets/css/tailwind.css'],
   ssr: false,
-  runtimeConfig: {
-    public: {
-      // Google Identity Services OAuth client id (Web application)
-      // Required for Sprint 3 (Auth) and all Google API calls.
-      googleClientId: (globalThis as any).process?.env?.NUXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-    },
-  },
 
   components: [
     {
