@@ -1,8 +1,16 @@
+import { readonly } from "vue"
+
 import type { SheetsCellValue } from "@/composables/useGoogleSheets"
 
-export type EventType = "water_change" | "dosing" | "maintenance" | "livestock_addition" | "livestock_removal"
+export type EventTargetType = "tank" | "livestock"
 
-export const EVENT_TYPES: EventType[] = [
+export type TankEventType = "water_change" | "dosing" | "maintenance" | "livestock_addition" | "livestock_removal"
+
+export type LivestockEventType = "feeding" | "health" | "treatment" | "observation" | "molt" | "spawn" | "fragging" | "other"
+
+export type EventType = TankEventType | LivestockEventType
+
+export const TANK_EVENT_TYPES: TankEventType[] = [
   "water_change",
   "dosing",
   "maintenance",
@@ -10,9 +18,18 @@ export const EVENT_TYPES: EventType[] = [
   "livestock_removal",
 ]
 
+export const LIVESTOCK_EVENT_TYPES: LivestockEventType[] = ["feeding", "health", "treatment", "observation", "molt", "spawn", "fragging", "other"]
+
+export const EVENT_TYPES: EventType[] = [
+  ...TANK_EVENT_TYPES,
+  ...LIVESTOCK_EVENT_TYPES,
+]
+
 export type TankEvent = {
   eventId: string
   date: string
+  targetType: EventTargetType
+  targetId: string | null
   eventType: string
   description: string
   quantity: number | null
@@ -24,6 +41,8 @@ export type TankEvent = {
 export type CreateTankEventInput = {
   spreadsheetId: string
   date: Date
+  targetType?: EventTargetType
+  targetId?: string | null
   eventType: EventType
   description: string
   quantity?: number | null
@@ -36,6 +55,8 @@ export type UpdateTankEventInput = {
   spreadsheetId: string
   eventId: string
   date: Date
+  targetType?: EventTargetType
+  targetId?: string | null
   eventType: EventType
   description: string
   quantity?: number | null
@@ -53,7 +74,7 @@ export type DeleteTankEventInput = {
   eventId: string
 }
 
-const EVENTS_HEADERS = ["id", "date", "type", "description", "quantity", "unit", "product", "note"] as const
+const EVENTS_HEADERS = ["id", "date", "type", "description", "quantity", "unit", "product", "note", "target_type", "target_id"] as const
 const ensuredSpreadsheets = new Set<string>()
 
 function generateId(prefix: string): string {
@@ -100,6 +121,13 @@ function cellToOptionalText(value: SheetsCellValue | undefined): string | null {
   return normalizeOptionalText(cellToString(value))
 }
 
+function normalizeTargetType(value: string): EventTargetType | null {
+  const trimmed = value.trim()
+  if (trimmed === "tank") return "tank"
+  if (trimmed === "livestock") return "livestock"
+  return null
+}
+
 function looksLikeHeaderRow(row: SheetsCellValue[] | undefined): boolean {
   if (!row?.length) return false
   const normalizeHeaderCell = (value: SheetsCellValue | undefined) => (typeof value === "string" ? value.trim().toLowerCase() : "")
@@ -125,12 +153,32 @@ function parseEventRow(row: SheetsCellValue[]): TankEvent | null {
   const unit = cellToOptionalText(row[5])
   const product = cellToOptionalText(row[6])
   const note = cellToOptionalText(row[7])
+  const targetTypeRaw = cellToOptionalText(row[8])
+  const targetIdRaw = cellToOptionalText(row[9])
 
   if (!eventId || !date || !eventType || !description) return null
+
+  let targetType: EventTargetType = "tank"
+  if (targetTypeRaw) {
+    const normalized = normalizeTargetType(targetTypeRaw)
+    if (normalized) targetType = normalized
+  }
+
+  let targetId: string | null = null
+  if (targetType === "livestock") {
+    targetId = targetIdRaw
+    if (!targetId) {
+      // Keep the row usable in the UI even if the target is malformed.
+      targetType = "tank"
+      targetId = null
+    }
+  }
 
   return {
     eventId,
     date,
+    targetType,
+    targetId,
     eventType,
     description,
     quantity,
@@ -147,6 +195,13 @@ function toEpochMs(value: string): number | null {
 
 export function useEvents() {
   const sheets = useGoogleSheets()
+  const revisions = useState<Record<string, number>>("events.revisionBySpreadsheetId", () => ({}))
+
+  function bumpEventsRevision(spreadsheetId: string) {
+    const id = spreadsheetId?.trim()
+    if (!id) return
+    revisions.value[id] = (revisions.value[id] ?? 0) + 1
+  }
 
   async function ensureEventsSheet(spreadsheetId: string) {
     if (!spreadsheetId) throw new Error("Missing spreadsheet id.")
@@ -166,7 +221,7 @@ export function useEvents() {
 
       await sheets.updateValues({
         spreadsheetId,
-        range: "EVENTS!A1:H1",
+        range: "EVENTS!A1:J1",
         values: [[...EVENTS_HEADERS]],
       })
     } catch (error) {
@@ -213,6 +268,12 @@ export function useEvents() {
       throw new Error("Invalid event date.")
     }
 
+    const targetType: EventTargetType = input.targetType === "livestock" ? "livestock" : "tank"
+    const targetId = targetType === "livestock" ? normalizeOptionalText(input.targetId ?? null) : null
+    if (targetType === "livestock" && !targetId) {
+      throw new Error("Missing livestock id.")
+    }
+
     const eventType = input.eventType
     if (!EVENT_TYPES.includes(eventType)) {
       throw new Error("Invalid event type.")
@@ -221,18 +282,20 @@ export function useEvents() {
     const description = input.description.trim()
     if (!description) throw new Error("Description is required.")
 
-    const quantity = input.quantity ?? null
+    const quantity = targetType === "livestock" ? null : (input.quantity ?? null)
     if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) {
       throw new Error("Invalid quantity.")
     }
 
-    const unit = normalizeOptionalText(input.unit)
-    const product = normalizeOptionalText(input.product)
+    const unit = targetType === "livestock" ? null : normalizeOptionalText(input.unit)
+    const product = targetType === "livestock" ? null : normalizeOptionalText(input.product)
     const note = normalizeOptionalText(input.note)
 
     const event: TankEvent = {
       eventId: generateId("ev"),
       date: input.date.toISOString(),
+      targetType,
+      targetId,
       eventType,
       description,
       quantity,
@@ -245,12 +308,24 @@ export function useEvents() {
 
     await sheets.appendValues({
       spreadsheetId: input.spreadsheetId,
-      range: "EVENTS!A:H",
-      values: [[event.eventId, event.date, event.eventType, event.description, event.quantity, event.unit, event.product, event.note]],
+      range: "EVENTS!A:J",
+      values: [[
+        event.eventId,
+        event.date,
+        event.eventType,
+        event.description,
+        event.quantity,
+        event.unit,
+        event.product,
+        event.note,
+        event.targetType,
+        event.targetId,
+      ]],
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
     })
 
+    bumpEventsRevision(input.spreadsheetId)
     return event
   }
 
@@ -262,6 +337,12 @@ export function useEvents() {
       throw new Error("Invalid event date.")
     }
 
+    const targetType: EventTargetType = input.targetType === "livestock" ? "livestock" : "tank"
+    const targetId = targetType === "livestock" ? normalizeOptionalText(input.targetId ?? null) : null
+    if (targetType === "livestock" && !targetId) {
+      throw new Error("Missing livestock id.")
+    }
+
     const eventType = input.eventType
     if (!EVENT_TYPES.includes(eventType)) {
       throw new Error("Invalid event type.")
@@ -270,13 +351,13 @@ export function useEvents() {
     const description = input.description.trim()
     if (!description) throw new Error("Description is required.")
 
-    const quantity = input.quantity ?? null
+    const quantity = targetType === "livestock" ? null : (input.quantity ?? null)
     if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) {
       throw new Error("Invalid quantity.")
     }
 
-    const unit = normalizeOptionalText(input.unit)
-    const product = normalizeOptionalText(input.product)
+    const unit = targetType === "livestock" ? null : normalizeOptionalText(input.unit)
+    const product = targetType === "livestock" ? null : normalizeOptionalText(input.product)
     const note = normalizeOptionalText(input.note)
 
     const rowNumber = await findEventRowNumber(input.spreadsheetId, input.eventId)
@@ -284,6 +365,8 @@ export function useEvents() {
     const event: TankEvent = {
       eventId: input.eventId,
       date: input.date.toISOString(),
+      targetType,
+      targetId,
       eventType,
       description,
       quantity,
@@ -294,11 +377,23 @@ export function useEvents() {
 
     await sheets.updateValues({
       spreadsheetId: input.spreadsheetId,
-      range: `EVENTS!A${rowNumber}:H${rowNumber}`,
-      values: [[event.eventId, event.date, event.eventType, event.description, event.quantity, event.unit, event.product, event.note]],
+      range: `EVENTS!A${rowNumber}:J${rowNumber}`,
+      values: [[
+        event.eventId,
+        event.date,
+        event.eventType,
+        event.description,
+        event.quantity,
+        event.unit,
+        event.product,
+        event.note,
+        event.targetType,
+        event.targetId,
+      ]],
       valueInputOption: "RAW",
     })
 
+    bumpEventsRevision(input.spreadsheetId)
     return event
   }
 
@@ -324,6 +419,8 @@ export function useEvents() {
         },
       ],
     })
+
+    bumpEventsRevision(input.spreadsheetId)
   }
 
   async function listEvents(input: ListTankEventsInput): Promise<TankEvent[]> {
@@ -333,7 +430,7 @@ export function useEvents() {
 
     const response = await sheets.getValues({
       spreadsheetId: input.spreadsheetId,
-      range: "EVENTS!A:H",
+      range: "EVENTS!A:J",
       valueRenderOption: "UNFORMATTED_VALUE",
     })
 
@@ -359,6 +456,7 @@ export function useEvents() {
     updateEvent,
     deleteEvent,
     listEvents,
+    eventRevisions: readonly(revisions),
   }
 }
 

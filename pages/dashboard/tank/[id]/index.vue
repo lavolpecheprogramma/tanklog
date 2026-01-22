@@ -214,10 +214,9 @@ function normalizeParameterKey(value: string): string {
 }
 
 function eventTypeLabel(value: string): string {
-  if (value === "water_change" || value === "dosing" || value === "maintenance" || value === "livestock_addition" || value === "livestock_removal") {
-    return t(`pages.events.types.${value}`)
-  }
-  return value
+  const key = `pages.events.types.${value}`
+  const translated = t(key)
+  return translated === key ? value : translated
 }
 
 const rangeByParameterKey = computed(() => {

@@ -21,6 +21,8 @@ function normalizeParameterKey(value: string): string {
 
 const PARAMETER_COLOR_ALIASES: Record<string, string> = {
   temperature: "temp",
+  calcium: "ca",
+  magnesium: "mg",
 }
 
 const DEFAULT_PARAMETER_COLORS: Record<string, string> = {
@@ -127,6 +129,14 @@ export function getDefaultParameterRangesForTankType(tankType: TankType): Defaul
       { parameter: "KH", minValue: 7, maxValue: 10, unit: "dKH", status: "optimal" },
       { parameter: "KH", minValue: 6, maxValue: 11, unit: "dKH", status: "acceptable" },
       { parameter: "KH", minValue: 5, maxValue: 12.5, unit: "dKH", status: "critical" },
+
+      { parameter: "Ca", minValue: 400, maxValue: 440, unit: "ppm", status: "optimal" },
+      { parameter: "Ca", minValue: 380, maxValue: 460, unit: "ppm", status: "acceptable" },
+      { parameter: "Ca", minValue: 350, maxValue: 480, unit: "ppm", status: "critical" },
+
+      { parameter: "Mg", minValue: 1250, maxValue: 1350, unit: "ppm", status: "optimal" },
+      { parameter: "Mg", minValue: 1200, maxValue: 1450, unit: "ppm", status: "acceptable" },
+      { parameter: "Mg", minValue: 1100, maxValue: 1500, unit: "ppm", status: "critical" },
 
       { parameter: "NH3", minValue: 0, maxValue: 0, unit: "ppm", status: "optimal" },
       { parameter: "NH3", minValue: 0, maxValue: 0.02, unit: "ppm", status: "acceptable" },

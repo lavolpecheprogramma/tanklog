@@ -2,7 +2,8 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { EVENT_TYPES, type EventType, type TankEvent } from "@/composables/useEvents"
+import { EVENT_TYPES, LIVESTOCK_EVENT_TYPES, TANK_EVENT_TYPES, type EventTargetType, type EventType, type TankEvent } from "@/composables/useEvents"
+import type { TankLivestock } from "@/composables/useLivestock"
 
 definePageMeta({
   layout: "tank",
@@ -29,11 +30,19 @@ const { tanks, status: tanksStatus, error: tanksError } = useTanks()
 const tank = computed(() => (tankId.value ? tanks.value.find((item) => item.id === tankId.value) ?? null : null))
 
 const eventsApi = useEvents()
+const livestockApi = useLivestock()
 
 type LoadStatus = "idle" | "loading" | "ready" | "error"
 const listStatus = ref<LoadStatus>("idle")
 const listError = ref<string | null>(null)
 const events = ref<TankEvent[]>([])
+
+const livestockStatus = ref<LoadStatus>("idle")
+const livestockError = ref<string | null>(null)
+const livestock = ref<TankLivestock[]>([])
+
+const createTargetType = ref<EventTargetType>("tank")
+const createTargetId = ref("")
 
 const actingEventId = ref<string | null>(null)
 const actionError = ref<string | null>(null)
@@ -41,6 +50,8 @@ const actionStatus = ref<string | null>(null)
 
 const isEditOpen = ref(false)
 const editingEvent = ref<TankEvent | null>(null)
+const editingTargetType = ref<EventTargetType>("tank")
+const editingTargetId = ref("")
 
 watch(isEditOpen, (open) => {
   if (!open) editingEvent.value = null
@@ -49,6 +60,12 @@ watch(isEditOpen, (open) => {
 function coerceEventType(value: string): EventType | null {
   return EVENT_TYPES.includes(value as EventType) ? (value as EventType) : null
 }
+
+const eventRevision = computed(() => {
+  const spreadsheetId = tank.value?.spreadsheetId
+  if (!spreadsheetId) return 0
+  return eventsApi.eventRevisions.value[spreadsheetId] ?? 0
+})
 
 function formatEventDate(value: string): string {
   const date = new Date(value)
@@ -76,10 +93,24 @@ function formatNumber(value: number): string {
 }
 
 function eventTypeLabel(value: string): string {
-  if (value === "water_change" || value === "dosing" || value === "maintenance" || value === "livestock_addition" || value === "livestock_removal") {
-    return t(`pages.events.types.${value}`)
+  const key = `pages.events.types.${value}`
+  const translated = t(key)
+  return translated === key ? value : translated
+}
+
+function livestockNameById(id: string | null): string | null {
+  if (!id) return null
+  const match = livestock.value.find((item) => item.livestockId === id)
+  return match?.nameCommon ?? null
+}
+
+function eventTargetLabel(event: TankEvent): string {
+  if (event.targetType === "livestock") {
+    const name = livestockNameById(event.targetId)
+    if (name) return t("pages.events.targets.livestockWithName", { name })
+    return t("pages.events.targets.livestockWithId", { id: event.targetId ?? "—" })
   }
-  return value
+  return t("pages.events.targets.tank")
 }
 
 async function loadEvents() {
@@ -105,13 +136,49 @@ async function loadEvents() {
   }
 }
 
-watch(
-  () => tank.value?.spreadsheetId,
-  () => {
-    loadEvents()
-  },
-  { immediate: true }
-)
+async function loadLivestock() {
+  if (!import.meta.client) return
+
+  if (!tank.value) {
+    livestock.value = []
+    livestockStatus.value = "idle"
+    livestockError.value = null
+    return
+  }
+
+  livestockStatus.value = "loading"
+  livestockError.value = null
+
+  try {
+    livestock.value = await livestockApi.listLivestock({ spreadsheetId: tank.value.spreadsheetId })
+    livestockStatus.value = "ready"
+  } catch (error) {
+    livestock.value = []
+    livestockError.value = error instanceof Error ? error.message : t("pages.livestock.list.errors.loadFailed")
+    livestockStatus.value = "error"
+  }
+}
+
+watch([() => tank.value?.spreadsheetId, eventRevision], () => {
+  loadEvents()
+}, { immediate: true })
+
+watch(() => tank.value?.spreadsheetId, () => {
+  loadLivestock()
+}, { immediate: true })
+
+watch(createTargetType, (value) => {
+  if (value === "tank") createTargetId.value = ""
+})
+
+watch(editingTargetType, (value) => {
+  if (value === "tank") editingTargetId.value = ""
+})
+
+const createEventTypes = computed(() => (createTargetType.value === "tank" ? TANK_EVENT_TYPES : LIVESTOCK_EVENT_TYPES))
+const editEventTypes = computed(() => (editingTargetType.value === "tank" ? TANK_EVENT_TYPES : LIVESTOCK_EVENT_TYPES))
+const showQuantityForCreate = computed(() => createTargetType.value === "tank")
+const showQuantityForEdit = computed(() => editingTargetType.value === "tank")
 
 type EventFormPayload = {
   date: Date
@@ -147,9 +214,16 @@ async function handleCreateEvent(payload: unknown) {
   if (!tank.value) throw new Error(t("pages.events.form.errors.noTank"))
   if (!isEventFormPayload(payload)) throw new Error(t("pages.events.form.errors.saveFailed"))
 
+  if (createTargetType.value === "livestock") {
+    const targetId = createTargetId.value.trim()
+    if (!targetId) throw new Error(t("pages.events.form.errors.missingLivestockTarget"))
+  }
+
   await eventsApi.createEvent({
     spreadsheetId: tank.value.spreadsheetId,
     date: payload.date,
+    targetType: createTargetType.value,
+    targetId: createTargetType.value === "livestock" ? createTargetId.value.trim() : null,
     eventType: payload.eventType,
     description: payload.description,
     quantity: payload.quantity,
@@ -164,6 +238,8 @@ async function handleCreateEvent(payload: unknown) {
 function startEdit(event: TankEvent) {
   actionError.value = null
   actionStatus.value = null
+  editingTargetType.value = event.targetType ?? "tank"
+  editingTargetId.value = event.targetType === "livestock" ? (event.targetId ?? "") : ""
   editingEvent.value = event
   isEditOpen.value = true
 }
@@ -173,10 +249,17 @@ async function handleUpdateEvent(payload: unknown) {
   if (!editingEvent.value) throw new Error(t("pages.events.actions.errors.updateFailed"))
   if (!isEventFormPayload(payload)) throw new Error(t("pages.events.actions.errors.updateFailed"))
 
+  if (editingTargetType.value === "livestock") {
+    const targetId = editingTargetId.value.trim()
+    if (!targetId) throw new Error(t("pages.events.form.errors.missingLivestockTarget"))
+  }
+
   await eventsApi.updateEvent({
     spreadsheetId: tank.value.spreadsheetId,
     eventId: editingEvent.value.eventId,
     date: payload.date,
+    targetType: editingTargetType.value,
+    targetId: editingTargetType.value === "livestock" ? editingTargetId.value.trim() : null,
     eventType: payload.eventType,
     description: payload.description,
     quantity: payload.quantity,
@@ -287,6 +370,42 @@ async function onDeleteEvent(event: TankEvent) {
             </DialogHeader>
 
             <div v-if="editingEvent" class="text-sm text-muted-foreground">
+              <div class="mb-5 grid gap-4 sm:grid-cols-2">
+                <div class="space-y-2">
+                  <label for="edit-event-target-type" class="text-foreground">{{ $t("pages.events.form.fields.target") }}</label>
+                  <select
+                    id="edit-event-target-type"
+                    v-model="editingTargetType"
+                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    <option value="tank">{{ $t("pages.events.form.targets.tank") }}</option>
+                    <option value="livestock">{{ $t("pages.events.form.targets.livestock") }}</option>
+                  </select>
+                  <p class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.target") }}</p>
+                </div>
+
+                <div v-if="editingTargetType === 'livestock'" class="space-y-2">
+                  <label for="edit-event-target-livestock" class="text-foreground">{{ $t("pages.events.form.fields.livestock") }}</label>
+                  <select
+                    id="edit-event-target-livestock"
+                    v-model="editingTargetId"
+                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    :disabled="livestockStatus === 'loading' || livestockStatus === 'error'"
+                  >
+                    <option value="">{{ $t("pages.events.form.placeholders.livestock") }}</option>
+                    <option v-for="ls in livestock" :key="ls.livestockId" :value="ls.livestockId">
+                      {{ ls.nameCommon }}
+                    </option>
+                  </select>
+                  <p v-if="livestockStatus === 'loading'" class="text-xs text-muted-foreground">{{ $t("pages.livestock.list.loading") }}</p>
+                  <p v-else-if="livestockStatus === 'error'" class="text-xs text-destructive">
+                    {{ $t("pages.events.form.errors.loadLivestockFailed") }}
+                    <span v-if="livestockError">({{ livestockError }})</span>
+                  </p>
+                  <p v-else class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.livestock") }}</p>
+                </div>
+              </div>
+
               <EventReminderForm
                 :id-base="`edit-event-${editingEvent.eventId}`"
                 mode="event"
@@ -294,6 +413,8 @@ async function onDeleteEvent(event: TankEvent) {
                 :saving-label="$t('pages.events.actions.savingChanges')"
                 :success-message="$t('pages.events.actions.statusUpdated')"
                 :reset-after-submit="false"
+                :event-types="editEventTypes"
+                :show-quantity-unit-product-fields="showQuantityForEdit"
                 :initial-values="{
                   date: editingEvent.date,
                   eventType: coerceEventType(editingEvent.eventType),
@@ -322,11 +443,49 @@ async function onDeleteEvent(event: TankEvent) {
             <CardDescription>{{ $t("pages.events.form.description") }}</CardDescription>
           </CardHeader>
           <CardContent class="text-sm text-muted-foreground">
+            <div class="mb-5 grid gap-4 sm:grid-cols-2">
+              <div class="space-y-2">
+                <label for="create-event-target-type" class="text-foreground">{{ $t("pages.events.form.fields.target") }}</label>
+                <select
+                  id="create-event-target-type"
+                  v-model="createTargetType"
+                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="tank">{{ $t("pages.events.form.targets.tank") }}</option>
+                  <option value="livestock">{{ $t("pages.events.form.targets.livestock") }}</option>
+                </select>
+                <p class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.target") }}</p>
+              </div>
+
+              <div v-if="createTargetType === 'livestock'" class="space-y-2">
+                <label for="create-event-target-livestock" class="text-foreground">{{ $t("pages.events.form.fields.livestock") }}</label>
+                <select
+                  id="create-event-target-livestock"
+                  v-model="createTargetId"
+                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  :disabled="livestockStatus === 'loading' || livestockStatus === 'error'"
+                >
+                  <option value="">{{ $t("pages.events.form.placeholders.livestock") }}</option>
+                  <option v-for="ls in livestock" :key="ls.livestockId" :value="ls.livestockId">
+                    {{ ls.nameCommon }}
+                  </option>
+                </select>
+                <p v-if="livestockStatus === 'loading'" class="text-xs text-muted-foreground">{{ $t("pages.livestock.list.loading") }}</p>
+                <p v-else-if="livestockStatus === 'error'" class="text-xs text-destructive">
+                  {{ $t("pages.events.form.errors.loadLivestockFailed") }}
+                  <span v-if="livestockError">({{ livestockError }})</span>
+                </p>
+                <p v-else class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.livestock") }}</p>
+              </div>
+            </div>
+
             <EventReminderForm
               id-base="create-event"
               mode="event"
               :submit-label="$t('pages.events.form.save')"
               :saving-label="$t('pages.events.form.saving')"
+              :event-types="createEventTypes"
+              :show-quantity-unit-product-fields="showQuantityForCreate"
               :submit-handler="handleCreateEvent"
             >
               <template #actions>
@@ -376,6 +535,8 @@ async function onDeleteEvent(event: TankEvent) {
                     <div class="font-medium">{{ eventTypeLabel(event.eventType) }}</div>
                     <div class="text-xs text-muted-foreground">
                       {{ formatEventDate(event.date) }}
+                      <span class="px-1">·</span>
+                      {{ eventTargetLabel(event) }}
                     </div>
                   </div>
 

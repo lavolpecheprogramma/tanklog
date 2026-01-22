@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
-import { EVENT_TYPES, type EventType } from "@/composables/useEvents"
+import { TANK_EVENT_TYPES, type EventType } from "@/composables/useEvents"
 
 type Mode = "event" | "reminder"
 
@@ -41,6 +41,8 @@ const props = defineProps<{
   successMessage?: string
   errorMessageFallback?: string
   resetAfterSubmit?: boolean
+  eventTypes?: readonly EventType[]
+  showQuantityUnitProductFields?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -110,6 +112,24 @@ const submitError = ref<string | null>(null)
 const submitStatus = ref<string | null>(null)
 
 const autoReset = computed(() => props.resetAfterSubmit !== false)
+const availableEventTypes = computed<readonly EventType[]>(() => (props.eventTypes?.length ? props.eventTypes : TANK_EVENT_TYPES))
+const showQuantityUnitProductFields = computed(() => props.showQuantityUnitProductFields !== false)
+
+watch(availableEventTypes, (types) => {
+  const current = eventTypeInput.value
+  if (!current) return
+  if (!types.includes(current as EventType)) {
+    eventTypeInput.value = ""
+  }
+})
+
+watch(showQuantityUnitProductFields, (enabled) => {
+  if (enabled) return
+  quantityInput.value = ""
+  unitInput.value = ""
+  productInput.value = ""
+  quantityError.value = null
+})
 
 watch(
   () => props.initialValues,
@@ -153,6 +173,7 @@ onMounted(() => {
 })
 
 watch(eventTypeInput, (value) => {
+  if (!showQuantityUnitProductFields.value) return
   if (value === "water_change" && !unitInput.value.trim()) unitInput.value = "L"
   if (value === "dosing" && !unitInput.value.trim()) unitInput.value = "ml"
 })
@@ -188,6 +209,10 @@ function validate(): EventSubmitPayload | ReminderSubmitPayload | null {
       eventTypeError.value = t("pages.events.form.errors.missingType")
       return null
     }
+    if (!availableEventTypes.value.includes(eventType as EventType)) {
+      eventTypeError.value = t("pages.events.form.errors.missingType")
+      return null
+    }
 
     const description = descriptionInput.value.trim()
     if (!description) {
@@ -195,10 +220,12 @@ function validate(): EventSubmitPayload | ReminderSubmitPayload | null {
       return null
     }
 
-    const quantity = parseNumberInput(quantityInput.value)
-    if (quantity !== null && quantity < 0) {
-      quantityError.value = t("pages.events.form.errors.invalidQuantity")
-      return null
+    const quantity = showQuantityUnitProductFields.value ? parseNumberInput(quantityInput.value) : null
+    if (showQuantityUnitProductFields.value) {
+      if (quantity !== null && quantity < 0) {
+        quantityError.value = t("pages.events.form.errors.invalidQuantity")
+        return null
+      }
     }
 
     return {
@@ -206,8 +233,8 @@ function validate(): EventSubmitPayload | ReminderSubmitPayload | null {
       eventType,
       description,
       quantity,
-      unit: normalizeOptionalText(unitInput.value),
-      product: normalizeOptionalText(productInput.value),
+      unit: showQuantityUnitProductFields.value ? normalizeOptionalText(unitInput.value) : null,
+      product: showQuantityUnitProductFields.value ? normalizeOptionalText(productInput.value) : null,
       note: normalizeOptionalText(noteInput.value),
     }
   }
@@ -235,6 +262,10 @@ function validate(): EventSubmitPayload | ReminderSubmitPayload | null {
     eventTypeError.value = t("pages.events.form.errors.missingType")
     return null
   }
+  if (!availableEventTypes.value.includes(eventType as EventType)) {
+    eventTypeError.value = t("pages.events.form.errors.missingType")
+    return null
+  }
 
   const description = descriptionInput.value.trim()
   if (!description) {
@@ -242,10 +273,12 @@ function validate(): EventSubmitPayload | ReminderSubmitPayload | null {
     return null
   }
 
-  const quantity = parseNumberInput(quantityInput.value)
-  if (quantity !== null && quantity < 0) {
-    quantityError.value = t("pages.events.form.errors.invalidQuantity")
-    return null
+  const quantity = showQuantityUnitProductFields.value ? parseNumberInput(quantityInput.value) : null
+  if (showQuantityUnitProductFields.value) {
+    if (quantity !== null && quantity < 0) {
+      quantityError.value = t("pages.events.form.errors.invalidQuantity")
+      return null
+    }
   }
 
   return {
@@ -254,8 +287,8 @@ function validate(): EventSubmitPayload | ReminderSubmitPayload | null {
     eventType,
     description,
     quantity,
-    unit: normalizeOptionalText(unitInput.value),
-    product: normalizeOptionalText(productInput.value),
+    unit: showQuantityUnitProductFields.value ? normalizeOptionalText(unitInput.value) : null,
+    product: showQuantityUnitProductFields.value ? normalizeOptionalText(productInput.value) : null,
     note: normalizeOptionalText(noteInput.value),
   }
 }
@@ -328,7 +361,7 @@ async function onSubmit() {
           required
         >
           <option value="">{{ $t("pages.events.form.placeholders.type") }}</option>
-          <option v-for="type in EVENT_TYPES" :key="type" :value="type">
+          <option v-for="type in availableEventTypes" :key="type" :value="type">
             {{ $t(`pages.events.types.${type}`) }}
           </option>
         </select>
@@ -391,7 +424,7 @@ async function onSubmit() {
           required
         >
           <option value="">{{ $t("pages.events.form.placeholders.type") }}</option>
-          <option v-for="type in EVENT_TYPES" :key="type" :value="type">
+          <option v-for="type in availableEventTypes" :key="type" :value="type">
             {{ $t(`pages.events.types.${type}`) }}
           </option>
         </select>
@@ -423,12 +456,12 @@ async function onSubmit() {
       <p v-else :id="`${idBase}-description-feedback`" class="sr-only"> </p>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div v-if="showQuantityUnitProductFields" class="grid gap-4 sm:grid-cols-2">
       <div class="space-y-2">
         <label :for="`${idBase}-quantity`" class="text-foreground">{{ $t("pages.events.form.fields.quantity") }}</label>
         <input
           :id="`${idBase}-quantity`"
-        v-model.trim="quantityInput"
+          v-model.trim="quantityInput"
           type="number"
           inputmode="decimal"
           autocomplete="off"
@@ -448,7 +481,7 @@ async function onSubmit() {
         <label :for="`${idBase}-unit`" class="text-foreground">{{ $t("pages.events.form.fields.unit") }}</label>
         <input
           :id="`${idBase}-unit`"
-        v-model.trim="unitInput"
+          v-model.trim="unitInput"
           type="text"
           autocomplete="off"
           class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -458,12 +491,12 @@ async function onSubmit() {
       </div>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2">
+    <div v-if="showQuantityUnitProductFields" class="grid gap-4 sm:grid-cols-2">
       <div class="space-y-2">
         <label :for="`${idBase}-product`" class="text-foreground">{{ $t("pages.events.form.fields.product") }}</label>
         <input
           :id="`${idBase}-product`"
-        v-model.trim="productInput"
+          v-model.trim="productInput"
           type="text"
           autocomplete="off"
           class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -475,13 +508,25 @@ async function onSubmit() {
         <label :for="`${idBase}-note`" class="text-foreground">{{ $t("pages.events.form.fields.note") }}</label>
         <input
           :id="`${idBase}-note`"
-        v-model.trim="noteInput"
+          v-model.trim="noteInput"
           type="text"
           autocomplete="off"
           class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :placeholder="$t('pages.events.form.placeholders.note')"
         />
       </div>
+    </div>
+
+    <div v-else class="space-y-2">
+      <label :for="`${idBase}-note`" class="text-foreground">{{ $t("pages.events.form.fields.note") }}</label>
+      <input
+        :id="`${idBase}-note`"
+        v-model.trim="noteInput"
+        type="text"
+        autocomplete="off"
+        class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        :placeholder="$t('pages.events.form.placeholders.note')"
+      />
     </div>
 
     <p v-if="submitError" class="text-sm text-destructive" role="alert">{{ submitError }}</p>

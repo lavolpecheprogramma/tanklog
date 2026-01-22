@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { EVENT_TYPES, LIVESTOCK_EVENT_TYPES, type EventType, type TankEvent } from "@/composables/useEvents"
 import type { TankLivestock } from "@/composables/useLivestock"
 import type { TankPhoto } from "@/composables/usePhotos"
 
@@ -35,6 +36,7 @@ const tank = computed(() => (tankId.value ? tanks.value.find((item) => item.id =
 
 const livestockApi = useLivestock()
 const photosApi = usePhotos()
+const eventsApi = useEvents()
 
 type LoadStatus = "idle" | "loading" | "ready" | "error"
 
@@ -46,6 +48,10 @@ const photosStatus = ref<LoadStatus>("idle")
 const photosError = ref<string | null>(null)
 const photos = ref<TankPhoto[]>([])
 
+const eventsStatus = ref<LoadStatus>("idle")
+const eventsError = ref<string | null>(null)
+const livestockEvents = ref<TankEvent[]>([])
+
 const featuredPhoto = computed(() => photos.value[0] ?? null)
 
 const photoRevision = computed(() => {
@@ -53,6 +59,19 @@ const photoRevision = computed(() => {
   if (!spreadsheetId) return 0
   return photosApi.photoRevisions.value[spreadsheetId] ?? 0
 })
+
+const eventRevision = computed(() => {
+  const spreadsheetId = tank.value?.spreadsheetId
+  if (!spreadsheetId) return 0
+  return eventsApi.eventRevisions.value[spreadsheetId] ?? 0
+})
+
+const isTimelineBusy = computed(() => photosStatus.value === "loading" || eventsStatus.value === "loading")
+
+function toEpochMs(value: string): number | null {
+  const parsed = Date.parse(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
 
 function formatPhotoDate(value: string): string {
   const date = new Date(value)
@@ -123,12 +142,36 @@ async function loadPhotos() {
   }
 }
 
+async function loadEvents() {
+  if (!import.meta.client) return
+
+  if (!tank.value || !livestockId.value) {
+    livestockEvents.value = []
+    eventsStatus.value = "idle"
+    eventsError.value = null
+    return
+  }
+
+  eventsStatus.value = "loading"
+  eventsError.value = null
+
+  try {
+    const all = await eventsApi.listEvents({ spreadsheetId: tank.value.spreadsheetId })
+    livestockEvents.value = all.filter((event) => event.targetType === "livestock" && event.targetId === livestockId.value)
+    eventsStatus.value = "ready"
+  } catch (error) {
+    livestockEvents.value = []
+    eventsStatus.value = "error"
+    eventsError.value = error instanceof Error ? error.message : t("pages.events.list.errors.loadFailed")
+  }
+}
+
 async function refresh() {
-  await Promise.all([loadItem(), loadPhotos()])
+  await Promise.all([loadItem(), loadPhotos(), loadEvents()])
 }
 
 watch(
-  [() => tank.value?.spreadsheetId, () => livestockId.value, photoRevision],
+  [() => tank.value?.spreadsheetId, () => livestockId.value, photoRevision, eventRevision],
   () => {
     void refresh()
   },
@@ -177,6 +220,78 @@ watch(isViewerOpen, (open) => {
 
 const altForLivestockPhoto = (photo: TankPhoto) =>
   t("pages.livestock.photos.alt.photo", { name: item.value?.nameCommon || livestockId.value || "—", date: formatPhotoDate(photo.date) })
+
+type ActivityTimelineItem =
+  | { kind: "photo"; id: string; date: string; photo: TankPhoto }
+  | { kind: "event"; id: string; date: string; event: TankEvent }
+
+const timelineItems = computed<ActivityTimelineItem[]>(() => {
+  const items: ActivityTimelineItem[] = []
+
+  for (const photo of photos.value) {
+    items.push({ kind: "photo", id: photo.photoId, date: photo.date, photo })
+  }
+
+  for (const event of livestockEvents.value) {
+    items.push({ kind: "event", id: event.eventId, date: event.date, event })
+  }
+
+  items.sort((a, b) => (toEpochMs(b.date) ?? -Infinity) - (toEpochMs(a.date) ?? -Infinity))
+  return items
+})
+
+type EventFormPayload = {
+  date: Date
+  eventType: EventType
+  description: string
+  quantity: number | null
+  unit: string | null
+  product: string | null
+  note: string | null
+}
+
+function isEventFormPayload(value: unknown): value is EventFormPayload {
+  if (!value || typeof value !== "object") return false
+  const candidate = value as Record<string, unknown>
+  if (!(candidate.date instanceof Date)) return false
+  if (typeof candidate.eventType !== "string") return false
+  if (!EVENT_TYPES.includes(candidate.eventType as EventType)) return false
+  if (typeof candidate.description !== "string") return false
+
+  if (candidate.quantity !== null && candidate.quantity !== undefined) {
+    if (typeof candidate.quantity !== "number") return false
+    if (!Number.isFinite(candidate.quantity)) return false
+  }
+
+  if (candidate.unit !== null && candidate.unit !== undefined && typeof candidate.unit !== "string") return false
+  if (candidate.product !== null && candidate.product !== undefined && typeof candidate.product !== "string") return false
+  if (candidate.note !== null && candidate.note !== undefined && typeof candidate.note !== "string") return false
+
+  return true
+}
+
+const isCreateEventOpen = ref(false)
+
+async function handleCreateLivestockEvent(payload: unknown) {
+  if (!tank.value) throw new Error(t("pages.events.form.errors.noTank"))
+  if (!livestockId.value) throw new Error(t("pages.livestock.detail.notFound"))
+  if (!isEventFormPayload(payload)) throw new Error(t("pages.events.form.errors.saveFailed"))
+
+  await eventsApi.createEvent({
+    spreadsheetId: tank.value.spreadsheetId,
+    date: payload.date,
+    targetType: "livestock",
+    targetId: livestockId.value,
+    eventType: payload.eventType,
+    description: payload.description,
+    quantity: null,
+    unit: null,
+    product: null,
+    note: payload.note,
+  })
+
+  await loadEvents()
+}
 
 type LivestockFormPayload = {
   nameCommon: string
@@ -337,39 +452,78 @@ async function handleUpdate(payload: LivestockFormPayload) {
           <CardHeader>
             <div class="flex flex-wrap items-start justify-between gap-3">
               <div class="space-y-1">
-                <CardTitle>{{ $t("pages.livestock.photos.cardTitle") }}</CardTitle>
-                <CardDescription>{{ $t("pages.livestock.photos.cardDescription") }}</CardDescription>
+                <CardTitle>{{ $t("pages.livestock.timeline.cardTitle") }}</CardTitle>
+                <CardDescription>{{ $t("pages.livestock.timeline.cardDescription") }}</CardDescription>
               </div>
 
               <div class="flex flex-wrap gap-2">
-                <Button variant="secondary" size="sm" type="button" :disabled="photosStatus === 'loading'" @click="loadPhotos">
-                  <span v-if="photosStatus === 'loading'">{{ $t("pages.photos.list.refreshing") }}</span>
-                  <span v-else>{{ $t("pages.livestock.photos.actions.refresh") }}</span>
+                <Button variant="secondary" size="sm" type="button" :disabled="isTimelineBusy" @click="refresh">
+                  <span v-if="isTimelineBusy">{{ $t("pages.photos.list.refreshing") }}</span>
+                  <span v-else>{{ $t("pages.livestock.timeline.actions.refresh") }}</span>
                 </Button>
+
+                <Dialog v-model:open="isCreateEventOpen">
+                  <DialogTrigger as-child>
+                    <Button size="sm" type="button">{{ $t("pages.livestock.timeline.actions.addEvent") }}</Button>
+                  </DialogTrigger>
+
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{{ $t("pages.livestock.timeline.eventDialog.title") }}</DialogTitle>
+                      <DialogDescription>{{ $t("pages.livestock.timeline.eventDialog.description") }}</DialogDescription>
+                    </DialogHeader>
+
+                    <div class="text-sm text-muted-foreground">
+                      <EventReminderForm
+                        id-base="create-livestock-event"
+                        mode="event"
+                        :submit-label="$t('pages.events.form.save')"
+                        :saving-label="$t('pages.events.form.saving')"
+                        :event-types="LIVESTOCK_EVENT_TYPES"
+                        :show-quantity-unit-product-fields="false"
+                        :submit-handler="handleCreateLivestockEvent"
+                        @success="isCreateEventOpen = false"
+                      >
+                        <template #actions>
+                          <DialogClose as-child>
+                            <Button variant="secondary" type="button">{{ $t("actions.cancel") }}</Button>
+                          </DialogClose>
+                        </template>
+                      </EventReminderForm>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
                 <PhotoUploadDialog :tank="tank" kind="livestock" :livestock-id="livestockId" @uploaded="loadPhotos" />
               </div>
             </div>
           </CardHeader>
 
           <CardContent class="space-y-4 text-sm text-muted-foreground">
-            <div v-if="photosStatus === 'loading'">{{ $t("pages.livestock.photos.loading") }}</div>
+            <div v-if="isTimelineBusy">{{ $t("pages.livestock.timeline.loading") }}</div>
 
-            <div v-else-if="photosStatus === 'error'" class="space-y-2">
+            <div v-if="eventsStatus === 'error'" class="space-y-2">
+              <p class="text-sm text-destructive" role="alert">
+                {{ $t("pages.events.list.errors.loadFailed") }}
+                <span v-if="eventsError">({{ eventsError }})</span>
+              </p>
+              <Button variant="secondary" size="sm" type="button" @click="loadEvents">
+                {{ $t("pages.livestock.timeline.actions.refresh") }}
+              </Button>
+            </div>
+
+            <div v-if="photosStatus === 'error'" class="space-y-2">
               <p class="text-sm text-destructive" role="alert">
                 {{ $t("pages.livestock.photos.errors.loadFailed") }}
                 <span v-if="photosError">({{ photosError }})</span>
               </p>
               <Button variant="secondary" size="sm" type="button" @click="loadPhotos">
-                {{ $t("pages.livestock.photos.actions.refresh") }}
+                {{ $t("pages.livestock.timeline.actions.refresh") }}
               </Button>
             </div>
 
-            <template v-else-if="photosStatus === 'ready'">
-              <PhotoTimeline :photos="photos" :alt-for="altForLivestockPhoto" :format-date="formatPhotoDate" @open="openViewer">
-                <template #emptyHint>
-                  {{ $t("pages.livestock.photos.emptyHint") }}
-                </template>
-              </PhotoTimeline>
+            <template v-if="eventsStatus === 'ready' || photosStatus === 'ready'">
+              <ActivityTimeline :items="timelineItems" :alt-for-photo="altForLivestockPhoto" :format-date="formatPhotoDate" @open-photo="openViewer" />
             </template>
           </CardContent>
         </Card>

@@ -150,18 +150,45 @@ Each tank has **ONE** Google Sheets file stored inside its tank folder:
 
 ### SHEET: `EVENTS`
 
-**Purpose**: track all actions and interventions on the tank.
+**Purpose**: track all actions and interventions on the tank **and** on specific livestock.
 
 | Column | Type | Required | Notes |
 | --- | --- | --- | --- |
 | `id` | string | yes | Unique event id (client-generated) |
 | `date` | string | yes | ISO timestamp (`YYYY-MM-DDTHH:mm:ss.sssZ`) |
-| `type` | string | yes | One of: `water_change`, `dosing`, `maintenance`, `livestock_addition`, `livestock_removal` |
+| `type` | string | yes | Depends on `target_type` (see below) |
 | `description` | string | yes | Short human description |
 | `quantity` | number | no | Numeric quantity (if applicable) |
 | `unit` | string | no | Unit for `quantity` (example: `L`, `ml`, `g`) |
 | `product` | string | no | Product name (if dosing/maintenance) |
 | `note` | string | no | Optional free text |
+| `target_type` | string | no | One of: `tank`, `livestock` (blank = `tank`) |
+| `target_id` | string | no | Required when `target_type = livestock` (must match `LIVESTOCK.livestock_id`) |
+
+**Event types**
+
+- `target_type = tank`:
+  - `water_change`
+  - `dosing`
+  - `maintenance`
+  - `livestock_addition`
+  - `livestock_removal`
+- `target_type = livestock`:
+  - `feeding`
+  - `health`
+  - `treatment`
+  - `observation`
+  - `molt`
+  - `spawn`
+  - `fragging`
+  - `other`
+
+**Invariants**
+
+- If `target_type` is blank, TankLog treats it as `tank`.
+- If `target_type = tank`, `target_id` MUST be blank.
+- If `target_type = livestock`, `target_id` MUST be present and valid.
+- For `target_type = livestock`, TankLog SHOULD keep `quantity` / `unit` / `product` blank (those fields are tank-centric).
 
 ---
 

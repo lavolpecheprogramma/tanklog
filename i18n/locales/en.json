@@ -596,6 +596,21 @@
           "photo": "{name} photo from {date}"
         }
       },
+      "timeline": {
+        "cardTitle": "Timeline",
+        "cardDescription": "Photos and events for this livestock, sorted by date.",
+        "loading": "Loading timeline…",
+        "empty": "No activity yet.",
+        "emptyHint": "Upload a photo or log an event to start building a history.",
+        "actions": {
+          "refresh": "Refresh",
+          "addEvent": "Log event"
+        },
+        "eventDialog": {
+          "title": "Log livestock event",
+          "description": "Add an event for this livestock (saved in your tank EVENTS sheet)."
+        }
+      },
       "form": {
         "title": "Livestock",
         "description": "These fields are stored in the LIVESTOCK tab of tank_data.xlsx.",
@@ -681,7 +696,20 @@
         "dosing": "Dosing",
         "maintenance": "Maintenance",
         "livestock_addition": "Livestock addition",
-        "livestock_removal": "Livestock removal"
+        "livestock_removal": "Livestock removal",
+        "feeding": "Feeding",
+        "health": "Health",
+        "treatment": "Treatment",
+        "observation": "Observation",
+        "molt": "Molt",
+        "spawn": "Spawn",
+        "fragging": "Fragging",
+        "other": "Other"
+      },
+      "targets": {
+        "tank": "Tank",
+        "livestockWithName": "Livestock: {name}",
+        "livestockWithId": "Livestock ID: {id}"
       },
       "form": {
         "title": "Add event",
@@ -689,6 +717,8 @@
         "save": "Save event",
         "saving": "Saving…",
         "fields": {
+          "target": "Target",
+          "livestock": "Livestock",
           "date": "Date & time",
           "type": "Type",
           "description": "Description",
@@ -697,7 +727,13 @@
           "product": "Product (optional)",
           "note": "Note (optional)"
         },
+        "targets": {
+          "tank": "Tank",
+          "livestock": "Livestock"
+        },
         "hints": {
+          "target": "Choose whether the event applies to the tank or to a specific livestock.",
+          "livestock": "Select which livestock this event is about.",
           "date": "Saved as an ISO timestamp in the sheet (UTC).",
           "type": "Choose what you did (water change, dosing, maintenance…).",
           "description": "Keep it short and human (e.g. “20% water change”, “Cleaned skimmer”).",
@@ -705,6 +741,7 @@
           "unit": "Optional. Examples: L, ml, g."
         },
         "placeholders": {
+          "livestock": "Select livestock…",
           "type": "Select a type…",
           "description": "What happened?",
           "quantity": "e.g. 20",
@@ -714,6 +751,8 @@
         },
         "errors": {
           "noTank": "Select an active tank first.",
+          "missingLivestockTarget": "Select a livestock.",
+          "loadLivestockFailed": "Failed to load livestock.",
           "missingDate": "Pick a date and time.",
           "invalidDate": "Enter a valid date/time.",
           "missingType": "Choose an event type.",

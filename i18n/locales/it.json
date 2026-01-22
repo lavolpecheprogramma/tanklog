@@ -596,6 +596,21 @@
           "photo": "Foto di {name} del {date}"
         }
       },
+      "timeline": {
+        "cardTitle": "Cronologia",
+        "cardDescription": "Foto ed eventi per questo elemento, ordinati per data.",
+        "loading": "Caricamento cronologia…",
+        "empty": "Nessuna attività ancora.",
+        "emptyHint": "Carica una foto o registra un evento per iniziare a costruire uno storico.",
+        "actions": {
+          "refresh": "Aggiorna",
+          "addEvent": "Registra evento"
+        },
+        "eventDialog": {
+          "title": "Registra evento",
+          "description": "Aggiungi un evento per questo elemento (salvato nella tab EVENTS della vasca)."
+        }
+      },
       "form": {
         "title": "Fauna e flora",
         "description": "Questi campi sono salvati nella tab LIVESTOCK di tank_data.xlsx.",
@@ -681,7 +696,20 @@
         "dosing": "Dosaggio",
         "maintenance": "Manutenzione",
         "livestock_addition": "Inserimento fauna",
-        "livestock_removal": "Rimozione fauna"
+        "livestock_removal": "Rimozione fauna",
+        "feeding": "Alimentazione",
+        "health": "Salute",
+        "treatment": "Trattamento",
+        "observation": "Osservazione",
+        "molt": "Muta",
+        "spawn": "Riproduzione",
+        "fragging": "Talea",
+        "other": "Altro"
+      },
+      "targets": {
+        "tank": "Vasca",
+        "livestockWithName": "Elemento: {name}",
+        "livestockWithId": "ID elemento: {id}"
       },
       "form": {
         "title": "Aggiungi evento",
@@ -689,6 +717,8 @@
         "save": "Salva evento",
         "saving": "Salvataggio…",
         "fields": {
+          "target": "Riferimento",
+          "livestock": "Fauna e flora",
           "date": "Data e ora",
           "type": "Tipo",
           "description": "Descrizione",
@@ -697,7 +727,13 @@
           "product": "Prodotto (opzionale)",
           "note": "Nota (opzionale)"
         },
+        "targets": {
+          "tank": "Vasca",
+          "livestock": "Fauna e flora"
+        },
         "hints": {
+          "target": "Scegli se l’evento riguarda la vasca o un elemento specifico.",
+          "livestock": "Seleziona l’elemento a cui si riferisce l’evento.",
           "date": "Viene salvato come timestamp ISO nel foglio (UTC).",
           "type": "Scegli cosa hai fatto (cambio acqua, dosaggio, manutenzione…).",
           "description": "Breve e chiaro (es. “Cambio acqua 20%”, “Pulito skimmer”).",
@@ -705,6 +741,7 @@
           "unit": "Opzionale. Esempi: L, ml, g."
         },
         "placeholders": {
+          "livestock": "Seleziona elemento…",
           "type": "Seleziona un tipo…",
           "description": "Cosa è stato fatto?",
           "quantity": "es. 20",
@@ -714,6 +751,8 @@
         },
         "errors": {
           "noTank": "Seleziona prima una vasca attiva.",
+          "missingLivestockTarget": "Seleziona un elemento.",
+          "loadLivestockFailed": "Impossibile caricare fauna e flora.",
           "missingDate": "Seleziona data e ora.",
           "invalidDate": "Inserisci una data/ora valida.",
           "missingType": "Seleziona un tipo evento.",
