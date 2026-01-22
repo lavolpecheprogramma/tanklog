@@ -94,21 +94,21 @@ export function getDefaultParameterRangesForTankType(tankType: TankType): Defaul
       { parameter: "Mg", minValue: 1200, maxValue: 1450, unit: "ppm", status: "acceptable" },
       { parameter: "Mg", minValue: 1100, maxValue: 1500, unit: "ppm", status: "critical" },
 
-      { parameter: "NH3", minValue: 0, maxValue: 0, unit: "ppm", status: "optimal" },
-      { parameter: "NH3", minValue: 0, maxValue: 0.02, unit: "ppm", status: "acceptable" },
-      { parameter: "NH3", minValue: 0, maxValue: 0.05, unit: "ppm", status: "critical" },
+      { parameter: "NH3", minValue: 0, maxValue: 0, unit: "mg/l", status: "optimal" },
+      { parameter: "NH3", minValue: 0, maxValue: 0.02, unit: "mg/l", status: "acceptable" },
+      { parameter: "NH3", minValue: 0, maxValue: 0.05, unit: "mg/l", status: "critical" },
 
-      { parameter: "NO2", minValue: 0, maxValue: 0, unit: "ppm", status: "optimal" },
-      { parameter: "NO2", minValue: 0, maxValue: 0.05, unit: "ppm", status: "acceptable" },
-      { parameter: "NO2", minValue: 0, maxValue: 0.1, unit: "ppm", status: "critical" },
+      { parameter: "NO2", minValue: 0, maxValue: 0, unit: "mg/l", status: "optimal" },
+      { parameter: "NO2", minValue: 0, maxValue: 0.05, unit: "mg/l", status: "acceptable" },
+      { parameter: "NO2", minValue: 0, maxValue: 0.1, unit: "mg/l", status: "critical" },
 
-      { parameter: "NO3", minValue: 2, maxValue: 10, unit: "ppm", status: "optimal" },
-      { parameter: "NO3", minValue: 0, maxValue: 20, unit: "ppm", status: "acceptable" },
-      { parameter: "NO3", minValue: 0, maxValue: 50, unit: "ppm", status: "critical" },
+      { parameter: "NO3", minValue: 2, maxValue: 10, unit: "mg/l", status: "optimal" },
+      { parameter: "NO3", minValue: 0, maxValue: 20, unit: "mg/l", status: "acceptable" },
+      { parameter: "NO3", minValue: 0, maxValue: 50, unit: "mg/l", status: "critical" },
 
-      { parameter: "PO4", minValue: 0.02, maxValue: 0.1, unit: "ppm", status: "optimal" },
-      { parameter: "PO4", minValue: 0, maxValue: 0.2, unit: "ppm", status: "acceptable" },
-      { parameter: "PO4", minValue: 0, maxValue: 0.4, unit: "ppm", status: "critical" },
+      { parameter: "PO4", minValue: 0.02, maxValue: 0.1, unit: "mg/l", status: "optimal" },
+      { parameter: "PO4", minValue: 0, maxValue: 0.2, unit: "mg/l", status: "acceptable" },
+      { parameter: "PO4", minValue: 0, maxValue: 0.4, unit: "mg/l", status: "critical" },
     ])
   }
 
@@ -138,21 +138,21 @@ export function getDefaultParameterRangesForTankType(tankType: TankType): Defaul
       { parameter: "Mg", minValue: 1200, maxValue: 1450, unit: "ppm", status: "acceptable" },
       { parameter: "Mg", minValue: 1100, maxValue: 1500, unit: "ppm", status: "critical" },
 
-      { parameter: "NH3", minValue: 0, maxValue: 0, unit: "ppm", status: "optimal" },
-      { parameter: "NH3", minValue: 0, maxValue: 0.02, unit: "ppm", status: "acceptable" },
-      { parameter: "NH3", minValue: 0, maxValue: 0.05, unit: "ppm", status: "critical" },
+      { parameter: "NH3", minValue: 0, maxValue: 0, unit: "mg/l", status: "optimal" },
+      { parameter: "NH3", minValue: 0, maxValue: 0.02, unit: "mg/l", status: "acceptable" },
+      { parameter: "NH3", minValue: 0, maxValue: 0.05, unit: "mg/l", status: "critical" },
 
-      { parameter: "NO2", minValue: 0, maxValue: 0, unit: "ppm", status: "optimal" },
-      { parameter: "NO2", minValue: 0, maxValue: 0.1, unit: "ppm", status: "acceptable" },
-      { parameter: "NO2", minValue: 0, maxValue: 0.2, unit: "ppm", status: "critical" },
+      { parameter: "NO2", minValue: 0, maxValue: 0, unit: "mg/l", status: "optimal" },
+      { parameter: "NO2", minValue: 0, maxValue: 0.1, unit: "mg/l", status: "acceptable" },
+      { parameter: "NO2", minValue: 0, maxValue: 0.2, unit: "mg/l", status: "critical" },
 
-      { parameter: "NO3", minValue: 0, maxValue: 20, unit: "ppm", status: "optimal" },
-      { parameter: "NO3", minValue: 0, maxValue: 40, unit: "ppm", status: "acceptable" },
-      { parameter: "NO3", minValue: 0, maxValue: 80, unit: "ppm", status: "critical" },
+      { parameter: "NO3", minValue: 0, maxValue: 20, unit: "mg/l", status: "optimal" },
+      { parameter: "NO3", minValue: 0, maxValue: 40, unit: "mg/l", status: "acceptable" },
+      { parameter: "NO3", minValue: 0, maxValue: 80, unit: "mg/l", status: "critical" },
 
-      { parameter: "PO4", minValue: 0, maxValue: 0.2, unit: "ppm", status: "optimal" },
-      { parameter: "PO4", minValue: 0, maxValue: 0.3, unit: "ppm", status: "acceptable" },
-      { parameter: "PO4", minValue: 0, maxValue: 0.5, unit: "ppm", status: "critical" },
+      { parameter: "PO4", minValue: 0, maxValue: 0.2, unit: "mg/l", status: "optimal" },
+      { parameter: "PO4", minValue: 0, maxValue: 0.3, unit: "mg/l", status: "acceptable" },
+      { parameter: "PO4", minValue: 0, maxValue: 0.5, unit: "mg/l", status: "critical" },
     ])
   }
 
@@ -174,21 +174,21 @@ export function getDefaultParameterRangesForTankType(tankType: TankType): Defaul
       { parameter: "GH", minValue: 3, maxValue: 14, unit: "dGH", status: "acceptable" },
       { parameter: "GH", minValue: 2, maxValue: 18, unit: "dGH", status: "critical" },
 
-      { parameter: "NH3", minValue: 0, maxValue: 0, unit: "ppm", status: "optimal" },
-      { parameter: "NH3", minValue: 0, maxValue: 0.02, unit: "ppm", status: "acceptable" },
-      { parameter: "NH3", minValue: 0, maxValue: 0.05, unit: "ppm", status: "critical" },
+      { parameter: "NH3", minValue: 0, maxValue: 0, unit: "mg/l", status: "optimal" },
+      { parameter: "NH3", minValue: 0, maxValue: 0.02, unit: "mg/l", status: "acceptable" },
+      { parameter: "NH3", minValue: 0, maxValue: 0.05, unit: "mg/l", status: "critical" },
 
-      { parameter: "NO2", minValue: 0, maxValue: 0, unit: "ppm", status: "optimal" },
-      { parameter: "NO2", minValue: 0, maxValue: 0.1, unit: "ppm", status: "acceptable" },
-      { parameter: "NO2", minValue: 0, maxValue: 0.2, unit: "ppm", status: "critical" },
+      { parameter: "NO2", minValue: 0, maxValue: 0, unit: "mg/l", status: "optimal" },
+      { parameter: "NO2", minValue: 0, maxValue: 0.1, unit: "mg/l", status: "acceptable" },
+      { parameter: "NO2", minValue: 0, maxValue: 0.2, unit: "mg/l", status: "critical" },
 
-      { parameter: "NO3", minValue: 5, maxValue: 20, unit: "ppm", status: "optimal" },
-      { parameter: "NO3", minValue: 0, maxValue: 30, unit: "ppm", status: "acceptable" },
-      { parameter: "NO3", minValue: 0, maxValue: 50, unit: "ppm", status: "critical" },
+      { parameter: "NO3", minValue: 5, maxValue: 20, unit: "mg/l", status: "optimal" },
+      { parameter: "NO3", minValue: 0, maxValue: 30, unit: "mg/l", status: "acceptable" },
+      { parameter: "NO3", minValue: 0, maxValue: 50, unit: "mg/l", status: "critical" },
 
-      { parameter: "PO4", minValue: 0.2, maxValue: 1.5, unit: "ppm", status: "optimal" },
-      { parameter: "PO4", minValue: 0.05, maxValue: 2.0, unit: "ppm", status: "acceptable" },
-      { parameter: "PO4", minValue: 0, maxValue: 3.0, unit: "ppm", status: "critical" },
+      { parameter: "PO4", minValue: 0.2, maxValue: 1.5, unit: "mg/l", status: "optimal" },
+      { parameter: "PO4", minValue: 0.05, maxValue: 2.0, unit: "mg/l", status: "acceptable" },
+      { parameter: "PO4", minValue: 0, maxValue: 3.0, unit: "mg/l", status: "critical" },
 
       { parameter: "Fe", minValue: 0.05, maxValue: 0.2, unit: "ppm", status: "optimal" },
       { parameter: "Fe", minValue: 0.02, maxValue: 0.3, unit: "ppm", status: "acceptable" },
@@ -214,21 +214,21 @@ export function getDefaultParameterRangesForTankType(tankType: TankType): Defaul
     { parameter: "GH", minValue: 4, maxValue: 16, unit: "dGH", status: "acceptable" },
     { parameter: "GH", minValue: 2, maxValue: 20, unit: "dGH", status: "critical" },
 
-    { parameter: "NH3", minValue: 0, maxValue: 0, unit: "ppm", status: "optimal" },
-    { parameter: "NH3", minValue: 0, maxValue: 0.02, unit: "ppm", status: "acceptable" },
-    { parameter: "NH3", minValue: 0, maxValue: 0.05, unit: "ppm", status: "critical" },
+    { parameter: "NH3", minValue: 0, maxValue: 0, unit: "mg/l", status: "optimal" },
+    { parameter: "NH3", minValue: 0, maxValue: 0.02, unit: "mg/l", status: "acceptable" },
+    { parameter: "NH3", minValue: 0, maxValue: 0.05, unit: "mg/l", status: "critical" },
 
-    { parameter: "NO2", minValue: 0, maxValue: 0, unit: "ppm", status: "optimal" },
-    { parameter: "NO2", minValue: 0, maxValue: 0.1, unit: "ppm", status: "acceptable" },
-    { parameter: "NO2", minValue: 0, maxValue: 0.2, unit: "ppm", status: "critical" },
+    { parameter: "NO2", minValue: 0, maxValue: 0, unit: "mg/l", status: "optimal" },
+    { parameter: "NO2", minValue: 0, maxValue: 0.1, unit: "mg/l", status: "acceptable" },
+    { parameter: "NO2", minValue: 0, maxValue: 0.2, unit: "mg/l", status: "critical" },
 
-    { parameter: "NO3", minValue: 0, maxValue: 20, unit: "ppm", status: "optimal" },
-    { parameter: "NO3", minValue: 0, maxValue: 40, unit: "ppm", status: "acceptable" },
-    { parameter: "NO3", minValue: 0, maxValue: 80, unit: "ppm", status: "critical" },
+    { parameter: "NO3", minValue: 0, maxValue: 20, unit: "mg/l", status: "optimal" },
+    { parameter: "NO3", minValue: 0, maxValue: 40, unit: "mg/l", status: "acceptable" },
+    { parameter: "NO3", minValue: 0, maxValue: 80, unit: "mg/l", status: "critical" },
 
-    { parameter: "PO4", minValue: 0, maxValue: 1.0, unit: "ppm", status: "optimal" },
-    { parameter: "PO4", minValue: 0, maxValue: 2.0, unit: "ppm", status: "acceptable" },
-    { parameter: "PO4", minValue: 0, maxValue: 5.0, unit: "ppm", status: "critical" },
+    { parameter: "PO4", minValue: 0, maxValue: 1.0, unit: "mg/l", status: "optimal" },
+    { parameter: "PO4", minValue: 0, maxValue: 2.0, unit: "mg/l", status: "acceptable" },
+    { parameter: "PO4", minValue: 0, maxValue: 5.0, unit: "mg/l", status: "critical" },
   ])
 }
 

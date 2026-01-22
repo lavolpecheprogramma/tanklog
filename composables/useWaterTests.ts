@@ -18,9 +18,9 @@ export const WATER_TEST_PARAMETERS: WaterTestParameterConfig[] = [
   { parameter: "pH", label: "pH", unit: "pH", step: 0.01, min: 0 },
   { parameter: "KH", label: "KH", unit: "dKH", step: 0.1, min: 0 },
   { parameter: "GH", label: "GH", unit: "dGH", step: 0.1, min: 0 },
-  { parameter: "NO2", label: "NO2", unit: "ppm", step: 0.01, min: 0 },
-  { parameter: "NO3", label: "NO3", unit: "ppm", step: 0.1, min: 0 },
-  { parameter: "PO4", label: "PO4", unit: "ppm", step: 0.01, min: 0 },
+  { parameter: "NO2", label: "NO2", unit: "mg/l", step: 0.01, min: 0 },
+  { parameter: "NO3", label: "NO3", unit: "mg/l", step: 0.1, min: 0 },
+  { parameter: "PO4", label: "PO4", unit: "mg/l", step: 0.01, min: 0 },
 ]
 
 export type WaterTestMeasurement = {

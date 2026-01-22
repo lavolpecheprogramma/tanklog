@@ -114,7 +114,7 @@ const parameterSuggestions = computed(() => {
   const extras = [
     { parameter: "Temp", unit: "°C" },
     { parameter: "Salinity", unit: "ppt" },
-    { parameter: "NH3", unit: "ppm" },
+    { parameter: "NH3", unit: "mg/l" },
     { parameter: "Ca", unit: "ppm" },
     { parameter: "Mg", unit: "ppm" },
   ]
