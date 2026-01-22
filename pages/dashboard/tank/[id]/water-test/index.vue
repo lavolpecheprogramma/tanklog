@@ -925,17 +925,22 @@ async function onSubmit() {
             </div>
             <div v-else class="grid gap-4 sm:grid-cols-2">
               <div v-for="range in parameterRanges" :key="range.parameter" class="space-y-2">
-                <label :for="toParameterInputId(range.parameter)" class="text-foreground">
-                  <span class="inline-flex items-center gap-2">
-                    <span
-                      class="inline-block size-2 shrink-0 rounded-full border border-border/60"
-                      :style="{ backgroundColor: range.color ?? 'transparent' }"
-                      aria-hidden="true"
-                    />
-                    <span>{{ range.parameter }}</span>
-                  </span>
-                  <span class="text-xs text-muted-foreground">({{ range.unit }})</span>
-                </label>
+                <div class="flex items-start justify-between gap-2">
+                  <label :for="toParameterInputId(range.parameter)" class="flex-1 text-foreground">
+                    <span class="inline-flex items-center gap-2">
+                      <span
+                        class="inline-block size-2 shrink-0 rounded-full border border-border/60"
+                        :style="{ backgroundColor: range.color ?? 'transparent' }"
+                        aria-hidden="true"
+                      />
+                      <span>{{ range.parameter }}</span>
+                    </span>
+                    <span class="text-xs text-muted-foreground">({{ range.unit }})</span>
+                  </label>
+                  <div class="shrink-0">
+                    <ParameterTimer :parameter="range.parameter" />
+                  </div>
+                </div>
                 <Input
                   :id="toParameterInputId(range.parameter)"
                   v-model="parameterValues[range.parameter]"

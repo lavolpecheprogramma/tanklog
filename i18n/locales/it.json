@@ -5,7 +5,9 @@
     "googleAccountWithLabel": "Account Google: {label}",
     "openNavigation": "Apri menu",
     "switchToLightMode": "Passa al tema chiaro",
-    "switchToDarkMode": "Passa al tema scuro"
+    "switchToDarkMode": "Passa al tema scuro",
+    "startTimerForParameter": "Avvia timer per {parameter}",
+    "stopTimerForParameter": "Ferma timer per {parameter}"
   },
   "nav": {
     "home": "Home",

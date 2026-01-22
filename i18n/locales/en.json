@@ -5,7 +5,9 @@
     "googleAccountWithLabel": "Google account: {label}",
     "openNavigation": "Open navigation",
     "switchToLightMode": "Switch to light mode",
-    "switchToDarkMode": "Switch to dark mode"
+    "switchToDarkMode": "Switch to dark mode",
+    "startTimerForParameter": "Start timer for {parameter}",
+    "stopTimerForParameter": "Stop timer for {parameter}"
   },
   "nav": {
     "home": "Home",
