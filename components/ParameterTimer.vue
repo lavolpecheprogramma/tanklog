@@ -8,10 +8,13 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-const elapsedSeconds = ref(0)
+const startTimeMs = ref<number | null>(null)
+const elapsedMs = ref(0)
 const isRunning = ref(false)
 
 let intervalId: ReturnType<typeof setInterval> | null = null
+
+const elapsedSeconds = computed(() => Math.floor(elapsedMs.value / 1000))
 
 const formattedTime = computed(() => {
   const minutes = Math.floor(elapsedSeconds.value / 60)
@@ -24,11 +27,20 @@ const ariaLabel = computed(() => {
   return t("a11y.startTimerForParameter", { parameter: props.parameter })
 })
 
+function refreshElapsed() {
+  if (!isRunning.value) return
+  if (startTimeMs.value === null) return
+  elapsedMs.value = Math.max(0, Date.now() - startTimeMs.value)
+}
+
 function stopTimer() {
-  if (!intervalId) return
-  clearInterval(intervalId)
-  intervalId = null
+  refreshElapsed()
+  if (intervalId) {
+    clearInterval(intervalId)
+    intervalId = null
+  }
   isRunning.value = false
+  startTimeMs.value = null
 }
 
 function startTimer() {
@@ -36,7 +48,7 @@ function startTimer() {
   isRunning.value = true
 
   intervalId = setInterval(() => {
-    elapsedSeconds.value += 1
+    refreshElapsed()
   }, 1000)
 }
 
@@ -46,7 +58,9 @@ function onToggle() {
     return
   }
 
-  elapsedSeconds.value = 0
+  elapsedMs.value = 0
+  startTimeMs.value = Date.now()
+  refreshElapsed()
   startTimer()
 }
 
