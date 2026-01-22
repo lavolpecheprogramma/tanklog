@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 import {
   LIVESTOCK_CATEGORIES,
   LIVESTOCK_ORIGINS,
@@ -255,12 +258,11 @@ async function onSubmit() {
     <div class="grid gap-4 sm:grid-cols-2">
       <div class="space-y-2">
         <label :for="`${idBase}-name-common`" class="text-foreground">{{ $t("pages.livestock.form.fields.nameCommon") }}</label>
-        <input
+        <Input
           :id="`${idBase}-name-common`"
           v-model="nameCommonInput"
           type="text"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :placeholder="$t('pages.livestock.form.placeholders.nameCommon')"
           :aria-invalid="nameCommonError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-name-common-feedback`"
@@ -274,22 +276,20 @@ async function onSubmit() {
 
       <div class="space-y-2">
         <label :for="`${idBase}-name-scientific`" class="text-foreground">{{ $t("pages.livestock.form.fields.nameScientific") }}</label>
-        <input
+        <Input
           :id="`${idBase}-name-scientific`"
           v-model="nameScientificInput"
           type="text"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :placeholder="$t('pages.livestock.form.placeholders.nameScientific')"
         />
       </div>
 
       <div class="space-y-2">
         <label :for="`${idBase}-category`" class="text-foreground">{{ $t("pages.livestock.form.fields.category") }}</label>
-        <select
+        <Select
           :id="`${idBase}-category`"
           v-model="categoryInput"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :aria-invalid="categoryError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-category-feedback`"
           required
@@ -298,7 +298,7 @@ async function onSubmit() {
           <option v-for="category in LIVESTOCK_CATEGORIES" :key="category" :value="category">
             {{ $t(`pages.livestock.options.category.${category}`) }}
           </option>
-        </select>
+        </Select>
         <p v-if="categoryError" :id="`${idBase}-category-feedback`" class="text-sm text-destructive" role="alert">
           {{ categoryError }}
         </p>
@@ -307,22 +307,20 @@ async function onSubmit() {
 
       <div class="space-y-2">
         <label :for="`${idBase}-sub-category`" class="text-foreground">{{ $t("pages.livestock.form.fields.subCategory") }}</label>
-        <input
+        <Input
           :id="`${idBase}-sub-category`"
           v-model="subCategoryInput"
           type="text"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :placeholder="$t('pages.livestock.form.placeholders.subCategory')"
         />
       </div>
 
       <div class="space-y-2">
         <label :for="`${idBase}-status`" class="text-foreground">{{ $t("pages.livestock.form.fields.status") }}</label>
-        <select
+        <Select
           :id="`${idBase}-status`"
           v-model="statusInput"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :aria-invalid="statusError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-status-feedback`"
           required
@@ -331,7 +329,7 @@ async function onSubmit() {
           <option v-for="status in LIVESTOCK_STATUSES" :key="status" :value="status">
             {{ $t(`pages.livestock.options.status.${status}`) }}
           </option>
-        </select>
+        </Select>
         <p v-if="statusError" :id="`${idBase}-status-feedback`" class="text-sm text-destructive" role="alert">
           {{ statusError }}
         </p>
@@ -340,40 +338,37 @@ async function onSubmit() {
 
       <div class="space-y-2">
         <label :for="`${idBase}-origin`" class="text-foreground">{{ $t("pages.livestock.form.fields.origin") }}</label>
-        <select
+        <Select
           :id="`${idBase}-origin`"
           v-model="originInput"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <option value="">{{ $t("pages.livestock.form.placeholders.origin") }}</option>
           <option v-for="origin in LIVESTOCK_ORIGINS" :key="origin" :value="origin">
             {{ $t(`pages.livestock.options.origin.${origin}`) }}
           </option>
-        </select>
+        </Select>
       </div>
 
       <div class="space-y-2">
         <label :for="`${idBase}-tank-zone`" class="text-foreground">{{ $t("pages.livestock.form.fields.tankZone") }}</label>
-        <select
+        <Select
           :id="`${idBase}-tank-zone`"
           v-model="tankZoneInput"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <option value="">{{ $t("pages.livestock.form.placeholders.tankZone") }}</option>
           <option v-for="zone in LIVESTOCK_TANK_ZONES" :key="zone" :value="zone">
             {{ $t(`pages.livestock.options.tankZone.${zone}`) }}
           </option>
-        </select>
+        </Select>
       </div>
 
       <div class="space-y-2">
         <label :for="`${idBase}-date-added`" class="text-foreground">{{ $t("pages.livestock.form.fields.dateAdded") }}</label>
-        <input
+        <Input
           :id="`${idBase}-date-added`"
           v-model="dateAddedInput"
           type="date"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :aria-invalid="dateAddedError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-date-added-feedback`"
           required
@@ -386,12 +381,11 @@ async function onSubmit() {
 
       <div class="space-y-2">
         <label :for="`${idBase}-date-removed`" class="text-foreground">{{ $t("pages.livestock.form.fields.dateRemoved") }}</label>
-        <input
+        <Input
           :id="`${idBase}-date-removed`"
           v-model="dateRemovedInput"
           type="date"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :aria-invalid="dateRemovedError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-date-removed-feedback`"
         />
@@ -403,11 +397,10 @@ async function onSubmit() {
 
       <div class="space-y-2 sm:col-span-2">
         <label :for="`${idBase}-notes`" class="text-foreground">{{ $t("pages.livestock.form.fields.notes") }}</label>
-        <textarea
+        <Textarea
           :id="`${idBase}-notes`"
           v-model="notesInput"
           rows="4"
-          class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :placeholder="$t('pages.livestock.form.placeholders.notes')"
         />
       </div>

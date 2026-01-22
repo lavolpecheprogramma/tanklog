@@ -23,6 +23,7 @@ type DriveListResponse = {
 const DRIVE_API_BASE_URL = "https://www.googleapis.com/drive/v3"
 const DRIVE_UPLOAD_API_BASE_URL = "https://www.googleapis.com/upload/drive/v3"
 
+const cache = new Map<string, Blob>()
 async function readErrorMessage(response: Response): Promise<string> {
   try {
     const data = (await response.json()) as { error?: { message?: string } }
@@ -109,7 +110,9 @@ export function useGoogleDrive() {
   async function downloadFile(options: { fileId: string; supportsAllDrives?: boolean; acknowledgeAbuse?: boolean }): Promise<Blob> {
     const fileId = options.fileId?.trim()
     if (!fileId) throw new Error("Missing file id.")
-
+    if(cache.has(fileId)) {
+      return cache.get(fileId)!
+    }
     const accessToken = getAccessTokenOrThrow()
     const query = toQueryString({
       alt: "media",
@@ -136,7 +139,9 @@ export function useGoogleDrive() {
       throw new Error(message)
     }
 
-    return await response.blob()
+    const blob = await response.blob()
+    cache.set(fileId, blob)
+    return blob
   }
 
   async function listFiles(options: {

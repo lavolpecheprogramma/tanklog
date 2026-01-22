@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import type { LivestockCategory, LivestockStatus, TankLivestock } from "@/composables/useLivestock"
 import type { TankPhoto } from "@/composables/usePhotos"
 
@@ -354,12 +355,11 @@ async function handleCreateLivestock(payload: LivestockFormPayload) {
             <div class="grid gap-3 sm:grid-cols-2">
               <div class="space-y-2">
                 <label for="livestock-search" class="text-foreground">{{ $t("pages.livestock.filters.searchPlaceholder") }}</label>
-                <input
+                <Input
                   id="livestock-search"
                   v-model.trim="searchQuery"
                   type="search"
                   autocomplete="off"
-                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   :placeholder="$t('pages.livestock.filters.searchPlaceholder')"
                 />
               </div>

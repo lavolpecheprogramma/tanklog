@@ -1,4 +1,5 @@
 import { computed, readonly, watch, watchEffect } from "vue"
+import { useLocalStorage } from "@vueuse/core"
 
 import type { GoogleDriveFile } from "@/composables/useGoogleDrive"
 import type { SheetsCellValue } from "@/composables/useGoogleSheets"
@@ -26,15 +27,6 @@ export type CreateTankInput = {
 type TanksStatus = "idle" | "loading" | "ready" | "error"
 
 const ACTIVE_TANK_STORAGE_KEY = "tanklog.activeTankId.v1"
-
-function getLocalStorage(): Storage | null {
-  if (!import.meta.client) return null
-  try {
-    return window.localStorage
-  } catch {
-    return null
-  }
-}
 
 function sanitizeTankNameFromFolderSegment(value: string): string {
   return value.replaceAll("_", " ").trim()
@@ -423,37 +415,7 @@ export function useTanks() {
 }
 
 export function useActiveTankId() {
-  const activeTankId = useState<string>("tanks.activeTankId", () => "")
-  const hydrated = useState<boolean>("tanks.activeTankId.hydrated", () => false)
-
-  function hydrateFromStorage() {
-    if (hydrated.value) return
-    hydrated.value = true
-
-    const storage = getLocalStorage()
-    if (!storage) return
-
-    const stored = storage.getItem(ACTIVE_TANK_STORAGE_KEY)
-    if (!stored) return
-    activeTankId.value = stored
-  }
-
-  function persistToStorage(value: string) {
-    const storage = getLocalStorage()
-    if (!storage) return
-    if (!value) {
-      storage.removeItem(ACTIVE_TANK_STORAGE_KEY)
-      return
-    }
-    storage.setItem(ACTIVE_TANK_STORAGE_KEY, value)
-  }
-
-  if (import.meta.client) {
-    hydrateFromStorage()
-    watch(activeTankId, (value) => persistToStorage(value), { immediate: true })
-  }
-
-  return activeTankId
+  return useLocalStorage<string>(ACTIVE_TANK_STORAGE_KEY, "", { writeDefaults: false })
 }
 
 export function useActiveTank() {

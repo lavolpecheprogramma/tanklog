@@ -11,6 +11,7 @@
     DialogTitle,
     DialogTrigger,
   } from "@/components/ui/dialog"
+  import { Input } from "@/components/ui/input"
   import type { GoogleDriveFile } from "@/composables/useGoogleDrive"
   
   const { t, locale: activeLocale } = useI18n()
@@ -415,14 +416,13 @@
               <label for="settings-google-client-id-input" class="text-foreground">
                 {{ $t("pages.settings.googleClientId.label") }}
               </label>
-              <input
+              <Input
                 id="settings-google-client-id-input"
                 v-model="googleClientIdInput"
                 type="text"
                 inputmode="text"
                 autocomplete="off"
                 spellcheck="false"
-                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 :placeholder="$t('pages.settings.googleClientId.placeholder')"
                 :aria-invalid="googleClientIdError ? 'true' : 'false'"
                 aria-describedby="settings-google-client-id-hint settings-google-client-id-feedback"
@@ -482,14 +482,13 @@
   
             <div class="space-y-2">
               <label for="tanklog-folder-id" class="text-foreground">{{ $t("pages.settings.storage.label") }}</label>
-              <input
+              <Input
                 id="tanklog-folder-id"
                 v-model="folderInput"
                 type="text"
                 inputmode="url"
                 autocomplete="off"
                 spellcheck="false"
-                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 :placeholder="$t('pages.settings.storage.placeholder')"
                 :aria-invalid="folderError ? 'true' : 'false'"
                 aria-describedby="tanklog-folder-hint tanklog-folder-feedback"

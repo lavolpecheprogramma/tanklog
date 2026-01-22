@@ -1,10 +1,13 @@
+import { useLocalStorage } from "@vueuse/core"
+
 const STORAGE_KEY = "tanklog.locale"
 
 export default defineNuxtPlugin(async () => {
   const { $i18n } = useNuxtApp();
   const { locale, localeCodes, setLocale, getBrowserLocale } = $i18n
   const supported = localeCodes.value
-  const stored = localStorage.getItem(STORAGE_KEY)
+  const storedRef = useLocalStorage<string>(STORAGE_KEY, "", { writeDefaults: false })
+  const stored = storedRef.value
   const browser = getBrowserLocale()
 
   type AppLocale = typeof locale.value
@@ -26,7 +29,7 @@ export default defineNuxtPlugin(async () => {
     locale,
     (value) => {
       if (!value) return
-      localStorage.setItem(STORAGE_KEY, value)
+      storedRef.value = value
     },
     { immediate: true }
   )

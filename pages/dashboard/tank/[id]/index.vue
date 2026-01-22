@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select } from "@/components/ui/select"
 import type { ParameterRange } from "@/composables/useParameterRanges"
 import { useParameterRanges } from "@/composables/useParameterRanges"
 import type { TankPhoto } from "@/composables/usePhotos"
@@ -211,12 +212,6 @@ const recentPhotos = computed(() => photos.value.slice(0, 3))
 
 function normalizeParameterKey(value: string): string {
   return value.trim().toLowerCase()
-}
-
-function eventTypeLabel(value: string): string {
-  const key = `pages.events.types.${value}`
-  const translated = t(key)
-  return translated === key ? value : translated
 }
 
 const rangeByParameterKey = computed(() => {
@@ -685,15 +680,14 @@ const trendChartOptions = computed(() => ({
                   <label for="overview-trend-parameter" class="text-sm font-medium text-foreground">
                     {{ $t("pages.tests.trends.fields.parameter") }}
                   </label>
-                  <select
+                  <Select
                     id="overview-trend-parameter"
                     v-model="trendParameter"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     <option v-for="param in parameterOptions" :key="param" :value="param">
                       {{ param }}
                     </option>
-                  </select>
+                  </Select>
                 </div>
 
                 <fieldset class="space-y-2">
@@ -829,18 +823,8 @@ const trendChartOptions = computed(() => ({
                   {{ $t("pages.tank.dashboard.events.count", { count: events.length }) }}
                 </p>
                 <ul role="list" class="space-y-2">
-                  <li
-                    v-for="event in recentEvents"
-                    :key="event.eventId"
-                    class="space-y-1 rounded-md border border-border bg-muted/20 px-3 py-2"
-                  >
-                    <div class="flex flex-wrap items-start justify-between gap-2 text-xs text-muted-foreground">
-                      <span>{{ eventTypeLabel(event.eventType) }}</span>
-                      <span>{{ formatSessionDate(event.date) }}</span>
-                    </div>
-                    <div class="text-sm text-foreground">
-                      {{ event.description }}
-                    </div>
+                  <li v-for="event in recentEvents" :key="event.eventId">
+                    <EventCard :event="event" :format-date="formatSessionDate" />
                   </li>
                 </ul>
               </div>

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
 import { TANK_EVENT_TYPES, type EventType } from "@/composables/useEvents"
+import { toDatetimeLocalValue } from "@/lib/datetime"
 
 type Mode = "event" | "reminder"
 
@@ -50,16 +53,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-
-function toDatetimeLocalValue(date: Date): string {
-  const pad = (value: number) => value.toString().padStart(2, "0")
-  const year = date.getFullYear()
-  const month = pad(date.getMonth() + 1)
-  const day = pad(date.getDate())
-  const hours = pad(date.getHours())
-  const minutes = pad(date.getMinutes())
-  return `${year}-${month}-${day}T${hours}:${minutes}`
-}
 
 function normalizeOptionalText(value: string): string | null {
   const trimmed = value.trim()
@@ -333,12 +326,11 @@ async function onSubmit() {
     <div v-if="mode === 'event'" class="grid gap-4 sm:grid-cols-2">
       <div class="space-y-2">
         <label :for="`${idBase}-date`" class="text-foreground">{{ $t("pages.events.form.fields.date") }}</label>
-        <input
+        <Input
           :id="`${idBase}-date`"
           v-model="dateInput"
           type="datetime-local"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :aria-invalid="dateError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-date-hint ${idBase}-date-feedback`"
           required
@@ -352,10 +344,9 @@ async function onSubmit() {
 
       <div class="space-y-2">
         <label :for="`${idBase}-type`" class="text-foreground">{{ $t("pages.events.form.fields.type") }}</label>
-        <select
+        <Select
           :id="`${idBase}-type`"
           v-model="eventTypeInput"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :aria-invalid="eventTypeError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-type-hint ${idBase}-type-feedback`"
           required
@@ -364,7 +355,7 @@ async function onSubmit() {
           <option v-for="type in availableEventTypes" :key="type" :value="type">
             {{ $t(`pages.events.types.${type}`) }}
           </option>
-        </select>
+        </Select>
         <p :id="`${idBase}-type-hint`" class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.type") }}</p>
         <p v-if="eventTypeError" :id="`${idBase}-type-feedback`" class="text-sm text-destructive" role="alert">
           {{ eventTypeError }}
@@ -376,12 +367,11 @@ async function onSubmit() {
     <div v-else class="grid gap-4 sm:grid-cols-2">
       <div class="space-y-2">
         <label :for="`${idBase}-next-due`" class="text-foreground">{{ $t("pages.reminders.form.fields.nextDue") }}</label>
-        <input
+        <Input
           :id="`${idBase}-next-due`"
           v-model="nextDueInput"
           type="datetime-local"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :aria-invalid="nextDueError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-next-due-hint ${idBase}-next-due-feedback`"
           required
@@ -395,13 +385,12 @@ async function onSubmit() {
 
       <div class="space-y-2">
         <label :for="`${idBase}-repeat`" class="text-foreground">{{ $t("pages.reminders.form.fields.repeatEveryDays") }}</label>
-        <input
+        <Input
           :id="`${idBase}-repeat`"
           v-model.trim="repeatEveryDaysInput"
           type="number"
           inputmode="numeric"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :placeholder="$t('pages.reminders.form.placeholders.repeatEveryDays')"
           :aria-invalid="repeatEveryDaysError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-repeat-hint ${idBase}-repeat-feedback`"
@@ -415,10 +404,9 @@ async function onSubmit() {
 
       <div class="space-y-2 sm:col-span-2">
         <label :for="`${idBase}-type`" class="text-foreground">{{ $t("pages.events.form.fields.type") }}</label>
-        <select
+        <Select
           :id="`${idBase}-type`"
           v-model="eventTypeInput"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :aria-invalid="eventTypeError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-type-hint ${idBase}-type-feedback`"
           required
@@ -427,7 +415,7 @@ async function onSubmit() {
           <option v-for="type in availableEventTypes" :key="type" :value="type">
             {{ $t(`pages.events.types.${type}`) }}
           </option>
-        </select>
+        </Select>
         <p :id="`${idBase}-type-hint`" class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.type") }}</p>
         <p v-if="eventTypeError" :id="`${idBase}-type-feedback`" class="text-sm text-destructive" role="alert">
           {{ eventTypeError }}
@@ -438,12 +426,11 @@ async function onSubmit() {
 
     <div class="space-y-2">
       <label :for="`${idBase}-description`" class="text-foreground">{{ $t("pages.events.form.fields.description") }}</label>
-      <input
+      <Input
         :id="`${idBase}-description`"
         v-model.trim="descriptionInput"
         type="text"
         autocomplete="off"
-        class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
         :placeholder="$t('pages.events.form.placeholders.description')"
         :aria-invalid="descriptionError ? 'true' : 'false'"
         :aria-describedby="`${idBase}-description-hint ${idBase}-description-feedback`"
@@ -459,13 +446,12 @@ async function onSubmit() {
     <div v-if="showQuantityUnitProductFields" class="grid gap-4 sm:grid-cols-2">
       <div class="space-y-2">
         <label :for="`${idBase}-quantity`" class="text-foreground">{{ $t("pages.events.form.fields.quantity") }}</label>
-        <input
+        <Input
           :id="`${idBase}-quantity`"
           v-model.trim="quantityInput"
           type="number"
           inputmode="decimal"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :placeholder="$t('pages.events.form.placeholders.quantity')"
           :aria-invalid="quantityError ? 'true' : 'false'"
           :aria-describedby="`${idBase}-quantity-hint ${idBase}-quantity-feedback`"
@@ -479,12 +465,11 @@ async function onSubmit() {
 
       <div class="space-y-2">
         <label :for="`${idBase}-unit`" class="text-foreground">{{ $t("pages.events.form.fields.unit") }}</label>
-        <input
+        <Input
           :id="`${idBase}-unit`"
           v-model.trim="unitInput"
           type="text"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :placeholder="$t('pages.events.form.placeholders.unit')"
         />
         <p class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.unit") }}</p>
@@ -494,24 +479,22 @@ async function onSubmit() {
     <div v-if="showQuantityUnitProductFields" class="grid gap-4 sm:grid-cols-2">
       <div class="space-y-2">
         <label :for="`${idBase}-product`" class="text-foreground">{{ $t("pages.events.form.fields.product") }}</label>
-        <input
+        <Input
           :id="`${idBase}-product`"
           v-model.trim="productInput"
           type="text"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :placeholder="$t('pages.events.form.placeholders.product')"
         />
       </div>
 
       <div class="space-y-2">
         <label :for="`${idBase}-note`" class="text-foreground">{{ $t("pages.events.form.fields.note") }}</label>
-        <input
+        <Input
           :id="`${idBase}-note`"
           v-model.trim="noteInput"
           type="text"
           autocomplete="off"
-          class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
           :placeholder="$t('pages.events.form.placeholders.note')"
         />
       </div>
@@ -519,12 +502,11 @@ async function onSubmit() {
 
     <div v-else class="space-y-2">
       <label :for="`${idBase}-note`" class="text-foreground">{{ $t("pages.events.form.fields.note") }}</label>
-      <input
+      <Input
         :id="`${idBase}-note`"
         v-model.trim="noteInput"
         type="text"
         autocomplete="off"
-        class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
         :placeholder="$t('pages.events.form.placeholders.note')"
       />
     </div>

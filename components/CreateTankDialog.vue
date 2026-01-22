@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
 
 const props = withDefaults(
   defineProps<{
@@ -115,12 +117,11 @@ async function onCreateTank() {
       <form class="space-y-4" @submit.prevent="onCreateTank">
         <div class="space-y-2">
           <label for="new-tank-name" class="text-foreground">{{ $t("pages.settings.tanks.fields.name") }}</label>
-          <input
+          <Input
             id="new-tank-name"
             v-model="newTankName"
             type="text"
             autocomplete="off"
-            class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
             :placeholder="$t('pages.settings.tanks.placeholders.name')"
             required
           />
@@ -129,27 +130,25 @@ async function onCreateTank() {
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="space-y-2">
             <label for="new-tank-type" class="text-foreground">{{ $t("pages.settings.tanks.fields.type") }}</label>
-            <select
+            <Select
               id="new-tank-type"
               v-model="newTankType"
-              class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <option value="freshwater">{{ $t("pages.settings.tanks.types.freshwater") }}</option>
               <option value="marine">{{ $t("pages.settings.tanks.types.marine") }}</option>
               <option value="reef">{{ $t("pages.settings.tanks.types.reef") }}</option>
-            </select>
+            </Select>
           </div>
 
           <div class="space-y-2">
             <label for="new-tank-volume" class="text-foreground">{{ $t("pages.settings.tanks.fields.volume") }}</label>
-            <input
+            <Input
               id="new-tank-volume"
               v-model="newTankVolumeLiters"
               type="number"
               inputmode="decimal"
               min="0"
               step="0.1"
-              class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
               :placeholder="$t('pages.settings.tanks.placeholders.volume')"
             />
           </div>
@@ -160,21 +159,19 @@ async function onCreateTank() {
             <label for="new-tank-start-date" class="text-foreground">
               {{ $t("pages.settings.tanks.fields.startDate") }}
             </label>
-            <input
+            <Input
               id="new-tank-start-date"
               v-model="newTankStartDate"
               type="date"
-              class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
 
           <div class="space-y-2">
             <label for="new-tank-notes" class="text-foreground">{{ $t("pages.settings.tanks.fields.notes") }}</label>
-            <input
+            <Input
               id="new-tank-notes"
               v-model="newTankNotes"
               type="text"
-              class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
               :placeholder="$t('pages.settings.tanks.placeholders.notes')"
             />
           </div>

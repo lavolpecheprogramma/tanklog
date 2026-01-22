@@ -19,12 +19,6 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const hasItems = computed(() => props.items.length > 0)
-
-function eventTypeLabel(value: string): string {
-  const key = `pages.events.types.${value}`
-  const translated = t(key)
-  return translated === key ? value : translated
-}
 </script>
 
 <template>
@@ -45,8 +39,8 @@ function eventTypeLabel(value: string): string {
         aria-hidden="true"
       />
 
-      <div class="overflow-hidden rounded-md border border-border bg-background shadow-sm">
-        <template v-if="item.kind === 'photo'">
+      <template v-if="item.kind === 'photo'">
+        <div class="overflow-hidden rounded-md border border-border bg-background shadow-sm">
           <button
             type="button"
             class="block w-full text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
@@ -78,31 +72,16 @@ function eventTypeLabel(value: string): string {
               {{ t("pages.photos.list.labels.openInDrive") }}
             </a>
           </div>
+        </div>
+      </template>
+
+      <EventCard v-else :event="item.event" variant="solid" :format-date="formatDate">
+        <template #details>
+          <p v-if="item.event.note" class="mt-1 text-xs text-muted-foreground">
+            {{ item.event.note }}
+          </p>
         </template>
-
-        <template v-else>
-          <div class="space-y-2 p-3">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <div class="space-y-1">
-                <div class="text-sm font-medium text-foreground">
-                  {{ eventTypeLabel(item.event.eventType) }}
-                </div>
-                <div class="text-xs text-muted-foreground">
-                  {{ formatDate(item.event.date) }}
-                </div>
-              </div>
-            </div>
-
-            <p class="text-sm text-foreground">
-              {{ item.event.description }}
-            </p>
-
-            <p v-if="item.event.note" class="text-xs text-muted-foreground">
-              {{ item.event.note }}
-            </p>
-          </div>
-        </template>
-      </div>
+      </EventCard>
     </li>
   </ul>
 </template>

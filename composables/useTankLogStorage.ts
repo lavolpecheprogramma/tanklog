@@ -1,16 +1,8 @@
-import { computed, readonly } from "vue"
+import { computed, readonly, watchEffect } from "vue"
+import { useLocalStorage } from "@vueuse/core"
 
 const STORAGE_KEY = "tanklog.drive.rootFolderId.v1"
 const GOOGLE_CLIENT_ID_STORAGE_KEY = "tanklog.google.clientId.v1"
-
-function getLocalStorage(): Storage | null {
-  if (!process.client) return null
-  try {
-    return window.localStorage
-  } catch {
-    return null
-  }
-}
 
 export function normalizeDriveFolderId(input: string): string | null {
   const trimmed = input.trim()
@@ -31,45 +23,31 @@ export function normalizeGoogleClientId(input: string): string | null {
 }
 
 export function useTankLogRootFolderId() {
-  const rootFolderId = useState<string | null>("drive.tanklog.rootFolderId", () => null)
-  const hydrated = useState<boolean>("drive.tanklog.rootFolderId.hydrated", () => false)
+  const stored = useLocalStorage<string | null>(STORAGE_KEY, null, { writeDefaults: false })
 
-  const hasRootFolderId = computed(() => Boolean(rootFolderId.value))
-
-  function hydrateFromStorage() {
-    if (!process.client) return
-    if (hydrated.value) return
-
-    const storage = getLocalStorage()
-    hydrated.value = true
-    if (!storage) return
-
-    const raw = storage.getItem(STORAGE_KEY)
+  watchEffect(() => {
+    const raw = stored.value
     if (!raw) return
 
     const normalized = normalizeDriveFolderId(raw)
     if (!normalized) {
-      storage.removeItem(STORAGE_KEY)
-      rootFolderId.value = null
+      stored.value = null
       return
     }
 
-    rootFolderId.value = normalized
+    if (normalized !== raw) stored.value = normalized
+  })
+
+  const rootFolderId = computed<string | null>(() => stored.value || null)
+  const hasRootFolderId = computed(() => Boolean(rootFolderId.value))
+
+  function hydrateFromStorage() {
+    // Backward-compatible no-op: VueUse already hydrates from localStorage.
   }
 
   function setRootFolderId(next: string | null) {
     const normalized = next ? normalizeDriveFolderId(next) : null
-    rootFolderId.value = normalized
-
-    const storage = getLocalStorage()
-    if (!storage) return
-
-    if (!normalized) {
-      storage.removeItem(STORAGE_KEY)
-      return
-    }
-
-    storage.setItem(STORAGE_KEY, normalized)
+    stored.value = normalized
   }
 
   function setRootFolderIdFromInput(input: string) {
@@ -83,7 +61,6 @@ export function useTankLogRootFolderId() {
 
   return {
     rootFolderId: readonly(rootFolderId),
-    hydrated: readonly(hydrated),
     hasRootFolderId,
     hydrateFromStorage,
     setRootFolderId,
@@ -93,45 +70,31 @@ export function useTankLogRootFolderId() {
 }
 
 export function useTankLogGoogleClientId() {
-  const googleClientId = useState<string | null>("google.tanklog.clientId", () => null)
-  const hydrated = useState<boolean>("google.tanklog.clientId.hydrated", () => false)
+  const stored = useLocalStorage<string | null>(GOOGLE_CLIENT_ID_STORAGE_KEY, null, { writeDefaults: false })
 
-  const hasGoogleClientId = computed(() => Boolean(googleClientId.value))
-
-  function hydrateFromStorage() {
-    if (!process.client) return
-    if (hydrated.value) return
-
-    const storage = getLocalStorage()
-    hydrated.value = true
-    if (!storage) return
-
-    const raw = storage.getItem(GOOGLE_CLIENT_ID_STORAGE_KEY)
+  watchEffect(() => {
+    const raw = stored.value
     if (!raw) return
 
     const normalized = normalizeGoogleClientId(raw)
     if (!normalized) {
-      storage.removeItem(GOOGLE_CLIENT_ID_STORAGE_KEY)
-      googleClientId.value = null
+      stored.value = null
       return
     }
 
-    googleClientId.value = normalized
+    if (normalized !== raw) stored.value = normalized
+  })
+
+  const googleClientId = computed<string | null>(() => stored.value || null)
+  const hasGoogleClientId = computed(() => Boolean(googleClientId.value))
+
+  function hydrateFromStorage() {
+    // Backward-compatible no-op: VueUse already hydrates from localStorage.
   }
 
   function setGoogleClientId(next: string | null) {
     const normalized = next ? normalizeGoogleClientId(next) : null
-    googleClientId.value = normalized
-
-    const storage = getLocalStorage()
-    if (!storage) return
-
-    if (!normalized) {
-      storage.removeItem(GOOGLE_CLIENT_ID_STORAGE_KEY)
-      return
-    }
-
-    storage.setItem(GOOGLE_CLIENT_ID_STORAGE_KEY, normalized)
+    stored.value = normalized
   }
 
   function setGoogleClientIdFromInput(input: string) {
@@ -145,7 +108,6 @@ export function useTankLogGoogleClientId() {
 
   return {
     googleClientId: readonly(googleClientId),
-    hydrated: readonly(hydrated),
     hasGoogleClientId,
     hydrateFromStorage,
     setGoogleClientId,

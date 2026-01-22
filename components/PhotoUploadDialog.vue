@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { toDatetimeLocalValue } from "@/lib/datetime"
 
 type UploadKind = "tank" | "livestock"
 
@@ -46,16 +48,6 @@ const resolvedDescription = computed(() => {
   return props.kind === "livestock" ? t("pages.livestock.photos.uploadDescription") : t("pages.photos.form.description")
 })
 const resolvedTriggerLabel = computed(() => props.triggerLabel || t("pages.photos.form.title"))
-
-function toDatetimeLocalValue(date: Date): string {
-  const pad = (value: number) => value.toString().padStart(2, "0")
-  const year = date.getFullYear()
-  const month = pad(date.getMonth() + 1)
-  const day = pad(date.getDate())
-  const hours = pad(date.getHours())
-  const minutes = pad(date.getMinutes())
-  return `${year}-${month}-${day}T${hours}:${minutes}`
-}
 
 function resetFormErrors() {
   dateError.value = null
@@ -186,12 +178,11 @@ async function onSubmit() {
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="space-y-2">
             <label for="upload-photo-date" class="text-foreground">{{ $t("pages.photos.form.fields.date") }}</label>
-            <input
+            <Input
               id="upload-photo-date"
               v-model="dateInput"
               type="datetime-local"
               autocomplete="off"
-              class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
               :aria-invalid="dateError ? 'true' : 'false'"
               aria-describedby="upload-photo-date-hint upload-photo-date-feedback"
               required
@@ -226,12 +217,11 @@ async function onSubmit() {
 
         <div class="space-y-2">
           <label for="upload-photo-note" class="text-foreground">{{ $t("pages.photos.form.fields.note") }}</label>
-          <input
+          <Input
             id="upload-photo-note"
             v-model="noteInput"
             type="text"
             autocomplete="off"
-            class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
             :placeholder="$t('pages.photos.form.placeholders.note')"
           />
         </div>

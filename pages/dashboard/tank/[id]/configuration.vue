@@ -11,6 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
 import type { SheetsCellValue } from "@/composables/useGoogleSheets"
 import type { TankType } from "@/composables/useTanks"
 
@@ -307,12 +309,11 @@ async function onDeleteTank() {
             <form class="space-y-5" @submit.prevent="onSave">
               <div class="space-y-2">
                 <label for="tank-config-name" class="text-foreground">{{ $t("pages.settings.tanks.fields.name") }}</label>
-                <input
+                <Input
                   id="tank-config-name"
                   v-model="nameInput"
                   type="text"
                   autocomplete="off"
-                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   :placeholder="$t('pages.settings.tanks.placeholders.name')"
                   required
                 />
@@ -321,28 +322,26 @@ async function onDeleteTank() {
               <div class="grid gap-4 sm:grid-cols-2">
                 <div class="space-y-2">
                   <label for="tank-config-type" class="text-foreground">{{ $t("pages.settings.tanks.fields.type") }}</label>
-                  <select
+                  <Select
                     id="tank-config-type"
                     v-model="typeInput"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     <option value="freshwater">{{ $t("pages.settings.tanks.types.freshwater") }}</option>
                     <option value="planted">{{ $t("pages.settings.tanks.types.planted") }}</option>
                     <option value="marine">{{ $t("pages.settings.tanks.types.marine") }}</option>
                     <option value="reef">{{ $t("pages.settings.tanks.types.reef") }}</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div class="space-y-2">
                   <label for="tank-config-volume" class="text-foreground">{{ $t("pages.settings.tanks.fields.volume") }}</label>
-                  <input
+                  <Input
                     id="tank-config-volume"
                     v-model="volumeInput"
                     type="number"
                     inputmode="decimal"
                     min="0"
                     step="0.1"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     :placeholder="$t('pages.settings.tanks.placeholders.volume')"
                   />
                 </div>
@@ -353,21 +352,19 @@ async function onDeleteTank() {
                   <label for="tank-config-start-date" class="text-foreground">
                     {{ $t("pages.settings.tanks.fields.startDate") }}
                   </label>
-                  <input
+                  <Input
                     id="tank-config-start-date"
                     v-model="startDateInput"
                     type="date"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   />
                 </div>
 
                 <div class="space-y-2">
                   <label for="tank-config-notes" class="text-foreground">{{ $t("pages.settings.tanks.fields.notes") }}</label>
-                  <input
+                  <Input
                     id="tank-config-notes"
                     v-model="notesInput"
                     type="text"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     :placeholder="$t('pages.settings.tanks.placeholders.notes')"
                   />
                 </div>

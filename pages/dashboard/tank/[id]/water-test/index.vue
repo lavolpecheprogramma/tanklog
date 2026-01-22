@@ -2,10 +2,13 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
 import type { ParameterRange, ParameterRangeStatus } from "@/composables/useParameterRanges"
 import { useParameterRanges } from "@/composables/useParameterRanges"
 import type { WaterTestSession } from "@/composables/useWaterTests"
 import { DEFAULT_CHART_COLOR, hexToRgbaOrFallback } from "@/lib/colors"
+import { toDatetimeLocalValue } from "@/lib/datetime"
 import { ArrowDown, ArrowUp, CircleCheck, CircleDot, CircleQuestionMark, CircleX, TriangleAlert } from "lucide-vue-next"
 import type { Component } from "vue"
 
@@ -36,16 +39,6 @@ const waterTests = useWaterTests()
 const parameterRangesApi = useParameterRanges()
 
 type HistoryStatus = "idle" | "loading" | "ready" | "error"
-
-function toDatetimeLocalValue(date: Date): string {
-  const pad = (value: number) => value.toString().padStart(2, "0")
-  const year = date.getFullYear()
-  const month = pad(date.getMonth() + 1)
-  const day = pad(date.getDate())
-  const hours = pad(date.getHours())
-  const minutes = pad(date.getMinutes())
-  return `${year}-${month}-${day}T${hours}:${minutes}`
-}
 
 function parseNumberInput(value: string | number): number | null {
   if (typeof value === "number") return value
@@ -888,12 +881,11 @@ async function onSubmit() {
           <div class="grid gap-4 sm:grid-cols-2">
             <div class="space-y-2">
               <label for="test-date" class="text-foreground">{{ $t("pages.tests.form.fields.date") }}</label>
-              <input
+              <Input
                 id="test-date"
                 v-model="dateInput"
                 type="datetime-local"
                 autocomplete="off"
-                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 :aria-invalid="dateError ? 'true' : 'false'"
                 aria-describedby="test-date-hint test-date-feedback"
                 required
@@ -944,13 +936,12 @@ async function onSubmit() {
                   </span>
                   <span class="text-xs text-muted-foreground">({{ range.unit }})</span>
                 </label>
-                <input
+                <Input
                   :id="toParameterInputId(range.parameter)"
                   v-model="parameterValues[range.parameter]"
                   type="number"
                   inputmode="decimal"
                   autocomplete="off"
-                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   step="any"
                   min="0"
                   :placeholder="$t('pages.tests.form.placeholders.value')"
@@ -998,24 +989,22 @@ async function onSubmit() {
           <div class="grid gap-4 sm:grid-cols-2">
             <div class="space-y-2">
               <label for="test-method" class="text-foreground">{{ $t("pages.tests.form.fields.method") }}</label>
-              <input
+              <Input
                 id="test-method"
                 v-model="methodInput"
                 type="text"
                 autocomplete="off"
-                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 :placeholder="$t('pages.tests.form.placeholders.method')"
               />
             </div>
 
             <div class="space-y-2">
               <label for="test-note" class="text-foreground">{{ $t("pages.tests.form.fields.note") }}</label>
-              <input
+              <Input
                 id="test-note"
                 v-model="noteInput"
                 type="text"
                 autocomplete="off"
-                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 :placeholder="$t('pages.tests.form.placeholders.note')"
               />
             </div>
@@ -1089,15 +1078,14 @@ async function onSubmit() {
                 <label for="trend-parameter" class="text-sm font-medium text-foreground">
                   {{ $t("pages.tests.trends.fields.parameter") }}
                 </label>
-                <select
+                <Select
                   id="trend-parameter"
                   v-model="trendParameter"
-                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   <option v-for="param in parameterOptions" :key="param" :value="param">
                     {{ param }}
                   </option>
-                </select>
+                </Select>
               </div>
             </div>
 
@@ -1128,36 +1116,33 @@ async function onSubmit() {
           <div class="grid gap-4 sm:grid-cols-3">
             <div class="space-y-2">
               <label for="history-from" class="text-foreground">{{ $t("pages.tests.history.filters.from") }}</label>
-              <input
+              <Input
                 id="history-from"
                 v-model="filterDateFrom"
                 type="date"
-                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
 
             <div class="space-y-2">
               <label for="history-to" class="text-foreground">{{ $t("pages.tests.history.filters.to") }}</label>
-              <input
+              <Input
                 id="history-to"
                 v-model="filterDateTo"
                 type="date"
-                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
               />
             </div>
 
             <div class="space-y-2">
               <label for="history-param" class="text-foreground">{{ $t("pages.tests.history.filters.parameter") }}</label>
-              <select
+              <Select
                 id="history-param"
                 v-model="filterParameter"
-                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="">{{ $t("pages.tests.history.filters.anyParameter") }}</option>
                 <option v-for="param in parameterOptions" :key="param" :value="param">
                   {{ param }}
                 </option>
-              </select>
+              </Select>
             </div>
           </div>
 
@@ -1247,7 +1232,7 @@ async function onSubmit() {
                     v-for="measurement in session.measurements"
                     :key="measurement.id"
                     :title="getMeasurementExpectedLabel(measurement) ?? undefined"
-                    class="rounded px-2 py-1 text-xs bg-muted text-foreground"
+                    class="inline-flex items-center rounded px-2 py-1 text-xs bg-muted text-foreground border border-muted-foreground"
                   >
                     <span class="inline-flex items-center gap-1.5 font-medium">
                       <span

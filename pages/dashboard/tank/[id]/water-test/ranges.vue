@@ -3,6 +3,8 @@ import AlertBanner from "@/components/AlertBanner.vue"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
 import { type ParameterRangeStatus, useParameterRanges } from "@/composables/useParameterRanges"
 import type { TankType } from "@/composables/useTanks"
 import { WATER_TEST_PARAMETERS } from "@/composables/useWaterTests"
@@ -445,16 +447,15 @@ async function onSave() {
               <label for="preset-source" class="text-foreground">
                 {{ $t("pages.tests.rangesEditor.preset.sourceLabel") }}
               </label>
-              <select
+              <Select
                 id="preset-source"
                 v-model="presetSource"
-                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="freshwater">{{ $t("pages.settings.tanks.types.freshwater") }}</option>
                 <option value="planted">{{ $t("pages.settings.tanks.types.planted") }}</option>
                 <option value="marine">{{ $t("pages.settings.tanks.types.marine") }}</option>
                 <option value="reef">{{ $t("pages.settings.tanks.types.reef") }}</option>
-              </select>
+              </Select>
             </div>
 
                 <div class="flex flex-wrap items-end gap-2">
@@ -561,13 +562,12 @@ async function onSave() {
                       <label :for="`parameter-${item.id}`" class="text-xs font-medium text-foreground">
                         {{ $t("pages.tests.rangesEditor.table.columns.parameter") }}
                       </label>
-                      <input
+                      <Input
                         :id="`parameter-${item.id}`"
                         v-model="item.parameter"
                         type="text"
                         autocomplete="off"
                         spellcheck="false"
-                        class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         list="parameter-list"
                         :aria-describedby="parameterErrors(item.id).length ? `errors-${item.id}` : undefined"
                         @blur="
@@ -581,13 +581,12 @@ async function onSave() {
                       <label :for="`unit-${item.id}`" class="text-xs font-medium text-foreground">
                         {{ $t("pages.tests.rangesEditor.table.columns.unit") }}
                       </label>
-                      <input
+                      <Input
                         :id="`unit-${item.id}`"
                         v-model="item.unit"
                         type="text"
                         autocomplete="off"
                         spellcheck="false"
-                        class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                         :aria-describedby="parameterErrors(item.id).length ? `errors-${item.id}` : undefined"
                       />
                     </div>
@@ -596,11 +595,11 @@ async function onSave() {
                       <label :for="`color-${item.id}`" class="text-xs font-medium text-foreground">
                         {{ $t("pages.tests.rangesEditor.table.columns.color") }}
                       </label>
-                      <input
+                      <Input
                         :id="`color-${item.id}`"
                         v-model="item.color"
                         type="color"
-                        class="h-9 w-full rounded-md border border-input bg-background px-2 py-1 shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        class="px-2"
                         :aria-describedby="parameterErrors(item.id).length ? `errors-${item.id}` : undefined"
                       />
                     </div>
@@ -621,12 +620,12 @@ async function onSave() {
                           <label :for="`min-${item.id}-${status}`" class="text-xs text-muted-foreground">
                             {{ $t("pages.tests.rangesEditor.table.columns.min") }}
                           </label>
-                          <input
+                          <Input
                             :id="`min-${item.id}-${status}`"
                             v-model="item.bands[status].minValue"
                             type="number"
                             inputmode="decimal"
-                            class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-right text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            class="text-right"
                             :placeholder="$t('pages.tests.rangesEditor.table.placeholders.none')"
                             :aria-describedby="parameterErrors(item.id).length ? `errors-${item.id}` : undefined"
                           />
@@ -636,12 +635,12 @@ async function onSave() {
                           <label :for="`max-${item.id}-${status}`" class="text-xs text-muted-foreground">
                             {{ $t("pages.tests.rangesEditor.table.columns.max") }}
                           </label>
-                          <input
+                          <Input
                             :id="`max-${item.id}-${status}`"
                             v-model="item.bands[status].maxValue"
                             type="number"
                             inputmode="decimal"
-                            class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-right text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            class="text-right"
                             :placeholder="$t('pages.tests.rangesEditor.table.placeholders.none')"
                             :aria-describedby="parameterErrors(item.id).length ? `errors-${item.id}` : undefined"
                           />

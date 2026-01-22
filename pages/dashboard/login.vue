@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 
 definePageMeta({
   layout: "auth",
@@ -127,14 +128,13 @@ async function onLogin() {
             <label for="google-client-id" class="text-sm text-foreground">
               {{ $t("pages.login.clientId.label") }}
             </label>
-            <input
+            <Input
               id="google-client-id"
               v-model="clientIdInput"
               type="text"
               inputmode="text"
               autocomplete="off"
               spellcheck="false"
-              class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               :placeholder="$t('pages.login.clientId.placeholder')"
               :aria-invalid="clientIdError ? 'true' : 'false'"
               aria-describedby="google-client-id-hint google-client-id-feedback"

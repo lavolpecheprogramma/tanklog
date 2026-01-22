@@ -1,17 +1,9 @@
 import { computed, readonly, watch } from "vue"
+import { useLocalStorage } from "@vueuse/core"
 
 export type ThemeMode = "light" | "dark"
 
 const THEME_STORAGE_KEY = "tanklog.theme.v1"
-
-function getLocalStorage(): Storage | null {
-  if (!import.meta.client) return null
-  try {
-    return window.localStorage
-  } catch {
-    return null
-  }
-}
 
 function normalizeStoredMode(value: string | null): ThemeMode | null {
   if (value === "light" || value === "dark") return value
@@ -34,8 +26,15 @@ function applyModeToDocument(mode: ThemeMode) {
 }
 
 export function useTheme() {
-  const mode = useState<ThemeMode>("theme.mode", () => "dark")
   const initialized = useState<boolean>("theme.initialized", () => false)
+  const storedMode = useLocalStorage<string | null>(THEME_STORAGE_KEY, null, { writeDefaults: false })
+
+  const mode = computed<ThemeMode>({
+    get: () => normalizeStoredMode(storedMode.value) ?? getSystemPreferredMode(),
+    set: (value) => {
+      storedMode.value = value
+    },
+  })
 
   function setMode(value: ThemeMode) {
     mode.value = value
@@ -50,16 +49,13 @@ export function useTheme() {
     if (initialized.value) return
     initialized.value = true
 
-    const storage = getLocalStorage()
-    const stored = normalizeStoredMode(storage?.getItem(THEME_STORAGE_KEY) ?? null)
-    mode.value = stored ?? getSystemPreferredMode()
-
-    applyModeToDocument(mode.value)
-
-    watch(mode, (next) => {
-      applyModeToDocument(next)
-      storage?.setItem(THEME_STORAGE_KEY, next)
-    })
+    watch(
+      mode,
+      (next) => {
+        applyModeToDocument(next)
+      },
+      { immediate: true }
+    )
   }
 
   return {

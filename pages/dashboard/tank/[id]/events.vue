@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Select } from "@/components/ui/select"
 import { EVENT_TYPES, LIVESTOCK_EVENT_TYPES, TANK_EVENT_TYPES, type EventTargetType, type EventType, type TankEvent } from "@/composables/useEvents"
 import type { TankLivestock } from "@/composables/useLivestock"
 
@@ -9,7 +10,7 @@ definePageMeta({
   layout: "tank",
 })
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const localePath = useLocalePath()
 
 useHead(() => ({
@@ -66,37 +67,6 @@ const eventRevision = computed(() => {
   if (!spreadsheetId) return 0
   return eventsApi.eventRevisions.value[spreadsheetId] ?? 0
 })
-
-function formatEventDate(value: string): string {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date)
-  } catch {
-    return date.toLocaleString()
-  }
-}
-
-function formatNumber(value: number): string {
-  try {
-    return new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 }).format(value)
-  } catch {
-    return String(value)
-  }
-}
-
-function eventTypeLabel(value: string): string {
-  const key = `pages.events.types.${value}`
-  const translated = t(key)
-  return translated === key ? value : translated
-}
 
 function livestockNameById(id: string | null): string | null {
   if (!id) return null
@@ -373,30 +343,28 @@ async function onDeleteEvent(event: TankEvent) {
               <div class="mb-5 grid gap-4 sm:grid-cols-2">
                 <div class="space-y-2">
                   <label for="edit-event-target-type" class="text-foreground">{{ $t("pages.events.form.fields.target") }}</label>
-                  <select
+                  <Select
                     id="edit-event-target-type"
                     v-model="editingTargetType"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     <option value="tank">{{ $t("pages.events.form.targets.tank") }}</option>
                     <option value="livestock">{{ $t("pages.events.form.targets.livestock") }}</option>
-                  </select>
+                  </Select>
                   <p class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.target") }}</p>
                 </div>
 
                 <div v-if="editingTargetType === 'livestock'" class="space-y-2">
                   <label for="edit-event-target-livestock" class="text-foreground">{{ $t("pages.events.form.fields.livestock") }}</label>
-                  <select
+                  <Select
                     id="edit-event-target-livestock"
                     v-model="editingTargetId"
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     :disabled="livestockStatus === 'loading' || livestockStatus === 'error'"
                   >
                     <option value="">{{ $t("pages.events.form.placeholders.livestock") }}</option>
                     <option v-for="ls in livestock" :key="ls.livestockId" :value="ls.livestockId">
                       {{ ls.nameCommon }}
                     </option>
-                  </select>
+                  </Select>
                   <p v-if="livestockStatus === 'loading'" class="text-xs text-muted-foreground">{{ $t("pages.livestock.list.loading") }}</p>
                   <p v-else-if="livestockStatus === 'error'" class="text-xs text-destructive">
                     {{ $t("pages.events.form.errors.loadLivestockFailed") }}
@@ -446,30 +414,28 @@ async function onDeleteEvent(event: TankEvent) {
             <div class="mb-5 grid gap-4 sm:grid-cols-2">
               <div class="space-y-2">
                 <label for="create-event-target-type" class="text-foreground">{{ $t("pages.events.form.fields.target") }}</label>
-                <select
+                <Select
                   id="create-event-target-type"
                   v-model="createTargetType"
-                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   <option value="tank">{{ $t("pages.events.form.targets.tank") }}</option>
                   <option value="livestock">{{ $t("pages.events.form.targets.livestock") }}</option>
-                </select>
+                </Select>
                 <p class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.target") }}</p>
               </div>
 
               <div v-if="createTargetType === 'livestock'" class="space-y-2">
                 <label for="create-event-target-livestock" class="text-foreground">{{ $t("pages.events.form.fields.livestock") }}</label>
-                <select
+                <Select
                   id="create-event-target-livestock"
                   v-model="createTargetId"
-                  class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm text-foreground shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   :disabled="livestockStatus === 'loading' || livestockStatus === 'error'"
                 >
                   <option value="">{{ $t("pages.events.form.placeholders.livestock") }}</option>
                   <option v-for="ls in livestock" :key="ls.livestockId" :value="ls.livestockId">
                     {{ ls.nameCommon }}
                   </option>
-                </select>
+                </Select>
                 <p v-if="livestockStatus === 'loading'" class="text-xs text-muted-foreground">{{ $t("pages.livestock.list.loading") }}</p>
                 <p v-else-if="livestockStatus === 'error'" class="text-xs text-destructive">
                   {{ $t("pages.events.form.errors.loadLivestockFailed") }}
@@ -527,43 +493,26 @@ async function onDeleteEvent(event: TankEvent) {
             <ul
               v-else-if="listStatus === 'ready'"
               role="list"
-              class="divide-y divide-border overflow-hidden rounded-md border border-border bg-background text-sm text-foreground"
+              class="space-y-2"
             >
-              <li v-for="event in events" :key="event.eventId" class="px-4 py-3">
-                <div class="flex flex-wrap items-start justify-between gap-2">
-                  <div class="space-y-1">
-                    <div class="font-medium">{{ eventTypeLabel(event.eventType) }}</div>
-                    <div class="text-xs text-muted-foreground">
-                      {{ formatEventDate(event.date) }}
-                      <span class="px-1">·</span>
-                      {{ eventTargetLabel(event) }}
-                    </div>
-                  </div>
-
-                  <div class="flex flex-wrap items-center gap-2">
-                    <div v-if="event.quantity !== null" class="text-right text-sm text-foreground">
-                      {{ formatNumber(event.quantity) }}
-                      <span v-if="event.unit" class="text-muted-foreground">{{ event.unit }}</span>
-                    </div>
-
+              <li v-for="event in events" :key="event.eventId">
+                <EventCard
+                  :event="event"
+                  variant="solid"
+                  :show-target="true"
+                  :target-label="eventTargetLabel(event)"
+                  :show-quantity="true"
+                  :show-product-and-note="true"
+                >
+                  <template #actions>
                     <Button size="xs" variant="secondary" type="button" :disabled="actingEventId === event.eventId" @click="startEdit(event)">
                       {{ $t("pages.events.actions.edit") }}
                     </Button>
                     <Button size="xs" variant="destructive" type="button" :disabled="actingEventId === event.eventId" @click="onDeleteEvent(event)">
                       {{ $t("pages.events.actions.delete") }}
                     </Button>
-                  </div>
-                </div>
-
-                <p class="mt-2 text-sm text-foreground">
-                  {{ event.description }}
-                </p>
-
-                <p v-if="event.product || event.note" class="mt-1 text-xs text-muted-foreground">
-                  <span v-if="event.product">{{ $t("pages.events.list.labels.product") }}: {{ event.product }}</span>
-                  <span v-if="event.product && event.note"> · </span>
-                  <span v-if="event.note">{{ $t("pages.events.list.labels.note") }}: {{ event.note }}</span>
-                </p>
+                  </template>
+                </EventCard>
               </li>
             </ul>
           </CardContent>
