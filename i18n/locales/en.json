@@ -171,6 +171,10 @@
           "empty": "No events yet.",
           "emptyHint": "Add a water change, dosing, or maintenance event to build a history here.",
           "count": "{count} event(s)"
+        },
+        "reminders": {
+          "title": "Next reminders",
+          "description": "The next tasks due for this tank."
         }
       },
       "unknown": {
@@ -419,7 +423,8 @@
           "parameter": "Parameter",
           "value": "Value",
           "unit": "Unit",
-          "range": "Range"
+          "range": "Range",
+          "result": "Result"
         }
       }
     },

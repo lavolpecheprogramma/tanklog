@@ -171,6 +171,10 @@
           "empty": "Nessun evento ancora.",
           "emptyHint": "Aggiungi un cambio acqua, un dosaggio o una manutenzione per costruire uno storico qui.",
           "count": "{count} evento(i)"
+        },
+        "reminders": {
+          "title": "Prossimi promemoria",
+          "description": "Le prossime attività in scadenza per questa vasca."
         }
       },
       "unknown": {
@@ -419,7 +423,8 @@
           "parameter": "Parametro",
           "value": "Valore",
           "unit": "Unità",
-          "range": "Intervallo"
+          "range": "Intervallo",
+          "result": "Esito"
         }
       }
     },

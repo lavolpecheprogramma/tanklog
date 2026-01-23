@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -109,58 +110,70 @@ async function onLogin() {
       </CardHeader>
 
       <CardContent class="space-y-4">
-        <div class="space-y-3 rounded-md border border-border/60 bg-background p-3">
-          <div class="space-y-1">
-            <div class="text-sm font-medium text-foreground">
-              {{ $t("pages.login.clientId.title") }}
-            </div>
-            <p class="text-xs text-muted-foreground">
-              {{ $t("pages.login.clientId.description") }}
-            </p>
-            <ul class="list-disc space-y-1 pl-5 text-xs text-muted-foreground">
-              <li>{{ $t("pages.login.clientId.steps.create") }}</li>
-              <li>{{ $t("pages.login.clientId.steps.origins") }}</li>
-              <li>{{ $t("pages.login.clientId.steps.paste") }}</li>
-            </ul>
-          </div>
+        <Accordion
+          type="single"
+          collapsible
+          :default-value="hasClientId ? undefined : 'client-id'"
+          class="rounded-md border border-border/60 bg-background text-foreground shadow-none"
+        >
+          <AccordionItem value="client-id">
+            <AccordionTrigger class="p-3">
+              <div class="flex flex-col gap-1">
+                <div class="text-sm font-medium text-foreground">
+                  {{ $t("pages.login.clientId.title") }}
+                </div>
+                <p class="text-xs text-muted-foreground">
+                  {{ $t("pages.login.clientId.description") }}
+                </p>
+              </div>
+            </AccordionTrigger>
 
-          <form class="space-y-2" @submit.prevent="onSaveClientId">
-            <label for="google-client-id" class="text-sm text-foreground">
-              {{ $t("pages.login.clientId.label") }}
-            </label>
-            <Input
-              id="google-client-id"
-              v-model="clientIdInput"
-              type="text"
-              inputmode="text"
-              autocomplete="off"
-              spellcheck="false"
-              :placeholder="$t('pages.login.clientId.placeholder')"
-              :aria-invalid="clientIdError ? 'true' : 'false'"
-              aria-describedby="google-client-id-hint google-client-id-feedback"
-            />
-            <p id="google-client-id-hint" class="text-xs text-muted-foreground">
-              {{ $t("pages.login.clientId.hint") }}
-            </p>
+            <AccordionContent class="px-3 pb-3 pt-0">
+              <ul class="mb-3 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+                <li>{{ $t("pages.login.clientId.steps.create") }}</li>
+                <li>{{ $t("pages.login.clientId.steps.origins") }}</li>
+                <li>{{ $t("pages.login.clientId.steps.paste") }}</li>
+              </ul>
 
-            <p v-if="clientIdError" id="google-client-id-feedback" class="text-sm text-destructive" role="alert">
-              {{ clientIdError }}
-            </p>
-            <p v-else-if="clientIdStatus" id="google-client-id-feedback" class="text-sm text-foreground" role="status">
-              {{ clientIdStatus }}
-            </p>
-            <p v-else id="google-client-id-feedback" class="sr-only"> </p>
+              <form class="space-y-2" @submit.prevent="onSaveClientId">
+                <label for="google-client-id" class="text-sm text-foreground">
+                  {{ $t("pages.login.clientId.label") }}
+                </label>
+                <Input
+                  id="google-client-id"
+                  v-model="clientIdInput"
+                  type="text"
+                  inputmode="text"
+                  autocomplete="off"
+                  spellcheck="false"
+                  :placeholder="$t('pages.login.clientId.placeholder')"
+                  :aria-invalid="clientIdError ? 'true' : 'false'"
+                  aria-describedby="google-client-id-hint google-client-id-feedback"
+                />
+                <p id="google-client-id-hint" class="text-xs text-muted-foreground">
+                  {{ $t("pages.login.clientId.hint") }}
+                </p>
 
-            <div class="flex flex-wrap gap-2 pt-1">
-              <Button type="submit" size="sm">
-                {{ $t("pages.login.clientId.actions.save") }}
-              </Button>
-              <Button type="button" size="sm" variant="secondary" :disabled="!hasClientId" @click="onRemoveClientId">
-                {{ $t("pages.login.clientId.actions.remove") }}
-              </Button>
-            </div>
-          </form>
-        </div>
+                <p v-if="clientIdError" id="google-client-id-feedback" class="text-sm text-destructive" role="alert">
+                  {{ clientIdError }}
+                </p>
+                <p v-else-if="clientIdStatus" id="google-client-id-feedback" class="text-sm text-foreground" role="status">
+                  {{ clientIdStatus }}
+                </p>
+                <p v-else id="google-client-id-feedback" class="sr-only"> </p>
+
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <Button type="submit" size="sm">
+                    {{ $t("pages.login.clientId.actions.save") }}
+                  </Button>
+                  <Button type="button" size="sm" variant="secondary" :disabled="!hasClientId" @click="onRemoveClientId">
+                    {{ $t("pages.login.clientId.actions.remove") }}
+                  </Button>
+                </div>
+              </form>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <p v-if="errorMessage" class="text-sm text-destructive" role="alert">
           {{ errorMessage }}

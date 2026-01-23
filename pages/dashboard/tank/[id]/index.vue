@@ -2,11 +2,12 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select } from "@/components/ui/select"
-import type { ParameterRange } from "@/composables/useParameterRanges"
+import type { ParameterRange, ParameterRangeStatus } from "@/composables/useParameterRanges"
 import { useParameterRanges } from "@/composables/useParameterRanges"
 import type { TankPhoto } from "@/composables/usePhotos"
 import type { TankEvent } from "@/composables/useEvents"
 import type { WaterTestSession } from "@/composables/useWaterTests"
+import type { TankReminder } from "@/composables/useReminders"
 import { DEFAULT_CHART_COLOR, hexToRgbaOrFallback } from "@/lib/colors"
 
 definePageMeta({
@@ -52,6 +53,7 @@ const waterTests = useWaterTests()
 const parameterRangesApi = useParameterRanges()
 const eventsApi = useEvents()
 const photosApi = usePhotos()
+const remindersApi = useReminders()
 
 const testsStatus = ref<LoadStatus>("idle")
 const testsError = ref<string | null>(null)
@@ -59,6 +61,7 @@ const sessions = ref<WaterTestSession[]>([])
 
 const rangesStatus = ref<LoadStatus>("idle")
 const rangesError = ref<string | null>(null)
+const parameterRangeRows = ref<ParameterRange[]>([])
 const parameterRanges = ref<ParameterRange[]>([])
 
 const eventsStatus = ref<LoadStatus>("idle")
@@ -68,6 +71,12 @@ const events = ref<TankEvent[]>([])
 const photosStatus = ref<LoadStatus>("idle")
 const photosError = ref<string | null>(null)
 const photos = ref<TankPhoto[]>([])
+
+const remindersStatus = ref<LoadStatus>("idle")
+const remindersError = ref<string | null>(null)
+const reminders = ref<TankReminder[]>([])
+const remindersNow = ref(new Date())
+const remindersToday = computed(() => toDateOnlyValue(remindersNow.value))
 
 function toEpochMs(value: string): number | null {
   const parsed = Date.parse(value)
@@ -99,6 +108,109 @@ function formatSessionDate(value: string): string {
   }
 }
 
+function toDateOnlyValue(date: Date): string {
+  const pad = (value: number) => value.toString().padStart(2, "0")
+  const year = date.getFullYear()
+  const month = pad(date.getMonth() + 1)
+  const day = pad(date.getDate())
+  return `${year}-${month}-${day}`
+}
+
+function isDateOnly(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value.trim())
+}
+
+function parseDateOnly(value: string): { year: number; month: number; day: number } | null {
+  const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!match) return null
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return null
+  if (month < 1 || month > 12) return null
+  if (day < 1 || day > 31) return null
+  return { year, month, day }
+}
+
+function toDueEpochMs(value: string): number | null {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  if (isDateOnly(trimmed)) {
+    const parsed = parseDateOnly(trimmed)
+    if (!parsed) return null
+    const localEndOfDay = new Date(parsed.year, parsed.month - 1, parsed.day, 23, 59, 59, 999)
+    if (Number.isNaN(localEndOfDay.getTime())) return null
+    return localEndOfDay.getTime()
+  }
+
+  const epochMs = Date.parse(trimmed)
+  return Number.isFinite(epochMs) ? epochMs : null
+}
+
+function formatDateOnly(value: string): string {
+  const parsed = parseDateOnly(value)
+  if (!parsed) return value
+  const date = new Date(parsed.year, parsed.month - 1, parsed.day, 0, 0, 0, 0)
+  if (Number.isNaN(date.getTime())) return value
+
+  try {
+    return new Intl.DateTimeFormat(locale.value, { year: "numeric", month: "short", day: "2-digit" }).format(date)
+  } catch {
+    return date.toLocaleDateString()
+  }
+}
+
+function formatDateTime(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+
+  try {
+    return new Intl.DateTimeFormat(locale.value, {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date)
+  } catch {
+    return date.toLocaleString()
+  }
+}
+
+function formatReminderDate(value: string): string {
+  return isDateOnly(value) ? formatDateOnly(value) : formatDateTime(value)
+}
+
+function reminderDueDateOnly(reminder: TankReminder): string {
+  if (isDateOnly(reminder.nextDue)) return reminder.nextDue.trim()
+  const date = new Date(reminder.nextDue)
+  if (Number.isNaN(date.getTime())) return reminder.nextDue
+  return toDateOnlyValue(date)
+}
+
+function reminderBadge(reminder: TankReminder): { label: string; className: string } {
+  const dueEpochMs = toDueEpochMs(reminder.nextDue)
+  if (dueEpochMs !== null && dueEpochMs < remindersNow.value.getTime()) {
+    return {
+      label: t("pages.reminders.list.badges.overdue"),
+      className: "border-destructive/40 bg-destructive/10 text-destructive",
+    }
+  }
+
+  if (reminderDueDateOnly(reminder) === remindersToday.value) {
+    return {
+      label: t("pages.reminders.list.badges.dueToday"),
+      className: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    }
+  }
+
+  return {
+    label: t("pages.reminders.list.badges.upcoming"),
+    className: "border-border bg-muted/30 text-muted-foreground",
+  }
+}
+
 async function loadTests() {
   if (!import.meta.client) return
 
@@ -126,6 +238,7 @@ async function loadRanges() {
   if (!import.meta.client) return
 
   if (!tank.value) {
+    parameterRangeRows.value = []
     parameterRanges.value = []
     rangesStatus.value = "idle"
     rangesError.value = null
@@ -136,12 +249,15 @@ async function loadRanges() {
   rangesError.value = null
 
   try {
-    parameterRanges.value = await parameterRangesApi.listParameterRanges({
+    const result = await parameterRangesApi.readParameterRangesSheet({
       spreadsheetId: tank.value.spreadsheetId,
       tankType: tank.value.type,
     })
+    parameterRangeRows.value = result.ranges
+    parameterRanges.value = buildRepresentativeRanges(result.ranges)
     rangesStatus.value = "ready"
   } catch (error) {
+    parameterRangeRows.value = []
     parameterRanges.value = []
     rangesError.value = error instanceof Error ? error.message : t("pages.tests.ranges.errors.loadFailed")
     rangesStatus.value = "error"
@@ -194,8 +310,32 @@ async function loadPhotos() {
   }
 }
 
+async function loadReminders() {
+  if (!import.meta.client) return
+
+  if (!tank.value) {
+    reminders.value = []
+    remindersStatus.value = "idle"
+    remindersError.value = null
+    return
+  }
+
+  remindersStatus.value = "loading"
+  remindersError.value = null
+
+  try {
+    reminders.value = await remindersApi.listReminders({ spreadsheetId: tank.value.spreadsheetId })
+    remindersNow.value = new Date()
+    remindersStatus.value = "ready"
+  } catch (error) {
+    reminders.value = []
+    remindersError.value = error instanceof Error ? error.message : t("pages.reminders.list.errors.loadFailed")
+    remindersStatus.value = "error"
+  }
+}
+
 async function refreshDashboard() {
-  await Promise.all([loadTests(), loadRanges(), loadEvents(), loadPhotos()])
+  await Promise.all([loadTests(), loadRanges(), loadEvents(), loadPhotos(), loadReminders()])
 }
 
 watch(
@@ -208,10 +348,55 @@ watch(
 
 const latestSession = computed(() => sessions.value[0] ?? null)
 const recentEvents = computed(() => events.value.slice(0, 3))
-const recentPhotos = computed(() => photos.value.slice(0, 3))
+const featuredPhoto = computed(() => photos.value[0] ?? null)
+const recentPhotos = computed(() => photos.value.slice(0, 4))
+
+const activeReminders = computed(() =>
+  reminders.value.filter((reminder) => !(reminder.repeatEveryDays === null && reminder.lastDone !== null))
+)
+const nextReminders = computed(() => activeReminders.value.slice(0, 3))
 
 function normalizeParameterKey(value: string): string {
   return value.trim().toLowerCase()
+}
+
+function pickPreferredColor(ranges: ParameterRange[]): string | null {
+  const preferredOrder: ParameterRangeStatus[] = ["acceptable", "optimal", "critical"]
+  for (const status of preferredOrder) {
+    const match = ranges.find((range) => range.status === status && Boolean(range.color))
+    if (match?.color) return match.color
+  }
+  return ranges.find((range) => Boolean(range.color))?.color ?? null
+}
+
+function pickRepresentativeRange(ranges: ParameterRange[]): ParameterRange | null {
+  return (
+    ranges.find((range) => range.status === "acceptable")
+    ?? ranges.find((range) => range.status === "optimal")
+    ?? ranges.find((range) => range.status === "critical")
+    ?? null
+  )
+}
+
+function buildRepresentativeRanges(rows: ParameterRange[]): ParameterRange[] {
+  const grouped = new Map<string, ParameterRange[]>()
+  for (const range of rows) {
+    const key = normalizeParameterKey(range.parameter)
+    const list = grouped.get(key) ?? []
+    list.push(range)
+    grouped.set(key, list)
+  }
+
+  const representative: ParameterRange[] = []
+  for (const list of grouped.values()) {
+    const selected = pickRepresentativeRange(list)
+    if (!selected) continue
+    const color = selected.color ?? pickPreferredColor(list)
+    representative.push({ ...selected, color })
+  }
+
+  representative.sort((a, b) => a.parameter.localeCompare(b.parameter))
+  return representative
 }
 
 const rangeByParameterKey = computed(() => {
@@ -254,21 +439,6 @@ function getMeasurementRangeStatus(measurement: Measurement): { status: Measurem
   if (range.minValue !== null && measurement.value < range.minValue) return { status: "low", range }
   if (range.maxValue !== null && measurement.value > range.maxValue) return { status: "high", range }
   return { status: "ok", range }
-}
-
-function getOutOfRangeStatus(measurement: Measurement): "low" | "high" | null {
-  const { status } = getMeasurementRangeStatus(measurement)
-  return status === "low" || status === "high" ? status : null
-}
-
-function isMeasurementOutOfRange(measurement: Measurement): boolean {
-  return getOutOfRangeStatus(measurement) !== null
-}
-
-function getMeasurementRangeText(measurement: Measurement): string | null {
-  const { range } = getMeasurementRangeStatus(measurement)
-  if (!range) return null
-  return formatRange(range)
 }
 
 type OutOfRangeAlert = {
@@ -423,11 +593,11 @@ const trendChartData = computed(() => ({
 const trendChartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  animation: false,
-  interaction: { mode: "nearest", intersect: false },
+  animation: false as const,
+  interaction: { mode: "nearest" as const, intersect: false },
   scales: {
     x: {
-      type: "linear",
+      type: "linear" as const,
       title: { display: true, text: t("pages.tests.trends.axes.date") },
       ticks: {
         callback: (raw: string | number) => formatChartTick(typeof raw === "string" ? Number(raw) : raw),
@@ -444,11 +614,11 @@ const trendChartOptions = computed(() => ({
     legend: { display: false },
     tooltip: {
       callbacks: {
-        title: (items: Array<{ parsed?: { x?: number } }>) => {
+        title: (items: any[]) => {
           const x = items?.[0]?.parsed?.x
           return typeof x === "number" ? formatChartTooltipDate(x) : ""
         },
-        label: (item: { parsed?: { y?: number } }) => {
+        label: (item: any) => {
           const y = item?.parsed?.y
           if (typeof y !== "number") return ""
 
@@ -507,11 +677,32 @@ const trendChartOptions = computed(() => ({
       <template v-else>
         <Card>
           <CardHeader>
-            <CardTitle class="truncate">{{ tank.name }}</CardTitle>
-            <CardDescription>
-              <span>{{ tankTypeLabel(tank.type) }}</span>
-              <span v-if="formatVolume(tank.volumeLiters)" class="text-muted-foreground"> · {{ formatVolume(tank.volumeLiters) }}</span>
-            </CardDescription>
+            <div class="grid gap-4 sm:grid-cols-[1fr,220px] sm:items-start">
+              <div class="min-w-0 space-y-1">
+                <CardTitle class="truncate">{{ tank.name }}</CardTitle>
+                <CardDescription>
+                  <span>{{ tankTypeLabel(tank.type) }}</span>
+                  <span v-if="formatVolume(tank.volumeLiters)" class="text-muted-foreground"> · {{ formatVolume(tank.volumeLiters) }}</span>
+                </CardDescription>
+              </div>
+
+              <div class="overflow-hidden rounded-md border border-border/60 bg-muted">
+                <div class="aspect-[4/3] w-full">
+                  <DrivePhoto
+                    v-if="featuredPhoto"
+                    :file-id="featuredPhoto.driveFileId"
+                    :alt="$t('pages.tank.featuredPhotoAlt', { tank: tank.name })"
+                    fit="cover"
+                    :lazy="false"
+                  />
+                  <div v-else class="flex h-full w-full items-center justify-center p-3 text-center text-xs text-muted-foreground">
+                    <span v-if="photosStatus === 'loading'">{{ $t("pages.photos.list.loading") }}</span>
+                    <span v-else-if="photosStatus === 'error'">{{ $t("pages.photos.list.errors.loadFailed") }}</span>
+                    <span v-else>{{ $t("pages.photos.list.empty") }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </CardHeader>
           <CardContent class="text-sm text-muted-foreground">
             <div class="flex flex-wrap items-center gap-2">
@@ -534,6 +725,55 @@ const trendChartOptions = computed(() => ({
             </Button>
           </CardFooter>
         </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{{ $t("pages.tank.dashboard.reminders.title") }}</CardTitle>
+              <CardDescription>{{ $t("pages.tank.dashboard.reminders.description") }}</CardDescription>
+            </CardHeader>
+            <CardContent class="space-y-3 text-sm text-muted-foreground">
+              <div v-if="remindersStatus === 'loading' || remindersStatus === 'idle'">
+                {{ $t("pages.reminders.list.loading") }}
+              </div>
+              <p v-else-if="remindersStatus === 'error'" class="text-sm text-destructive" role="alert">
+                {{ remindersError }}
+              </p>
+              <div v-else-if="remindersStatus === 'ready' && !nextReminders.length" class="space-y-1">
+                <p class="text-sm text-muted-foreground">{{ $t("pages.reminders.list.empty") }}</p>
+                <p class="text-xs text-muted-foreground">{{ $t("pages.reminders.list.emptyHint") }}</p>
+              </div>
+              <div v-else class="space-y-2">
+                <ul role="list" class="space-y-2">
+                  <li
+                    v-for="reminder in nextReminders"
+                    :key="reminder.reminderId"
+                    class="flex flex-wrap items-start justify-between gap-2 rounded-md border border-border bg-muted/20 px-3 py-2"
+                  >
+                    <div class="min-w-0 space-y-1">
+                      <div class="text-sm font-medium text-foreground">
+                        {{ reminder.title }}
+                      </div>
+                      <div class="text-xs text-muted-foreground">
+                        {{ formatReminderDate(reminder.nextDue) }}
+                      </div>
+                    </div>
+
+                    <span
+                      class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                      :class="reminderBadge(reminder).className"
+                    >
+                      {{ reminderBadge(reminder).label }}
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button variant="secondary" as-child>
+                <NuxtLink :to="localePath(`/dashboard/tank/${tank.id}/reminders`)">{{ $t("actions.goToReminders") }}</NuxtLink>
+              </Button>
+            </CardFooter>
+          </Card>
 
         <div class="grid gap-4 lg:grid-cols-2">
           <Card>
@@ -569,7 +809,7 @@ const trendChartOptions = computed(() => ({
                   </div>
 
                   <div class="flex flex-wrap gap-2">
-                    <Button variant="secondary" size="sm" type="button" :disabled="testsStatus === 'loading'" @click="refreshDashboard">
+                    <Button variant="secondary" size="sm" type="button" @click="refreshDashboard">
                       {{ $t("pages.tests.history.refresh") }}
                     </Button>
                     <Button variant="secondary" size="sm" as-child>
@@ -605,55 +845,10 @@ const trendChartOptions = computed(() => ({
                   </ul>
                 </AlertBanner>
 
-                <div class="max-w-full overflow-x-auto">
-                  <table class="w-full text-sm">
-                    <caption class="sr-only">{{ $t("pages.tests.detail.tableCaption") }}</caption>
-                    <thead class="text-xs text-muted-foreground">
-                      <tr class="border-b border-border">
-                        <th scope="col" class="px-2 py-2 text-left font-medium">{{ $t("pages.tests.detail.columns.parameter") }}</th>
-                        <th scope="col" class="px-2 py-2 text-right font-medium">{{ $t("pages.tests.detail.columns.value") }}</th>
-                        <th scope="col" class="hidden px-2 py-2 text-left font-medium sm:table-cell">
-                          {{ $t("pages.tests.detail.columns.unit") }}
-                        </th>
-                        <th scope="col" class="hidden px-2 py-2 text-left font-medium md:table-cell">
-                          {{ $t("pages.tests.detail.columns.range") }}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="measurement in latestSession.measurements" :key="measurement.id" class="border-b border-border/60">
-                        <th scope="row" class="px-2 py-2 text-left font-medium">
-                          <span class="inline-flex items-center gap-2">
-                            <span
-                              class="inline-block size-2 shrink-0 rounded-full border border-border/60"
-                              :style="{ backgroundColor: getColorForParameter(measurement.parameter) ?? 'transparent' }"
-                              aria-hidden="true"
-                            />
-                            <span>{{ measurement.parameter }}</span>
-                          </span>
-                        </th>
-                        <td class="px-2 py-2 text-right">
-                          <span :class="isMeasurementOutOfRange(measurement) ? 'font-semibold text-destructive' : ''">
-                            {{ formatNumber(measurement.value) }}
-                          </span>
-                          <span class="sm:hidden text-xs text-muted-foreground"> {{ getDisplayUnitForMeasurement(measurement) }}</span>
-                          <span v-if="getOutOfRangeStatus(measurement)" class="ml-2 text-xs font-medium text-destructive">
-                            ({{ getOutOfRangeStatus(measurement) === "low" ? $t("pages.tests.ranges.low") : $t("pages.tests.ranges.high") }})
-                          </span>
-                          <div class="mt-1 text-xs text-muted-foreground md:hidden">
-                            {{ $t("pages.tests.detail.columns.range") }}: {{ getMeasurementRangeText(measurement) ?? "—" }}
-                          </div>
-                        </td>
-                        <td class="hidden px-2 py-2 text-left text-muted-foreground sm:table-cell">
-                          {{ getDisplayUnitForMeasurement(measurement) }}
-                        </td>
-                        <td class="hidden px-2 py-2 text-left text-muted-foreground md:table-cell">
-                          {{ getMeasurementRangeText(measurement) ?? "—" }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <WaterTestMeasurementsTable
+                  :measurements="latestSession.measurements"
+                  :parameter-range-rows="parameterRangeRows"
+                />
 
                 <p v-if="rangesStatus === 'loading'" class="text-xs text-muted-foreground">
                   {{ $t("pages.tests.ranges.loading") }}
@@ -743,7 +938,7 @@ const trendChartOptions = computed(() => ({
               </p>
               <ChartComponent
                 v-else
-                :aria-label="trendChartAriaLabel"
+                :ariaLabel="trendChartAriaLabel"
                 :data="trendChartData"
                 :options="trendChartOptions"
                 container-class="h-72 sm:h-80"
@@ -769,32 +964,26 @@ const trendChartOptions = computed(() => ({
                 <p class="text-sm text-muted-foreground">{{ $t("pages.photos.list.empty") }}</p>
                 <p class="text-xs text-muted-foreground">{{ $t("pages.photos.list.emptyHint") }}</p>
               </div>
-              <div v-else-if="photosStatus === 'ready'" class="space-y-3">
-                <ul role="list" class="space-y-2">
-                  <li
-                    v-for="photo in recentPhotos"
-                    :key="photo.photoId"
-                    class="flex flex-wrap items-start justify-between gap-2 rounded-md border border-border bg-muted/20 px-3 py-2"
-                  >
-                    <div class="min-w-0 space-y-1">
-                      <div class="text-sm font-medium text-foreground">
-                        {{ formatSessionDate(photo.date) }}
-                      </div>
-                      <p v-if="photo.note" class="line-clamp-2 text-xs text-muted-foreground">
-                        {{ photo.note }}
-                      </p>
-                    </div>
-
-                    <a
-                      class="text-xs font-medium text-primary underline underline-offset-4 hover:text-primary/90"
-                      :href="photo.driveUrl"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {{ $t("pages.photos.list.labels.openInDrive") }}
-                    </a>
-                  </li>
-                </ul>
+              <div v-else-if="photosStatus === 'ready'" class="grid grid-cols-2 gap-2">
+                <a
+                  v-for="photo in recentPhotos"
+                  :key="photo.photoId"
+                  class="group relative overflow-hidden rounded-md border border-border bg-muted focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  :href="photo.driveUrl"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <div class="aspect-[4/3] w-full bg-muted">
+                    <DrivePhoto
+                      :file-id="photo.driveFileId"
+                      :alt="$t('pages.photos.timeline.alt.tankPhoto', { date: formatSessionDate(photo.date) })"
+                      fit="cover"
+                    />
+                  </div>
+                  <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent px-2 py-1">
+                    <p class="text-[11px] font-medium text-foreground">{{ formatSessionDate(photo.date) }}</p>
+                  </div>
+                </a>
               </div>
             </CardContent>
             <CardFooter>

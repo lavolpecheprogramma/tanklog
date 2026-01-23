@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -425,13 +426,6 @@ function getInputVerdictBadge(parameter: string): VerdictBadge | null {
   return makeVerdictBadge(result.verdict, result.direction)
 }
 
-function measurementValueClass(measurement: Measurement): string {
-  const { verdict } = getMeasurementVerdict(measurement.parameter, measurement.value)
-  if (verdict === "worst") return "font-semibold text-destructive"
-  if (verdict === "critical") return "font-semibold text-amber-700 dark:text-amber-400"
-  return ""
-}
-
 type OutOfRangeAlert = {
   measurementId: string
   parameter: string
@@ -836,197 +830,208 @@ async function onSubmit() {
       </p>
     </div>
 
-    <Card>
-      <CardHeader>
-        <CardTitle>{{ $t("pages.tests.form.title") }}</CardTitle>
-        <CardDescription>{{ $t("pages.tests.form.description") }}</CardDescription>
-      </CardHeader>
-      <CardContent class="text-sm text-muted-foreground">
-        <div v-if="!isStorageReady" class="space-y-2">
-          <p>{{ $t("pages.tests.form.locked") }}</p>
-          <Button as-child>
-            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
-          </Button>
-        </div>
-
-        <div v-else-if="tanksStatus === 'loading'" class="text-sm text-muted-foreground">
-          {{ $t("pages.tests.form.loadingTanks") }}
-        </div>
-
-        <div v-else-if="tanksError" class="space-y-2">
-          <p class="text-sm text-destructive" role="alert">{{ tanksError }}</p>
-          <Button as-child>
-            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
-          </Button>
-        </div>
-
-        <div v-else-if="!tanks.length" class="space-y-2">
-          <p>{{ $t("pages.tests.form.noTanks") }}</p>
-          <Button as-child>
-            <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
-          </Button>
-        </div>
-
-        <div v-else-if="!tank" class="space-y-2">
-          <p class="text-sm text-destructive" role="alert">
-            {{ $t("pages.tank.unknown.descriptionPrefix") }}
-            <code class="rounded bg-muted px-1 py-0.5">{{ tankId }}</code>
-          </p>
-          <Button as-child>
-            <NuxtLink :to="localePath('/dashboard')">{{ $t("actions.backToHome") }}</NuxtLink>
-          </Button>
-        </div>
-
-        <form v-else class="space-y-5" @submit.prevent="onSubmit">
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div class="space-y-2">
-              <label for="test-date" class="text-foreground">{{ $t("pages.tests.form.fields.date") }}</label>
-              <Input
-                id="test-date"
-                v-model="dateInput"
-                type="datetime-local"
-                autocomplete="off"
-                :aria-invalid="dateError ? 'true' : 'false'"
-                aria-describedby="test-date-hint test-date-feedback"
-                required
-              />
-              <p id="test-date-hint" class="text-xs text-muted-foreground">{{ $t("pages.tests.form.hints.date") }}</p>
-              <p v-if="dateError" id="test-date-feedback" class="text-sm text-destructive" role="alert">
-                {{ dateError }}
-              </p>
-              <p v-else id="test-date-feedback" class="sr-only"> </p>
+    <Accordion type="single" collapsible :default-value="undefined">
+      <AccordionItem value="create-test">
+        <AccordionTrigger>
+          <div class="flex flex-col gap-y-1.5">
+            <div class="font-semibold leading-none tracking-tight">
+              {{ $t("pages.tests.form.title") }}
             </div>
-
-            <div class="space-y-2">
-              <div class="text-foreground">{{ $t("pages.tests.form.fields.tank") }}</div>
-              <div class="text-sm text-foreground">
-                {{ tank.name }}
-              </div>
-              <p class="text-xs text-muted-foreground">{{ $t("pages.tests.form.hints.tank") }}</p>
-            </div>
+            <p class="text-sm text-muted-foreground">
+              {{ $t("pages.tests.form.description") }}
+            </p>
           </div>
+        </AccordionTrigger>
 
-          <fieldset class="space-y-3">
-            <legend class="text-sm font-medium text-foreground">{{ $t("pages.tests.form.fields.parameters") }}</legend>
-            <p v-if="rangesStatus === 'loading'" class="text-xs text-muted-foreground">
-              {{ $t("pages.tests.ranges.loading") }}
-            </p>
-            <p v-else-if="rangesStatus === 'error'" class="text-xs text-destructive" role="alert">
-              {{ $t("pages.tests.ranges.errors.loadFailed") }}
-              <span v-if="rangesError">({{ rangesError }})</span>
-            </p>
-            <div v-else-if="!parameterRanges.length" class="space-y-2 rounded-md border border-border/60 bg-muted/20 p-4">
-              <p class="text-xs text-muted-foreground">
-                {{ $t("pages.tests.ranges.emptyHint") }}
-              </p>
-              <Button as-child variant="secondary" size="sm">
-                <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/water-test/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
+        <AccordionContent>
+          <div class="text-sm text-muted-foreground">
+            <div v-if="!isStorageReady" class="space-y-2">
+              <p>{{ $t("pages.tests.form.locked") }}</p>
+              <Button as-child>
+                <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
               </Button>
             </div>
-            <div v-else class="grid gap-4 sm:grid-cols-2">
-              <div v-for="range in parameterRanges" :key="range.parameter" class="space-y-2">
-                <div class="flex items-start justify-between gap-2">
-                  <label :for="toParameterInputId(range.parameter)" class="flex-1 text-foreground">
-                    <span class="inline-flex items-center gap-2">
-                      <span
-                        class="inline-block size-2 shrink-0 rounded-full border border-border/60"
-                        :style="{ backgroundColor: range.color ?? 'transparent' }"
-                        aria-hidden="true"
-                      />
-                      <span>{{ range.parameter }}</span>
-                    </span>
-                    <span class="text-xs text-muted-foreground">({{ range.unit }})</span>
-                  </label>
-                  <div class="shrink-0">
-                    <ParameterTimer :parameter="range.parameter" />
+
+            <div v-else-if="tanksStatus === 'loading'" class="text-sm text-muted-foreground">
+              {{ $t("pages.tests.form.loadingTanks") }}
+            </div>
+
+            <div v-else-if="tanksError" class="space-y-2">
+              <p class="text-sm text-destructive" role="alert">{{ tanksError }}</p>
+              <Button as-child>
+                <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+              </Button>
+            </div>
+
+            <div v-else-if="!tanks.length" class="space-y-2">
+              <p>{{ $t("pages.tests.form.noTanks") }}</p>
+              <Button as-child>
+                <NuxtLink :to="localePath('/dashboard/settings')">{{ $t("actions.goToSettings") }}</NuxtLink>
+              </Button>
+            </div>
+
+            <div v-else-if="!tank" class="space-y-2">
+              <p class="text-sm text-destructive" role="alert">
+                {{ $t("pages.tank.unknown.descriptionPrefix") }}
+                <code class="rounded bg-muted px-1 py-0.5">{{ tankId }}</code>
+              </p>
+              <Button as-child>
+                <NuxtLink :to="localePath('/dashboard')">{{ $t("actions.backToHome") }}</NuxtLink>
+              </Button>
+            </div>
+
+            <form v-else class="space-y-5" @submit.prevent="onSubmit">
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div class="space-y-2">
+                  <label for="test-date" class="text-foreground">{{ $t("pages.tests.form.fields.date") }}</label>
+                  <Input
+                    id="test-date"
+                    v-model="dateInput"
+                    type="datetime-local"
+                    autocomplete="off"
+                    :aria-invalid="dateError ? 'true' : 'false'"
+                    aria-describedby="test-date-hint test-date-feedback"
+                    required
+                  />
+                  <p id="test-date-hint" class="text-xs text-muted-foreground">{{ $t("pages.tests.form.hints.date") }}</p>
+                  <p v-if="dateError" id="test-date-feedback" class="text-sm text-destructive" role="alert">
+                    {{ dateError }}
+                  </p>
+                  <p v-else id="test-date-feedback" class="sr-only"> </p>
+                </div>
+
+                <div class="space-y-2">
+                  <div class="text-foreground">{{ $t("pages.tests.form.fields.tank") }}</div>
+                  <div class="text-sm text-foreground">
+                    {{ tank.name }}
+                  </div>
+                  <p class="text-xs text-muted-foreground">{{ $t("pages.tests.form.hints.tank") }}</p>
+                </div>
+              </div>
+
+              <fieldset class="space-y-3">
+                <legend class="text-sm font-medium text-foreground">{{ $t("pages.tests.form.fields.parameters") }}</legend>
+                <p v-if="rangesStatus === 'loading'" class="text-xs text-muted-foreground">
+                  {{ $t("pages.tests.ranges.loading") }}
+                </p>
+                <p v-else-if="rangesStatus === 'error'" class="text-xs text-destructive" role="alert">
+                  {{ $t("pages.tests.ranges.errors.loadFailed") }}
+                  <span v-if="rangesError">({{ rangesError }})</span>
+                </p>
+                <div v-else-if="!parameterRanges.length" class="space-y-2 rounded-md border border-border/60 bg-muted/20 p-4">
+                  <p class="text-xs text-muted-foreground">
+                    {{ $t("pages.tests.ranges.emptyHint") }}
+                  </p>
+                  <Button as-child variant="secondary" size="sm">
+                    <NuxtLink :to="localePath(`/dashboard/tank/${tankId}/water-test/ranges`)">{{ $t("actions.editRanges") }}</NuxtLink>
+                  </Button>
+                </div>
+                <div v-else class="grid gap-4 sm:grid-cols-2">
+                  <div v-for="range in parameterRanges" :key="range.parameter" class="space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                      <label :for="toParameterInputId(range.parameter)" class="flex-1 text-foreground">
+                        <span class="inline-flex items-center gap-2">
+                          <span
+                            class="inline-block size-2 shrink-0 rounded-full border border-border/60"
+                            :style="{ backgroundColor: range.color ?? 'transparent' }"
+                            aria-hidden="true"
+                          />
+                          <span>{{ range.parameter }}</span>
+                        </span>
+                        <span class="text-xs text-muted-foreground">({{ range.unit }})</span>
+                      </label>
+                      <div class="shrink-0">
+                        <ParameterTimer :parameter="range.parameter" />
+                      </div>
+                    </div>
+                    <Input
+                      :id="toParameterInputId(range.parameter)"
+                      v-model="parameterValues[range.parameter]"
+                      type="number"
+                      inputmode="decimal"
+                      autocomplete="off"
+                      step="any"
+                      min="0"
+                      :placeholder="$t('pages.tests.form.placeholders.value')"
+                      :aria-invalid="parameterErrors[range.parameter] ? 'true' : 'false'"
+                      :aria-describedby="`${toParameterInputId(range.parameter)}-feedback`"
+                    />
+                    <p
+                      v-if="parameterErrors[range.parameter]"
+                      :id="`${toParameterInputId(range.parameter)}-feedback`"
+                      class="text-sm text-destructive"
+                      role="alert"
+                    >
+                      {{ parameterErrors[range.parameter] }}
+                    </p>
+                    <p v-else :id="`${toParameterInputId(range.parameter)}-feedback`" class="text-xs text-muted-foreground">
+                      <span class="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span
+                          v-if="getInputVerdictBadge(range.parameter)"
+                          class="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase leading-none"
+                          :class="getInputVerdictBadge(range.parameter)!.className"
+                          :title="getInputVerdictBadge(range.parameter)!.ariaLabel"
+                        >
+                          <component :is="getInputVerdictBadge(range.parameter)!.icon" class="size-3.5" aria-hidden="true" />
+                          <span>{{ getInputVerdictBadge(range.parameter)!.label }}</span>
+                          <component
+                            v-if="getInputVerdictBadge(range.parameter)!.directionIcon"
+                            :is="getInputVerdictBadge(range.parameter)!.directionIcon"
+                            class="size-3.5"
+                            aria-hidden="true"
+                          />
+                          <span v-if="getInputVerdictBadge(range.parameter)!.directionLabel" class="sr-only">
+                            ({{ getInputVerdictBadge(range.parameter)!.directionLabel }})
+                          </span>
+                        </span>
+                        <span v-if="getExpectedRangeTextForParameter(range.parameter)">
+                          {{ $t("pages.tests.ranges.expected") }} {{ getExpectedRangeTextForParameter(range.parameter) }}
+                        </span>
+                      </span>
+                    </p>
                   </div>
                 </div>
-                <Input
-                  :id="toParameterInputId(range.parameter)"
-                  v-model="parameterValues[range.parameter]"
-                  type="number"
-                  inputmode="decimal"
-                  autocomplete="off"
-                  step="any"
-                  min="0"
-                  :placeholder="$t('pages.tests.form.placeholders.value')"
-                  :aria-invalid="parameterErrors[range.parameter] ? 'true' : 'false'"
-                  :aria-describedby="`${toParameterInputId(range.parameter)}-feedback`"
-                />
-                <p
-                  v-if="parameterErrors[range.parameter]"
-                  :id="`${toParameterInputId(range.parameter)}-feedback`"
-                  class="text-sm text-destructive"
-                  role="alert"
-                >
-                  {{ parameterErrors[range.parameter] }}
-                </p>
-                <p v-else :id="`${toParameterInputId(range.parameter)}-feedback`" class="text-xs text-muted-foreground">
-                  <span class="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span
-                      v-if="getInputVerdictBadge(range.parameter)"
-                      class="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase leading-none"
-                      :class="getInputVerdictBadge(range.parameter)!.className"
-                      :title="getInputVerdictBadge(range.parameter)!.ariaLabel"
-                    >
-                      <component :is="getInputVerdictBadge(range.parameter)!.icon" class="size-3.5" aria-hidden="true" />
-                      <span>{{ getInputVerdictBadge(range.parameter)!.label }}</span>
-                      <component
-                        v-if="getInputVerdictBadge(range.parameter)!.directionIcon"
-                        :is="getInputVerdictBadge(range.parameter)!.directionIcon"
-                        class="size-3.5"
-                        aria-hidden="true"
-                      />
-                      <span v-if="getInputVerdictBadge(range.parameter)!.directionLabel" class="sr-only">
-                        ({{ getInputVerdictBadge(range.parameter)!.directionLabel }})
-                      </span>
-                    </span>
-                    <span v-if="getExpectedRangeTextForParameter(range.parameter)">
-                      {{ $t("pages.tests.ranges.expected") }} {{ getExpectedRangeTextForParameter(range.parameter) }}
-                    </span>
-                  </span>
-                </p>
+                <p class="text-xs text-muted-foreground">{{ $t("pages.tests.form.hints.parameters") }}</p>
+              </fieldset>
+
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div class="space-y-2">
+                  <label for="test-method" class="text-foreground">{{ $t("pages.tests.form.fields.method") }}</label>
+                  <Input
+                    id="test-method"
+                    v-model="methodInput"
+                    type="text"
+                    autocomplete="off"
+                    :placeholder="$t('pages.tests.form.placeholders.method')"
+                  />
+                </div>
+
+                <div class="space-y-2">
+                  <label for="test-note" class="text-foreground">{{ $t("pages.tests.form.fields.note") }}</label>
+                  <Input
+                    id="test-note"
+                    v-model="noteInput"
+                    type="text"
+                    autocomplete="off"
+                    :placeholder="$t('pages.tests.form.placeholders.note')"
+                  />
+                </div>
               </div>
-            </div>
-            <p class="text-xs text-muted-foreground">{{ $t("pages.tests.form.hints.parameters") }}</p>
-          </fieldset>
 
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div class="space-y-2">
-              <label for="test-method" class="text-foreground">{{ $t("pages.tests.form.fields.method") }}</label>
-              <Input
-                id="test-method"
-                v-model="methodInput"
-                type="text"
-                autocomplete="off"
-                :placeholder="$t('pages.tests.form.placeholders.method')"
-              />
-            </div>
+              <p v-if="submitError" class="text-sm text-destructive" role="alert">{{ submitError }}</p>
+              <p v-else-if="submitStatus" class="text-sm text-foreground" role="status">{{ submitStatus }}</p>
 
-            <div class="space-y-2">
-              <label for="test-note" class="text-foreground">{{ $t("pages.tests.form.fields.note") }}</label>
-              <Input
-                id="test-note"
-                v-model="noteInput"
-                type="text"
-                autocomplete="off"
-                :placeholder="$t('pages.tests.form.placeholders.note')"
-              />
-            </div>
+              <div class="flex flex-wrap gap-2">
+                <Button type="submit" :disabled="isSubmitting || rangesStatus !== 'ready' || !parameterRanges.length">
+                  <span v-if="isSubmitting">{{ $t("pages.tests.form.saving") }}</span>
+                  <span v-else>{{ $t("pages.tests.form.save") }}</span>
+                </Button>
+              </div>
+            </form>
           </div>
-
-          <p v-if="submitError" class="text-sm text-destructive" role="alert">{{ submitError }}</p>
-          <p v-else-if="submitStatus" class="text-sm text-foreground" role="status">{{ submitStatus }}</p>
-
-          <div class="flex flex-wrap gap-2">
-            <Button type="submit" :disabled="isSubmitting || rangesStatus !== 'ready' || !parameterRanges.length">
-              <span v-if="isSubmitting">{{ $t("pages.tests.form.saving") }}</span>
-              <span v-else>{{ $t("pages.tests.form.save") }}</span>
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
 
     <Card>
       <CardHeader>
@@ -1343,73 +1348,10 @@ async function onSubmit() {
                   </ul>
                 </AlertBanner>
 
-                <div class="max-w-full overflow-x-auto">
-                  <table class="w-full text-sm">
-                    <caption class="sr-only">{{ $t("pages.tests.detail.tableCaption") }}</caption>
-                    <thead class="text-xs text-muted-foreground">
-                      <tr class="border-b border-border">
-                        <th scope="col" class="px-2 py-2 text-left font-medium">{{ $t("pages.tests.detail.columns.parameter") }}</th>
-                        <th scope="col" class="px-2 py-2 text-right font-medium">{{ $t("pages.tests.detail.columns.value") }}</th>
-                        <th scope="col" class="hidden px-2 py-2 text-left font-medium sm:table-cell">
-                          {{ $t("pages.tests.detail.columns.unit") }}
-                        </th>
-                        <th scope="col" class="hidden px-2 py-2 text-left font-medium md:table-cell">
-                          {{ $t("pages.tests.detail.columns.range") }}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="measurement in selectedSession.measurements" :key="measurement.id" class="border-b border-border/60">
-                        <th scope="row" class="px-2 py-2 text-left font-medium">
-                          <span class="inline-flex items-center gap-2">
-                            <span
-                              class="inline-block size-2 shrink-0 rounded-full border border-border/60"
-                              :style="{ backgroundColor: getColorForParameter(measurement.parameter) ?? 'transparent' }"
-                              aria-hidden="true"
-                            />
-                            <span>{{ measurement.parameter }}</span>
-                          </span>
-                        </th>
-                        <td class="px-2 py-2 text-right">
-                          <div class="flex flex-wrap items-center justify-end gap-2">
-                            <span :class="measurementValueClass(measurement)">
-                              {{ formatNumber(measurement.value) }}
-                            </span>
-                            <span
-                              class="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-medium uppercase leading-none"
-                              :class="getMeasurementVerdictBadge(measurement).className"
-                              :title="getMeasurementVerdictBadge(measurement).ariaLabel"
-                            >
-                              <component :is="getMeasurementVerdictBadge(measurement).icon" class="size-3.5" aria-hidden="true" />
-                              <span>{{ getMeasurementVerdictBadge(measurement).label }}</span>
-                              <component
-                                v-if="getMeasurementVerdictBadge(measurement).directionIcon"
-                                :is="getMeasurementVerdictBadge(measurement).directionIcon"
-                                class="size-3.5"
-                                aria-hidden="true"
-                              />
-                              <span v-if="getMeasurementVerdictBadge(measurement).directionLabel" class="sr-only">
-                                ({{ getMeasurementVerdictBadge(measurement).directionLabel }})
-                              </span>
-                            </span>
-                          </div>
-                          <div class="mt-1 text-xs text-muted-foreground sm:hidden">
-                            {{ getDisplayUnitForMeasurement(measurement) }}
-                          </div>
-                          <div class="mt-1 text-xs text-muted-foreground md:hidden">
-                            {{ $t("pages.tests.detail.columns.range") }}: {{ getMeasurementRangeText(measurement) ?? "—" }}
-                          </div>
-                        </td>
-                        <td class="hidden px-2 py-2 text-left text-muted-foreground sm:table-cell">
-                          {{ getDisplayUnitForMeasurement(measurement) }}
-                        </td>
-                        <td class="hidden px-2 py-2 text-left text-muted-foreground md:table-cell">
-                          {{ getMeasurementRangeText(measurement) ?? "—" }}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <WaterTestMeasurementsTable
+                  :measurements="selectedSession.measurements"
+                  :parameter-range-rows="parameterRangeRows"
+                />
               </div>
             </DialogContent>
           </Dialog>

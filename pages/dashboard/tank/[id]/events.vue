@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -405,64 +406,75 @@ async function onDeleteEvent(event: TankEvent) {
           </DialogContent>
         </Dialog>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{{ $t("pages.events.form.title") }}</CardTitle>
-            <CardDescription>{{ $t("pages.events.form.description") }}</CardDescription>
-          </CardHeader>
-          <CardContent class="text-sm text-muted-foreground">
-            <div class="mb-5 grid gap-4 sm:grid-cols-2">
-              <div class="space-y-2">
-                <label for="create-event-target-type" class="text-foreground">{{ $t("pages.events.form.fields.target") }}</label>
-                <Select
-                  id="create-event-target-type"
-                  v-model="createTargetType"
-                >
-                  <option value="tank">{{ $t("pages.events.form.targets.tank") }}</option>
-                  <option value="livestock">{{ $t("pages.events.form.targets.livestock") }}</option>
-                </Select>
-                <p class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.target") }}</p>
-              </div>
-
-              <div v-if="createTargetType === 'livestock'" class="space-y-2">
-                <label for="create-event-target-livestock" class="text-foreground">{{ $t("pages.events.form.fields.livestock") }}</label>
-                <Select
-                  id="create-event-target-livestock"
-                  v-model="createTargetId"
-                  :disabled="livestockStatus === 'loading' || livestockStatus === 'error'"
-                >
-                  <option value="">{{ $t("pages.events.form.placeholders.livestock") }}</option>
-                  <option v-for="ls in livestock" :key="ls.livestockId" :value="ls.livestockId">
-                    {{ ls.nameCommon }}
-                  </option>
-                </Select>
-                <p v-if="livestockStatus === 'loading'" class="text-xs text-muted-foreground">{{ $t("pages.livestock.list.loading") }}</p>
-                <p v-else-if="livestockStatus === 'error'" class="text-xs text-destructive">
-                  {{ $t("pages.events.form.errors.loadLivestockFailed") }}
-                  <span v-if="livestockError">({{ livestockError }})</span>
+        <Accordion type="single" collapsible :default-value="undefined">
+          <AccordionItem value="create-event">
+            <AccordionTrigger>
+              <div class="flex flex-col gap-y-1.5">
+                <div class="font-semibold leading-none tracking-tight">
+                  {{ $t("pages.events.form.title") }}
+                </div>
+                <p class="text-sm text-muted-foreground">
+                  {{ $t("pages.events.form.description") }}
                 </p>
-                <p v-else class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.livestock") }}</p>
               </div>
-            </div>
+            </AccordionTrigger>
 
-            <EventReminderForm
-              id-base="create-event"
-              mode="event"
-              :submit-label="$t('pages.events.form.save')"
-              :saving-label="$t('pages.events.form.saving')"
-              :event-types="createEventTypes"
-              :show-quantity-unit-product-fields="showQuantityForCreate"
-              :submit-handler="handleCreateEvent"
-            >
-              <template #actions>
-                <Button variant="secondary" type="button" :disabled="listStatus === 'loading'" @click="loadEvents">
-                  <span v-if="listStatus === 'loading'">{{ $t("pages.events.list.refreshing") }}</span>
-                  <span v-else>{{ $t("pages.events.list.refresh") }}</span>
-                </Button>
-              </template>
-            </EventReminderForm>
-          </CardContent>
-        </Card>
+            <AccordionContent>
+              <div class="text-sm text-muted-foreground">
+                <div class="mb-5 grid gap-4 sm:grid-cols-2">
+                  <div class="space-y-2">
+                    <label for="create-event-target-type" class="text-foreground">{{ $t("pages.events.form.fields.target") }}</label>
+                    <Select
+                      id="create-event-target-type"
+                      v-model="createTargetType"
+                    >
+                      <option value="tank">{{ $t("pages.events.form.targets.tank") }}</option>
+                      <option value="livestock">{{ $t("pages.events.form.targets.livestock") }}</option>
+                    </Select>
+                    <p class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.target") }}</p>
+                  </div>
+
+                  <div v-if="createTargetType === 'livestock'" class="space-y-2">
+                    <label for="create-event-target-livestock" class="text-foreground">{{ $t("pages.events.form.fields.livestock") }}</label>
+                    <Select
+                      id="create-event-target-livestock"
+                      v-model="createTargetId"
+                      :disabled="livestockStatus === 'loading' || livestockStatus === 'error'"
+                    >
+                      <option value="">{{ $t("pages.events.form.placeholders.livestock") }}</option>
+                      <option v-for="ls in livestock" :key="ls.livestockId" :value="ls.livestockId">
+                        {{ ls.nameCommon }}
+                      </option>
+                    </Select>
+                    <p v-if="livestockStatus === 'loading'" class="text-xs text-muted-foreground">{{ $t("pages.livestock.list.loading") }}</p>
+                    <p v-else-if="livestockStatus === 'error'" class="text-xs text-destructive">
+                      {{ $t("pages.events.form.errors.loadLivestockFailed") }}
+                      <span v-if="livestockError">({{ livestockError }})</span>
+                    </p>
+                    <p v-else class="text-xs text-muted-foreground">{{ $t("pages.events.form.hints.livestock") }}</p>
+                  </div>
+                </div>
+
+                <EventReminderForm
+                  id-base="create-event"
+                  mode="event"
+                  :submit-label="$t('pages.events.form.save')"
+                  :saving-label="$t('pages.events.form.saving')"
+                  :event-types="createEventTypes"
+                  :show-quantity-unit-product-fields="showQuantityForCreate"
+                  :submit-handler="handleCreateEvent"
+                >
+                  <template #actions>
+                    <Button variant="secondary" type="button" :disabled="listStatus === 'loading'" @click="loadEvents">
+                      <span v-if="listStatus === 'loading'">{{ $t("pages.events.list.refreshing") }}</span>
+                      <span v-else>{{ $t("pages.events.list.refresh") }}</span>
+                    </Button>
+                  </template>
+                </EventReminderForm>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <Card>
           <CardHeader>

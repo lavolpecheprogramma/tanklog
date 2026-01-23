@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { EVENT_TYPES, type EventType } from "@/composables/useEvents"
@@ -417,28 +418,39 @@ async function onDeleteReminder(reminder: TankReminder) {
       </Card>
 
       <template v-else>
-        <Card>
-          <CardHeader>
-            <CardTitle>{{ $t("pages.reminders.form.title") }}</CardTitle>
-            <CardDescription>{{ $t("pages.reminders.form.description") }}</CardDescription>
-          </CardHeader>
-          <CardContent class="text-sm text-muted-foreground">
-            <EventReminderForm
-              id-base="create-reminder"
-              mode="reminder"
-              :submit-label="$t('pages.reminders.form.save')"
-              :saving-label="$t('pages.reminders.form.saving')"
-              :submit-handler="handleCreateReminder"
-            >
-              <template #actions>
-                <Button variant="secondary" type="button" :disabled="listStatus === 'loading'" @click="loadReminders">
-                  <span v-if="listStatus === 'loading'">{{ $t("pages.reminders.list.refreshing") }}</span>
-                  <span v-else>{{ $t("pages.reminders.list.refresh") }}</span>
-                </Button>
-              </template>
-            </EventReminderForm>
-          </CardContent>
-        </Card>
+        <Accordion type="single" collapsible :default-value="undefined">
+          <AccordionItem value="create-reminder">
+            <AccordionTrigger>
+              <div class="flex flex-col gap-y-1.5">
+                <div class="font-semibold leading-none tracking-tight">
+                  {{ $t("pages.reminders.form.title") }}
+                </div>
+                <p class="text-sm text-muted-foreground">
+                  {{ $t("pages.reminders.form.description") }}
+                </p>
+              </div>
+            </AccordionTrigger>
+
+            <AccordionContent>
+              <div class="text-sm text-muted-foreground">
+                <EventReminderForm
+                  id-base="create-reminder"
+                  mode="reminder"
+                  :submit-label="$t('pages.reminders.form.save')"
+                  :saving-label="$t('pages.reminders.form.saving')"
+                  :submit-handler="handleCreateReminder"
+                >
+                  <template #actions>
+                    <Button variant="secondary" type="button" :disabled="listStatus === 'loading'" @click="loadReminders">
+                      <span v-if="listStatus === 'loading'">{{ $t("pages.reminders.list.refreshing") }}</span>
+                      <span v-else>{{ $t("pages.reminders.list.refresh") }}</span>
+                    </Button>
+                  </template>
+                </EventReminderForm>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <Card>
           <CardHeader>
