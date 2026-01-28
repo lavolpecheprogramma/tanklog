@@ -148,6 +148,18 @@ function toDueEpochMs(value: string): number | null {
   return Number.isFinite(epochMs) ? epochMs : null
 }
 
+function localDayIndex(date: Date): number {
+  return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000)
+}
+
+function dueLocalDayIndex(value: string): number | null {
+  const epochMs = toDueEpochMs(value)
+  if (epochMs === null) return null
+  const date = new Date(epochMs)
+  if (Number.isNaN(date.getTime())) return null
+  return localDayIndex(date)
+}
+
 function formatDateOnly(value: string): string {
   const parsed = parseDateOnly(value)
   if (!parsed) return value
@@ -189,7 +201,77 @@ function reminderDueDateOnly(reminder: TankReminder): string {
   return toDateOnlyValue(date)
 }
 
+function reminderOccurrenceIndex(reminder: TankReminder, dueValue: string): number | null {
+  if (reminder.repeatEveryDays === null) return null
+  if (!reminder.startDue) return null
+  if (!Number.isFinite(reminder.repeatEveryDays) || reminder.repeatEveryDays <= 0) return null
+
+  const startIndex = dueLocalDayIndex(reminder.startDue)
+  const dueIndex = dueLocalDayIndex(dueValue)
+  if (startIndex === null || dueIndex === null) return null
+
+  const diffDays = dueIndex - startIndex
+  if (diffDays <= 0) return 1
+  return Math.floor(diffDays / reminder.repeatEveryDays) + 1
+}
+
+function reminderTotalOccurrences(reminder: TankReminder): number | null {
+  if (reminder.repeatEveryDays === null) return null
+  if (!reminder.startDue || !reminder.endDue) return null
+  if (!Number.isFinite(reminder.repeatEveryDays) || reminder.repeatEveryDays <= 0) return null
+
+  const startIndex = dueLocalDayIndex(reminder.startDue)
+  const endIndex = dueLocalDayIndex(reminder.endDue)
+  if (startIndex === null || endIndex === null) return null
+  if (endIndex < startIndex) return null
+
+  return Math.floor((endIndex - startIndex) / reminder.repeatEveryDays) + 1
+}
+
+function isReminderEnded(reminder: TankReminder): boolean {
+  const endDue = reminder.endDue
+  if (!endDue) return false
+
+  const endEpochMs = toDueEpochMs(endDue)
+  if (endEpochMs === null) return false
+
+  const nowMs = remindersNow.value.getTime()
+  if (nowMs > endEpochMs) return true
+
+  const nextDueEpochMs = toDueEpochMs(reminder.nextDue)
+  return nextDueEpochMs !== null && nextDueEpochMs > endEpochMs
+}
+
+function reminderOccurrenceLabel(reminder: TankReminder): string | null {
+  if (reminder.repeatEveryDays === null) return null
+  if (!reminder.startDue) return null
+
+  if (reminder.endDue) {
+    const total = reminderTotalOccurrences(reminder)
+    if (!total) return null
+
+    const currentRaw = isReminderEnded(reminder)
+      ? total
+      : reminderOccurrenceIndex(reminder, reminder.nextDue)
+
+    if (!currentRaw) return null
+    const current = Math.min(Math.max(currentRaw, 1), total)
+    return `${current}/${total}`
+  }
+
+  const current = reminderOccurrenceIndex(reminder, reminder.nextDue)
+  if (!current) return null
+  return `${current}`
+}
+
 function reminderBadge(reminder: TankReminder): { label: string; className: string } {
+  if (isReminderEnded(reminder)) {
+    return {
+      label: t("pages.reminders.list.badges.ended"),
+      className: "border-slate-500/30 bg-slate-500/10 text-slate-700 dark:text-slate-400",
+    }
+  }
+
   const dueEpochMs = toDueEpochMs(reminder.nextDue)
   if (dueEpochMs !== null && dueEpochMs < remindersNow.value.getTime()) {
     return {
@@ -352,7 +434,9 @@ const featuredPhoto = computed(() => photos.value[0] ?? null)
 const recentPhotos = computed(() => photos.value.slice(0, 4))
 
 const activeReminders = computed(() =>
-  reminders.value.filter((reminder) => !(reminder.repeatEveryDays === null && reminder.lastDone !== null))
+  reminders.value.filter((reminder) =>
+    !((reminder.repeatEveryDays === null && reminder.lastDone !== null) || isReminderEnded(reminder))
+  )
 )
 const nextReminders = computed(() => activeReminders.value.slice(0, 3))
 
@@ -750,20 +834,30 @@ const trendChartOptions = computed(() => ({
                     class="flex flex-wrap items-start justify-between gap-2 rounded-md border border-border bg-muted/20 px-3 py-2"
                   >
                     <div class="min-w-0 space-y-1">
-                      <div class="text-sm font-medium text-foreground">
-                        {{ reminder.title }}
+                      <div class="flex flex-wrap items-center gap-2">
+                        <div class="text-sm font-medium text-foreground">
+                          {{ reminder.title }}
+                        </div>
+                        <span
+                          v-if="reminderOccurrenceLabel(reminder)"
+                          class="inline-flex items-center rounded-full border border-border bg-muted/30 px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                        >
+                          {{ reminderOccurrenceLabel(reminder) }}
+                        </span>
                       </div>
                       <div class="text-xs text-muted-foreground">
                         {{ formatReminderDate(reminder.nextDue) }}
                       </div>
                     </div>
 
-                    <span
-                      class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
-                      :class="reminderBadge(reminder).className"
-                    >
-                      {{ reminderBadge(reminder).label }}
-                    </span>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span
+                        class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+                        :class="reminderBadge(reminder).className"
+                      >
+                        {{ reminderBadge(reminder).label }}
+                      </span>
+                    </div>
                   </li>
                 </ul>
               </div>

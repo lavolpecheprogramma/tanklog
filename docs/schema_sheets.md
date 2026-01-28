@@ -209,12 +209,15 @@ When a reminder is marked **done**, TankLog can automatically create a matching 
 | `quantity` | number | no | Numeric quantity (if applicable) |
 | `unit` | string | no | Unit for `quantity` (example: `L`, `ml`, `g`) |
 | `product` | string | no | Product name (if dosing/maintenance) |
+| `start_due` | string | no | Initial due date/time (set once at creation; does not change when `next_due` advances) |
+| `end_due` | string | no | Optional end date (date-only `YYYY-MM-DD` recommended). After this, the reminder is considered ended and should not be scheduled. |
 
 **Behavior**
 
 - A reminder is **overdue** if `next_due` is before now.
 - A reminder is **due today** if `next_due` is today (user’s local date).
 - A reminder is **upcoming** if `next_due` is after today.
+- If `end_due` is set, a reminder is **ended** when now is past `end_due` (date-only evaluated in the user’s local time), or when the next occurrence would fall after `end_due`.
 - If `event_type` is set, marking a reminder as **done** SHOULD create one row in `EVENTS` with:
   - `date`: the done timestamp
   - `type`: `REMINDERS.event_type`
@@ -227,6 +230,7 @@ When a reminder is marked **done**, TankLog can automatically create a matching 
 - Older spreadsheets may contain `next_due` / `last_done` as date-only (`YYYY-MM-DD`).
 - TankLog reads both formats; new reminders are saved as full ISO timestamps (UTC).
 - Older spreadsheets may be missing the `event_type` / `quantity` / `unit` / `product` columns; TankLog will add the headers and treat missing values as empty.
+- Older spreadsheets may be missing the `start_due` / `end_due` columns; TankLog will add the headers and treat missing values as empty.
 
 ---
 

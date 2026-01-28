@@ -220,6 +220,11 @@
         <p class="max-w-prose text-muted-foreground">
           {{ $t("pages.settings.description") }}
         </p>
+        <div v-if="activeTank" class="flex flex-wrap gap-2">
+          <Button variant="secondary" size="sm" as-child>
+            <NuxtLink :to="localePath(`/dashboard/tank/${activeTank.id}`)">{{ $t("actions.backToTank") }}</NuxtLink>
+          </Button>
+        </div>
       </div>
   
       <Card>

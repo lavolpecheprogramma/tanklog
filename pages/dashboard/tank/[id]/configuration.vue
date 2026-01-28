@@ -253,6 +253,11 @@ async function onDeleteTank() {
     <div class="space-y-2">
       <h1 class="text-2xl font-semibold tracking-tight">{{ $t("pages.tankConfiguration.title") }}</h1>
       <p class="max-w-prose text-muted-foreground">{{ $t("pages.tankConfiguration.description") }}</p>
+      <div v-if="tankId" class="flex flex-wrap gap-2">
+        <Button variant="secondary" size="sm" as-child>
+          <NuxtLink :to="localePath(`/dashboard/tank/${tankId}`)">{{ $t("actions.backToTank") }}</NuxtLink>
+        </Button>
+      </div>
     </div>
 
     <Card v-if="!isStorageReady">

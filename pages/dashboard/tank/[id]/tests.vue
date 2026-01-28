@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Button } from "@/components/ui/button"
+
 definePageMeta({
   layout: "tank",
 })
@@ -27,6 +29,11 @@ watchEffect(() => {
   <section class="space-y-2">
     <h1 class="text-2xl font-semibold tracking-tight">TankLog</h1>
     <p class="text-sm text-muted-foreground">Redirecting…</p>
+    <div v-if="tankId" class="flex flex-wrap gap-2">
+      <Button variant="secondary" size="sm" as-child>
+        <NuxtLink :to="localePath(`/dashboard/tank/${tankId}`)">{{ $t("actions.backToTank") }}</NuxtLink>
+      </Button>
+    </div>
   </section>
 </template>
 

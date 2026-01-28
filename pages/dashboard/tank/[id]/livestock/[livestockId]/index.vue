@@ -332,9 +332,14 @@ async function handleUpdate(payload: LivestockFormPayload) {
 <template>
   <section class="space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div class="space-y-1">
+      <div class="space-y-2">
         <h1 class="text-2xl font-semibold tracking-tight">{{ $t("pages.livestock.detail.title") }}</h1>
         <p class="max-w-prose text-muted-foreground">{{ $t("pages.livestock.detail.description") }}</p>
+        <div v-if="tankId" class="flex flex-wrap gap-2">
+          <Button variant="secondary" size="sm" as-child>
+            <NuxtLink :to="localePath(`/dashboard/tank/${tankId}`)">{{ $t("actions.backToTank") }}</NuxtLink>
+          </Button>
+        </div>
       </div>
 
       <div class="flex flex-wrap gap-2">

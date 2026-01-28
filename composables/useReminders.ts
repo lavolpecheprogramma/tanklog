@@ -5,6 +5,8 @@ export type TankReminder = {
   reminderId: string
   title: string
   nextDue: string
+  startDue: string | null
+  endDue: string | null
   repeatEveryDays: number | null
   lastDone: string | null
   notes: string | null
@@ -20,6 +22,7 @@ export type CreateTankReminderInput = {
   nextDue: string
   eventType: EventType
   repeatEveryDays?: number | null
+  endDue?: string | null
   quantity?: number | null
   unit?: string | null
   product?: string | null
@@ -47,7 +50,7 @@ export type SetTankReminderDoneInput = {
   done: boolean
 }
 
-const REMINDERS_HEADERS = ["id", "title", "next_due", "repeat_every_days", "last_done", "notes", "event_type", "quantity", "unit", "product"] as const
+const REMINDERS_HEADERS = ["id", "title", "next_due", "repeat_every_days", "last_done", "notes", "event_type", "quantity", "unit", "product", "start_due", "end_due"] as const
 const ensuredSpreadsheets = new Set<string>()
 
 function generateId(prefix: string): string {
@@ -177,6 +180,8 @@ function parseReminderRow(row: SheetsCellValue[]): TankReminder | null {
   const quantity = cellToNumber(row[7])
   const unit = cellToOptionalText(row[8])
   const product = cellToOptionalText(row[9])
+  const rawStartDue = cellToOptionalText(row[10])
+  const rawEndDue = cellToOptionalText(row[11])
 
   if (!reminderId || !title || !rawNextDue) return null
 
@@ -185,6 +190,9 @@ function parseReminderRow(row: SheetsCellValue[]): TankReminder | null {
 
   const lastDone = rawLastDone ? normalizeDateOrTimestamp(rawLastDone) : null
   if (rawLastDone && !lastDone) return null
+
+  const startDue = rawStartDue ? normalizeDateOrTimestamp(rawStartDue) : null
+  const endDue = rawEndDue ? normalizeDateOrTimestamp(rawEndDue) : null
 
   const normalizedRepeat = repeatEveryDays !== null && repeatEveryDays > 0 ? repeatEveryDays : null
 
@@ -195,6 +203,8 @@ function parseReminderRow(row: SheetsCellValue[]): TankReminder | null {
     reminderId,
     title,
     nextDue,
+    startDue,
+    endDue,
     repeatEveryDays: normalizedRepeat,
     lastDone,
     notes,
@@ -226,7 +236,7 @@ export function useReminders() {
 
       await sheets.updateValues({
         spreadsheetId,
-        range: "REMINDERS!A1:J1",
+        range: "REMINDERS!A1:L1",
         values: [[...REMINDERS_HEADERS]],
       })
     } catch (error) {
@@ -246,6 +256,18 @@ export function useReminders() {
 
     const nextDue = normalizeDateOrTimestamp(rawNextDue)
     if (!nextDue) throw new Error("Invalid next due date.")
+
+    const rawEndDue = input.endDue?.trim() ?? ""
+    const endDue = rawEndDue ? normalizeDateOrTimestamp(rawEndDue) : null
+    if (rawEndDue && !endDue) throw new Error("Invalid end date.")
+
+    if (endDue) {
+      const endEpochMs = toDueEpochMs(endDue)
+      const startEpochMs = toDueEpochMs(nextDue)
+      if (endEpochMs !== null && startEpochMs !== null && endEpochMs < startEpochMs) {
+        throw new Error("End date must be on or after the first due date.")
+      }
+    }
 
     const eventType = input.eventType
     if (!EVENT_TYPES.includes(eventType)) {
@@ -269,6 +291,8 @@ export function useReminders() {
       reminderId: generateId("r"),
       title,
       nextDue,
+      startDue: nextDue,
+      endDue,
       eventType,
       repeatEveryDays,
       quantity,
@@ -282,7 +306,7 @@ export function useReminders() {
 
     await sheets.appendValues({
       spreadsheetId: input.spreadsheetId,
-      range: "REMINDERS!A:J",
+      range: "REMINDERS!A:L",
       values: [[
         reminder.reminderId,
         reminder.title,
@@ -294,6 +318,8 @@ export function useReminders() {
         reminder.quantity,
         reminder.unit,
         reminder.product,
+        reminder.startDue,
+        reminder.endDue,
       ]],
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
@@ -309,7 +335,7 @@ export function useReminders() {
 
     const response = await sheets.getValues({
       spreadsheetId: input.spreadsheetId,
-      range: "REMINDERS!A:J",
+      range: "REMINDERS!A:L",
       valueRenderOption: "UNFORMATTED_VALUE",
     })
 
@@ -335,7 +361,7 @@ export function useReminders() {
 
     const response = await sheets.getValues({
       spreadsheetId,
-      range: "REMINDERS!A:J",
+      range: "REMINDERS!A:L",
       valueRenderOption: "UNFORMATTED_VALUE",
     })
 
@@ -395,7 +421,7 @@ export function useReminders() {
 
     const response = await sheets.getValues({
       spreadsheetId: input.spreadsheetId,
-      range: `REMINDERS!A${rowNumber}:J${rowNumber}`,
+      range: `REMINDERS!A${rowNumber}:L${rowNumber}`,
       valueRenderOption: "UNFORMATTED_VALUE",
     })
 
@@ -410,7 +436,7 @@ export function useReminders() {
 
     await sheets.updateValues({
       spreadsheetId: input.spreadsheetId,
-      range: `REMINDERS!A${rowNumber}:J${rowNumber}`,
+      range: `REMINDERS!A${rowNumber}:L${rowNumber}`,
       values: [[
         reminder.reminderId,
         reminder.title,
@@ -422,6 +448,8 @@ export function useReminders() {
         reminder.quantity,
         reminder.unit,
         reminder.product,
+        reminder.startDue,
+        reminder.endDue,
       ]],
       valueInputOption: "RAW",
     })
@@ -437,7 +465,7 @@ export function useReminders() {
 
     const response = await sheets.getValues({
       spreadsheetId: input.spreadsheetId,
-      range: `REMINDERS!A${rowNumber}:J${rowNumber}`,
+      range: `REMINDERS!A${rowNumber}:L${rowNumber}`,
       valueRenderOption: "UNFORMATTED_VALUE",
     })
 
@@ -466,7 +494,7 @@ export function useReminders() {
 
     await sheets.updateValues({
       spreadsheetId: input.spreadsheetId,
-      range: `REMINDERS!A${rowNumber}:J${rowNumber}`,
+      range: `REMINDERS!A${rowNumber}:L${rowNumber}`,
       values: [[
         reminder.reminderId,
         reminder.title,
@@ -478,6 +506,8 @@ export function useReminders() {
         reminder.quantity,
         reminder.unit,
         reminder.product,
+        reminder.startDue,
+        reminder.endDue,
       ]],
       valueInputOption: "RAW",
     })

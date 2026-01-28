@@ -45,6 +45,7 @@
     "logout": "Esci",
     "loggingOut": "Uscita…",
     "backToHome": "Torna alla Home",
+    "backToTank": "Torna alla vasca",
     "goToPhotos": "Vai a Foto",
     "goToEvents": "Vai a Eventi",
     "goToReminders": "Vai a Promemoria",
@@ -845,11 +846,13 @@
         "fields": {
           "title": "Titolo",
           "nextDue": "Prossima scadenza",
+          "endDue": "Data fine (opzionale)",
           "repeatEveryDays": "Ripeti ogni (giorni, opzionale)",
           "notes": "Note (opzionale)"
         },
         "hints": {
           "nextDue": "Viene salvato come timestamp ISO nel foglio (UTC).",
+          "endDue": "Opzionale. Dopo questa data, il promemoria viene considerato terminato.",
           "repeatEveryDays": "Lascia vuoto per promemoria una tantum."
         },
         "placeholders": {
@@ -862,6 +865,8 @@
           "missingTitle": "Inserisci un titolo.",
           "missingNextDue": "Seleziona data e ora di scadenza.",
           "invalidNextDue": "Inserisci una data/ora valida.",
+          "invalidEndDue": "Inserisci una data fine valida (YYYY-MM-DD).",
+          "endDueBeforeNextDue": "La data fine deve essere uguale o successiva alla prima scadenza.",
           "invalidRepeatEveryDays": "Inserisci un numero intero di giorni > 0.",
           "saveFailed": "Salvataggio promemoria non riuscito."
         },
@@ -883,6 +888,8 @@
           "completed": "Completati"
         },
         "labels": {
+          "initial": "Inizio",
+          "end": "Fine",
           "repeatEveryDays": "Ripetizione",
           "notes": "Note",
           "lastDone": "Ultima esecuzione"
@@ -891,7 +898,8 @@
           "dueToday": "Scade oggi",
           "overdue": "Scaduto",
           "upcoming": "In arrivo",
-          "done": "Completato"
+          "done": "Completato",
+          "ended": "Terminato"
         },
         "errors": {
           "loadFailed": "Impossibile caricare i promemoria."

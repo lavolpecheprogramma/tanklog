@@ -17,12 +17,13 @@ type BaseFields = {
 }
 
 type EventSubmitPayload = BaseFields & { date: Date }
-type ReminderSubmitPayload = BaseFields & { nextDue: string; repeatEveryDays: number | null }
+type ReminderSubmitPayload = BaseFields & { nextDue: string; endDue: string | null; repeatEveryDays: number | null }
 
 type InitialValues = Partial<
   {
     date: string | Date
     nextDue: string | Date
+    endDue: string | Date | null
     repeatEveryDays: number | null
   } & {
     eventType: EventType | null
@@ -59,6 +60,26 @@ function normalizeOptionalText(value: string): string | null {
   return trimmed ? trimmed : null
 }
 
+function toDateOnlyValue(date: Date): string {
+  const pad = (value: number) => value.toString().padStart(2, "0")
+  const year = date.getFullYear()
+  const month = pad(date.getMonth() + 1)
+  const day = pad(date.getDate())
+  return `${year}-${month}-${day}`
+}
+
+function parseDateOnly(value: string): { year: number; month: number; day: number } | null {
+  const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!match) return null
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return null
+  if (month < 1 || month > 12) return null
+  if (day < 1 || day > 31) return null
+  return { year, month, day }
+}
+
 function parseNumberInput(value: string | number): number | null {
   if (typeof value === "number") return value
   const normalized = value.trim().replace(",", ".")
@@ -83,6 +104,9 @@ const dateError = ref<string | null>(null)
 
 const nextDueInput = ref("")
 const nextDueError = ref<string | null>(null)
+
+const endDueInput = ref("")
+const endDueError = ref<string | null>(null)
 
 const repeatEveryDaysInput = ref("")
 const repeatEveryDaysError = ref<string | null>(null)
@@ -148,6 +172,24 @@ watch(
         const date = values.nextDue instanceof Date ? values.nextDue : new Date(values.nextDue)
         nextDueInput.value = Number.isNaN(date.getTime()) ? "" : toDatetimeLocalValue(date)
       }
+      if (values.endDue !== undefined) {
+        const value = values.endDue
+        if (!value) {
+          endDueInput.value = ""
+        } else if (value instanceof Date) {
+          endDueInput.value = Number.isNaN(value.getTime()) ? "" : toDateOnlyValue(value)
+        } else {
+          const trimmed = value.trim()
+          if (!trimmed) {
+            endDueInput.value = ""
+          } else if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+            endDueInput.value = trimmed
+          } else {
+            const date = new Date(trimmed)
+            endDueInput.value = Number.isNaN(date.getTime()) ? "" : toDateOnlyValue(date)
+          }
+        }
+      }
       if (values.repeatEveryDays !== undefined) {
         repeatEveryDaysInput.value = values.repeatEveryDays === null ? "" : String(values.repeatEveryDays)
       }
@@ -174,6 +216,7 @@ watch(eventTypeInput, (value) => {
 function resetFormErrors() {
   dateError.value = null
   nextDueError.value = null
+  endDueError.value = null
   repeatEveryDaysError.value = null
   eventTypeError.value = null
   descriptionError.value = null
@@ -243,6 +286,24 @@ function validate(): EventSubmitPayload | ReminderSubmitPayload | null {
     return null
   }
 
+  const endRaw = endDueInput.value.trim()
+  if (endRaw) {
+    const parsed = parseDateOnly(endRaw)
+    if (!parsed) {
+      endDueError.value = t("pages.reminders.form.errors.invalidEndDue")
+      return null
+    }
+    const endDate = new Date(parsed.year, parsed.month - 1, parsed.day, 23, 59, 59, 999)
+    if (Number.isNaN(endDate.getTime())) {
+      endDueError.value = t("pages.reminders.form.errors.invalidEndDue")
+      return null
+    }
+    if (endDate.getTime() < dueDate.getTime()) {
+      endDueError.value = t("pages.reminders.form.errors.endDueBeforeNextDue")
+      return null
+    }
+  }
+
   const repeatRaw = String(repeatEveryDaysInput.value ?? "").trim()
   const repeatEveryDays = repeatRaw ? parsePositiveInteger(repeatRaw) : null
   if (repeatRaw && repeatEveryDays === null) {
@@ -276,6 +337,7 @@ function validate(): EventSubmitPayload | ReminderSubmitPayload | null {
 
   return {
     nextDue: dueDate.toISOString(),
+    endDue: endRaw ? endRaw : null,
     repeatEveryDays,
     eventType,
     description,
@@ -296,6 +358,7 @@ function resetAfterSuccess() {
 
   if (props.mode === "reminder") {
     repeatEveryDaysInput.value = ""
+    endDueInput.value = ""
   }
 }
 
@@ -402,7 +465,24 @@ async function onSubmit() {
         <p v-else :id="`${idBase}-repeat-feedback`" class="sr-only"> </p>
       </div>
 
-      <div class="space-y-2 sm:col-span-2">
+      <div class="space-y-2">
+        <label :for="`${idBase}-end-due`" class="text-foreground">{{ $t("pages.reminders.form.fields.endDue") }}</label>
+        <Input
+          :id="`${idBase}-end-due`"
+          v-model="endDueInput"
+          type="date"
+          autocomplete="off"
+          :aria-invalid="endDueError ? 'true' : 'false'"
+          :aria-describedby="`${idBase}-end-due-hint ${idBase}-end-due-feedback`"
+        />
+        <p :id="`${idBase}-end-due-hint`" class="text-xs text-muted-foreground">{{ $t("pages.reminders.form.hints.endDue") }}</p>
+        <p v-if="endDueError" :id="`${idBase}-end-due-feedback`" class="text-sm text-destructive" role="alert">
+          {{ endDueError }}
+        </p>
+        <p v-else :id="`${idBase}-end-due-feedback`" class="sr-only"> </p>
+      </div>
+
+      <div class="space-y-2">
         <label :for="`${idBase}-type`" class="text-foreground">{{ $t("pages.events.form.fields.type") }}</label>
         <Select
           :id="`${idBase}-type`"

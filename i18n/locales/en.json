@@ -45,6 +45,7 @@
     "logout": "Logout",
     "loggingOut": "Logging out…",
     "backToHome": "Back to Home",
+    "backToTank": "Back to Tank",
     "goToPhotos": "Go to Photos",
     "goToEvents": "Go to Events",
     "goToReminders": "Go to Reminders",
@@ -845,11 +846,13 @@
         "fields": {
           "title": "Title",
           "nextDue": "Next due",
+          "endDue": "End date (optional)",
           "repeatEveryDays": "Repeat every (days, optional)",
           "notes": "Notes (optional)"
         },
         "hints": {
           "nextDue": "Saved as an ISO timestamp in the sheet (UTC).",
+          "endDue": "Optional. After this date, the reminder is considered ended.",
           "repeatEveryDays": "Leave blank for one-time reminders."
         },
         "placeholders": {
@@ -862,6 +865,8 @@
           "missingTitle": "Add a title.",
           "missingNextDue": "Pick a due date and time.",
           "invalidNextDue": "Enter a valid date/time.",
+          "invalidEndDue": "Enter a valid end date (YYYY-MM-DD).",
+          "endDueBeforeNextDue": "End date must be on or after the first due date.",
           "invalidRepeatEveryDays": "Enter a whole number of days > 0.",
           "saveFailed": "Failed to save the reminder."
         },
@@ -883,6 +888,8 @@
           "completed": "Completed"
         },
         "labels": {
+          "initial": "Initial",
+          "end": "End",
           "repeatEveryDays": "Repeat",
           "notes": "Notes",
           "lastDone": "Last done"
@@ -891,7 +898,8 @@
           "dueToday": "Due today",
           "overdue": "Overdue",
           "upcoming": "Upcoming",
-          "done": "Done"
+          "done": "Done",
+          "ended": "Ended"
         },
         "errors": {
           "loadFailed": "Failed to load reminders."

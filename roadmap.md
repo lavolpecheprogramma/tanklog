@@ -231,6 +231,7 @@
 
 - [ ] Settings: language, disconnect account, change spreadsheet ID
 - [ ] Onboarding: “create/copy the template sheet” instructions (simple step-by-step)
+- [x] Reminders: start/end dates (persist initial date + optional end date to stop scheduling)
 - [ ] Robust error handling (expired token, missing tabs, bad sheet ID)
 - [ ] Final UI pass (copy, spacing, empty states)
 

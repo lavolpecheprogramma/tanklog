@@ -129,6 +129,81 @@ function reminderDueDateOnly(reminder: TankReminder): string {
   return toDateOnlyValue(date)
 }
 
+function isReminderEnded(reminder: TankReminder): boolean {
+  const endDue = reminder.endDue
+  if (!endDue) return false
+
+  const endEpochMs = toDueEpochMs(endDue)
+  if (endEpochMs === null) return false
+
+  const nowMs = now.value.getTime()
+  if (nowMs > endEpochMs) return true
+
+  const nextDueEpochMs = toDueEpochMs(reminder.nextDue)
+  return nextDueEpochMs !== null && nextDueEpochMs > endEpochMs
+}
+
+function localDayIndex(date: Date): number {
+  return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000)
+}
+
+function dueLocalDayIndex(value: string): number | null {
+  const epochMs = toDueEpochMs(value)
+  if (epochMs === null) return null
+  const date = new Date(epochMs)
+  if (Number.isNaN(date.getTime())) return null
+  return localDayIndex(date)
+}
+
+function reminderOccurrenceIndex(reminder: TankReminder, dueValue: string): number | null {
+  if (reminder.repeatEveryDays === null) return null
+  if (!reminder.startDue) return null
+  if (!Number.isFinite(reminder.repeatEveryDays) || reminder.repeatEveryDays <= 0) return null
+
+  const startIndex = dueLocalDayIndex(reminder.startDue)
+  const dueIndex = dueLocalDayIndex(dueValue)
+  if (startIndex === null || dueIndex === null) return null
+
+  const diffDays = dueIndex - startIndex
+  if (diffDays <= 0) return 1
+  return Math.floor(diffDays / reminder.repeatEveryDays) + 1
+}
+
+function reminderTotalOccurrences(reminder: TankReminder): number | null {
+  if (reminder.repeatEveryDays === null) return null
+  if (!reminder.startDue || !reminder.endDue) return null
+  if (!Number.isFinite(reminder.repeatEveryDays) || reminder.repeatEveryDays <= 0) return null
+
+  const startIndex = dueLocalDayIndex(reminder.startDue)
+  const endIndex = dueLocalDayIndex(reminder.endDue)
+  if (startIndex === null || endIndex === null) return null
+  if (endIndex < startIndex) return null
+
+  return Math.floor((endIndex - startIndex) / reminder.repeatEveryDays) + 1
+}
+
+function reminderOccurrenceLabel(reminder: TankReminder): string | null {
+  if (reminder.repeatEveryDays === null) return null
+  if (!reminder.startDue) return null
+
+  if (reminder.endDue) {
+    const total = reminderTotalOccurrences(reminder)
+    if (!total) return null
+
+    const currentRaw = isReminderEnded(reminder)
+      ? total
+      : reminderOccurrenceIndex(reminder, reminder.nextDue)
+
+    if (!currentRaw) return null
+    const current = Math.min(Math.max(currentRaw, 1), total)
+    return `${current}/${total}`
+  }
+
+  const current = reminderOccurrenceIndex(reminder, reminder.nextDue)
+  if (!current) return null
+  return `${current}`
+}
+
 async function loadReminders() {
   if (!import.meta.client) return
 
@@ -161,10 +236,16 @@ watch(
   { immediate: true }
 )
 
-const completedReminders = computed(() => reminders.value.filter((reminder) => reminder.repeatEveryDays === null && reminder.lastDone !== null))
+const completedReminders = computed(() =>
+  reminders.value.filter((reminder) =>
+    (reminder.repeatEveryDays === null && reminder.lastDone !== null) || isReminderEnded(reminder)
+  )
+)
 
 const activeReminders = computed(() =>
-  reminders.value.filter((reminder) => !(reminder.repeatEveryDays === null && reminder.lastDone !== null))
+  reminders.value.filter((reminder) =>
+    !((reminder.repeatEveryDays === null && reminder.lastDone !== null) || isReminderEnded(reminder))
+  )
 )
 
 const overdueReminders = computed(() =>
@@ -182,6 +263,13 @@ const upcomingReminders = computed(() =>
 )
 
 function reminderBadge(reminder: TankReminder): { label: string; className: string } {
+  if (isReminderEnded(reminder)) {
+    return {
+      label: t("pages.reminders.list.badges.ended"),
+      className: "border-slate-500/30 bg-slate-500/10 text-slate-700 dark:text-slate-400",
+    }
+  }
+
   if (reminder.repeatEveryDays === null && reminder.lastDone !== null) {
     return {
       label: t("pages.reminders.list.badges.done"),
@@ -217,6 +305,7 @@ const actionStatus = ref<string | null>(null)
 
 type ReminderFormPayload = {
   nextDue: string
+  endDue: string | null
   repeatEveryDays: number | null
   eventType: EventType
   description: string
@@ -230,6 +319,7 @@ function isReminderFormPayload(value: unknown): value is ReminderFormPayload {
   if (!value || typeof value !== "object") return false
   const candidate = value as Record<string, unknown>
   if (typeof candidate.nextDue !== "string") return false
+  if (candidate.endDue !== null && candidate.endDue !== undefined && typeof candidate.endDue !== "string") return false
   if (candidate.repeatEveryDays !== null && candidate.repeatEveryDays !== undefined && typeof candidate.repeatEveryDays !== "number") return false
 
   if (typeof candidate.eventType !== "string") return false
@@ -258,6 +348,7 @@ async function handleCreateReminder(payload: unknown) {
     nextDue: payload.nextDue,
     eventType: payload.eventType,
     repeatEveryDays: payload.repeatEveryDays,
+    endDue: payload.endDue ?? null,
     quantity: payload.quantity,
     unit: payload.unit,
     product: payload.product,
@@ -361,6 +452,11 @@ async function onDeleteReminder(reminder: TankReminder) {
       <p class="max-w-prose text-muted-foreground">
         {{ $t("pages.reminders.description") }}
       </p>
+      <div v-if="tankId" class="flex flex-wrap gap-2">
+        <Button variant="secondary" size="sm" as-child>
+          <NuxtLink :to="localePath(`/dashboard/tank/${tankId}`)">{{ $t("actions.backToTank") }}</NuxtLink>
+        </Button>
+      </div>
     </div>
 
     <Card v-if="!isStorageReady">
@@ -490,8 +586,24 @@ async function onDeleteReminder(reminder: TankReminder) {
                   <li v-for="reminder in overdueReminders" :key="reminder.reminderId" class="px-4 py-3">
                     <div class="flex flex-wrap items-start justify-between gap-2">
                       <div class="space-y-1">
-                        <div class="font-medium text-foreground">{{ reminder.title }}</div>
+                        <div class="flex flex-wrap items-center gap-2">
+                          <div class="font-medium text-foreground">{{ reminder.title }}</div>
+                          <span
+                            v-if="reminderOccurrenceLabel(reminder)"
+                            class="inline-flex items-center rounded-full border border-border bg-muted/30 px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                          >
+                            {{ reminderOccurrenceLabel(reminder) }}
+                          </span>
+                        </div>
                         <div class="text-xs text-muted-foreground">{{ formatReminderDate(reminder.nextDue) }}</div>
+                        <div class="text-xs text-muted-foreground">
+                          {{ $t("pages.reminders.list.labels.initial") }}:
+                          <span>{{ reminder.startDue ? formatReminderDate(reminder.startDue) : "—" }}</span>
+                          <template v-if="reminder.endDue">
+                            <span> · </span>
+                            <span>{{ $t("pages.reminders.list.labels.end") }}: {{ formatReminderDate(reminder.endDue) }}</span>
+                          </template>
+                        </div>
                       </div>
                       <div class="flex flex-wrap items-center gap-2">
                       <div v-if="reminder.quantity !== null" class="text-right text-sm text-foreground">
@@ -557,8 +669,24 @@ async function onDeleteReminder(reminder: TankReminder) {
                   <li v-for="reminder in upcomingReminders" :key="reminder.reminderId" class="px-4 py-3">
                     <div class="flex flex-wrap items-start justify-between gap-2">
                       <div class="space-y-1">
-                        <div class="font-medium text-foreground">{{ reminder.title }}</div>
+                        <div class="flex flex-wrap items-center gap-2">
+                          <div class="font-medium text-foreground">{{ reminder.title }}</div>
+                          <span
+                            v-if="reminderOccurrenceLabel(reminder)"
+                            class="inline-flex items-center rounded-full border border-border bg-muted/30 px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                          >
+                            {{ reminderOccurrenceLabel(reminder) }}
+                          </span>
+                        </div>
                         <div class="text-xs text-muted-foreground">{{ formatReminderDate(reminder.nextDue) }}</div>
+                        <div class="text-xs text-muted-foreground">
+                          {{ $t("pages.reminders.list.labels.initial") }}:
+                          <span>{{ reminder.startDue ? formatReminderDate(reminder.startDue) : "—" }}</span>
+                          <template v-if="reminder.endDue">
+                            <span> · </span>
+                            <span>{{ $t("pages.reminders.list.labels.end") }}: {{ formatReminderDate(reminder.endDue) }}</span>
+                          </template>
+                        </div>
                       </div>
                       <div class="flex flex-wrap items-center gap-2">
                       <div v-if="reminder.quantity !== null" class="text-right text-sm text-foreground">
@@ -624,8 +752,24 @@ async function onDeleteReminder(reminder: TankReminder) {
                   <li v-for="reminder in completedReminders" :key="reminder.reminderId" class="px-4 py-3">
                     <div class="flex flex-wrap items-start justify-between gap-2">
                       <div class="space-y-1">
-                        <div class="font-medium text-foreground">{{ reminder.title }}</div>
+                        <div class="flex flex-wrap items-center gap-2">
+                          <div class="font-medium text-foreground">{{ reminder.title }}</div>
+                          <span
+                            v-if="reminderOccurrenceLabel(reminder)"
+                            class="inline-flex items-center rounded-full border border-border bg-muted/30 px-2 py-0.5 text-xs font-medium text-muted-foreground"
+                          >
+                            {{ reminderOccurrenceLabel(reminder) }}
+                          </span>
+                        </div>
                         <div class="text-xs text-muted-foreground">{{ formatReminderDate(reminder.nextDue) }}</div>
+                        <div class="text-xs text-muted-foreground">
+                          {{ $t("pages.reminders.list.labels.initial") }}:
+                          <span>{{ reminder.startDue ? formatReminderDate(reminder.startDue) : "—" }}</span>
+                          <template v-if="reminder.endDue">
+                            <span> · </span>
+                            <span>{{ $t("pages.reminders.list.labels.end") }}: {{ formatReminderDate(reminder.endDue) }}</span>
+                          </template>
+                        </div>
                       </div>
                       <div class="flex flex-wrap items-center gap-2">
                         <div v-if="reminder.quantity !== null" class="text-right text-sm text-foreground">
@@ -639,6 +783,7 @@ async function onDeleteReminder(reminder: TankReminder) {
                           {{ reminderBadge(reminder).label }}
                         </span>
                         <Button
+                          v-if="!isReminderEnded(reminder) && reminder.repeatEveryDays === null && reminder.lastDone !== null"
                           size="xs"
                           variant="secondary"
                           type="button"

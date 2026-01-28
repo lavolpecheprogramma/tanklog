@@ -828,6 +828,11 @@ async function onSubmit() {
       <p class="max-w-prose text-muted-foreground">
         {{ $t("pages.tests.description") }}
       </p>
+      <div v-if="tankId" class="flex flex-wrap gap-2">
+        <Button variant="secondary" size="sm" as-child>
+          <NuxtLink :to="localePath(`/dashboard/tank/${tankId}`)">{{ $t("actions.backToTank") }}</NuxtLink>
+        </Button>
+      </div>
     </div>
 
     <Accordion type="single" collapsible :default-value="undefined">

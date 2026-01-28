@@ -135,6 +135,11 @@ const altForTankPhoto = (photo: TankPhoto) => t("pages.photos.timeline.alt.tankP
       <p class="max-w-prose text-muted-foreground">
         {{ $t("pages.photos.description") }}
       </p>
+      <div v-if="tankId" class="flex flex-wrap gap-2">
+        <Button variant="secondary" size="sm" as-child>
+          <NuxtLink :to="localePath(`/dashboard/tank/${tankId}`)">{{ $t("actions.backToTank") }}</NuxtLink>
+        </Button>
+      </div>
     </div>
 
     <Card v-if="!isStorageReady">
