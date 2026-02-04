@@ -831,11 +831,22 @@
         "statusUpdated": "Reminder updated.",
         "statusUpdatedAndLogged": "Reminder updated. Event logged.",
         "statusDeleted": "Reminder deleted.",
+        "statusDeletedWithWarning": "Reminder deleted, but: {message}",
         "errors": {
           "updateFailed": "Failed to update the reminder.",
           "deleteFailed": "Failed to delete the reminder.",
           "eventLogFailed": "Failed to create the linked event.",
           "eventLogFailedWithMessage": "Reminder updated, but failed to create the linked event. ({message})"
+        }
+      },
+      "notifications": {
+        "heading": "TankLog reminder",
+        "errors": {
+          "scheduleFailed": "Failed to schedule the push notification.",
+          "scheduleFailedWithMessage": "Reminder saved, but failed to schedule the push notification. ({message})",
+          "cancelMissingConfig": "OneSignal is not configured (missing API key), so TankLog can’t cancel the scheduled push.",
+          "cancelFailed": "Failed to cancel the scheduled push notification.",
+          "cancelFailedWithMessage": "Reminder updated, but failed to cancel the scheduled push notification. ({message})"
         }
       },
       "form": {
@@ -973,6 +984,74 @@
           "saved": "Client ID saved.",
           "removed": "Client ID removed."
         }
+      },
+      "oneSignal": {
+        "title": "Notifications (OneSignal)",
+        "description": "Optional: enable web push notifications via OneSignal (bring your own App ID + API key).",
+        "statusLabel": "Status",
+        "status": {
+          "enabled": "Enabled",
+          "sdk": "SDK",
+          "workerPath": "Service worker",
+          "pushSupported": "Push supported",
+          "permission": "Permission",
+          "subscribed": "Subscribed",
+          "subscriptionId": "Subscription ID",
+          "externalId": "External ID"
+        },
+        "sdkStatus": {
+          "idle": "Not initialized",
+          "loading": "Loading…",
+          "ready": "Ready",
+          "error": "Error"
+        },
+        "values": {
+          "yes": "Yes",
+          "no": "No",
+          "granted": "Granted",
+          "denied": "Denied"
+        },
+        "fields": {
+          "appId": {
+            "label": "App ID",
+            "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            "hint": "Find it in OneSignal → Settings → Keys & IDs."
+          },
+          "apiKey": {
+            "label": "App API key (optional, for scheduling)",
+            "placeholder": "Paste your OneSignal App API key",
+            "hint": "Required to schedule notifications with send_after. Stored locally on this device."
+          }
+        },
+        "actions": {
+          "save": "Save",
+          "remove": "Remove",
+          "enable": "Enable",
+          "disable": "Disable",
+          "refresh": "Refresh status",
+          "subscribe": "Subscribe this browser",
+          "unsubscribe": "Unsubscribe"
+        },
+        "errors": {
+          "invalidAppId": "Enter a valid OneSignal App ID.",
+          "invalidApiKey": "Enter a valid OneSignal API key.",
+          "initFailed": "Failed to initialize OneSignal.",
+          "disableFailed": "Failed to disable OneSignal.",
+          "refreshFailed": "Failed to refresh OneSignal status.",
+          "subscribeFailed": "Failed to subscribe to push notifications.",
+          "unsubscribeFailed": "Failed to unsubscribe from push notifications.",
+          "notInitialized": "Initialize OneSignal first."
+        },
+        "success": {
+          "saved": "OneSignal settings saved.",
+          "removed": "OneSignal settings removed.",
+          "enabled": "OneSignal enabled.",
+          "disabled": "OneSignal disabled.",
+          "refreshed": "Status refreshed.",
+          "subscribed": "Subscribed.",
+          "unsubscribed": "Unsubscribed."
+        },
+        "securityNote": "Security note: the OneSignal API key is stored locally in your browser. Use this only on trusted devices."
       },
       "storage": {
         "title": "Storage (Google Drive)",

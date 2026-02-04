@@ -211,6 +211,7 @@ When a reminder is marked **done**, TankLog can automatically create a matching 
 | `product` | string | no | Product name (if dosing/maintenance) |
 | `start_due` | string | no | Initial due date/time (set once at creation; does not change when `next_due` advances) |
 | `end_due` | string | no | Optional end date (date-only `YYYY-MM-DD` recommended). After this, the reminder is considered ended and should not be scheduled. |
+| `onesignal_message_id` | string | no | Optional: OneSignal message id returned when scheduling a push for this reminder’s current `next_due`. Used to cancel/reschedule scheduled pushes. |
 
 **Behavior**
 
@@ -231,6 +232,7 @@ When a reminder is marked **done**, TankLog can automatically create a matching 
 - TankLog reads both formats; new reminders are saved as full ISO timestamps (UTC).
 - Older spreadsheets may be missing the `event_type` / `quantity` / `unit` / `product` columns; TankLog will add the headers and treat missing values as empty.
 - Older spreadsheets may be missing the `start_due` / `end_due` columns; TankLog will add the headers and treat missing values as empty.
+- Older spreadsheets may be missing the `onesignal_message_id` column; TankLog will add the header and treat missing values as empty.
 
 ---
 

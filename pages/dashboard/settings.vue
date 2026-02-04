@@ -84,6 +84,171 @@
     googleClientIdStatus.value = t("pages.settings.googleClientId.success.removed")
   }
 
+  const oneSignalConfig = useTankLogOneSignalConfig()
+  oneSignalConfig.hydrateFromStorage()
+
+  const configuredOneSignalAppId = oneSignalConfig.oneSignalAppId
+  const configuredOneSignalApiKey = oneSignalConfig.oneSignalApiKey
+  const isOneSignalEnabled = oneSignalConfig.isOneSignalEnabled
+
+  const oneSignalAppIdInput = ref(configuredOneSignalAppId.value ?? "")
+  const oneSignalApiKeyInput = ref(configuredOneSignalApiKey.value ?? "")
+  const oneSignalConfigError = ref<string | null>(null)
+  const oneSignalConfigStatus = ref<string | null>(null)
+
+  watch(
+    configuredOneSignalAppId,
+    (value) => {
+      oneSignalAppIdInput.value = value ?? ""
+    },
+    { immediate: true }
+  )
+
+  watch(
+    configuredOneSignalApiKey,
+    (value) => {
+      oneSignalApiKeyInput.value = value ?? ""
+    },
+    { immediate: true }
+  )
+
+  const oneSignal = useOneSignal()
+  const oneSignalWorkerInfo = computed(() => {
+    try {
+      return oneSignal.getWorkerConfig()
+    } catch {
+      return null
+    }
+  })
+
+  const isOneSignalBusy = ref(false)
+
+  function resetOneSignalFeedback() {
+    oneSignalConfigError.value = null
+    oneSignalConfigStatus.value = null
+  }
+
+  function onSaveOneSignalConfig() {
+    resetOneSignalFeedback()
+
+    const appId = oneSignalConfig.setOneSignalAppIdFromInput(oneSignalAppIdInput.value)
+    if (!appId) {
+      oneSignalConfigError.value = t("pages.settings.oneSignal.errors.invalidAppId")
+      return
+    }
+
+    const apiKeyRaw = oneSignalApiKeyInput.value.trim()
+    if (apiKeyRaw) {
+      const apiKey = oneSignalConfig.setOneSignalApiKeyFromInput(apiKeyRaw)
+      if (!apiKey) {
+        oneSignalConfigError.value = t("pages.settings.oneSignal.errors.invalidApiKey")
+        return
+      }
+    } else {
+      // API key is optional (only needed for scheduling via REST API).
+      oneSignalConfig.clearOneSignalApiKey()
+    }
+
+    oneSignalConfigStatus.value = t("pages.settings.oneSignal.success.saved")
+  }
+
+  function onRemoveOneSignalConfig() {
+    resetOneSignalFeedback()
+    oneSignalConfig.clearOneSignalConfig()
+    oneSignalAppIdInput.value = ""
+    oneSignalApiKeyInput.value = ""
+    oneSignalConfigStatus.value = t("pages.settings.oneSignal.success.removed")
+  }
+
+  async function onEnableOneSignal() {
+    resetOneSignalFeedback()
+    const appId = oneSignalConfig.setOneSignalAppIdFromInput(oneSignalAppIdInput.value)
+    if (!appId) {
+      oneSignalConfigError.value = t("pages.settings.oneSignal.errors.invalidAppId")
+      return
+    }
+
+    oneSignalConfig.setOneSignalEnabled(true)
+    isOneSignalBusy.value = true
+    try {
+      await oneSignal.init({ appId })
+      oneSignalConfigStatus.value = t("pages.settings.oneSignal.success.enabled")
+    } catch (error) {
+      oneSignalConfigError.value = error instanceof Error ? error.message : t("pages.settings.oneSignal.errors.initFailed")
+    } finally {
+      isOneSignalBusy.value = false
+    }
+  }
+
+  async function onDisableOneSignal() {
+    resetOneSignalFeedback()
+    oneSignalConfig.setOneSignalEnabled(false)
+
+    isOneSignalBusy.value = true
+    try {
+      // Best-effort: opt out from this browser so scheduled pushes won't show up.
+      if (oneSignal.isInitialized.value) {
+        await oneSignal.optOut()
+        await oneSignal.logout()
+      }
+      oneSignalConfigStatus.value = t("pages.settings.oneSignal.success.disabled")
+    } catch (error) {
+      oneSignalConfigError.value = error instanceof Error ? error.message : t("pages.settings.oneSignal.errors.disableFailed")
+    } finally {
+      isOneSignalBusy.value = false
+    }
+  }
+
+  async function onRefreshOneSignalStatus() {
+    resetOneSignalFeedback()
+    isOneSignalBusy.value = true
+    try {
+      const appId = configuredOneSignalAppId.value
+      if (isOneSignalEnabled.value && appId && !oneSignal.isInitialized.value) {
+        await oneSignal.init({ appId })
+      }
+      await oneSignal.refreshState()
+      oneSignalConfigStatus.value = t("pages.settings.oneSignal.success.refreshed")
+    } catch (error) {
+      oneSignalConfigError.value = error instanceof Error ? error.message : t("pages.settings.oneSignal.errors.refreshFailed")
+    } finally {
+      isOneSignalBusy.value = false
+    }
+  }
+
+  async function onSubscribeOneSignal() {
+    resetOneSignalFeedback()
+    isOneSignalBusy.value = true
+    try {
+      const appId = configuredOneSignalAppId.value
+      if (!appId) throw new Error(t("pages.settings.oneSignal.errors.invalidAppId"))
+      if (!oneSignal.isInitialized.value) {
+        await oneSignal.init({ appId })
+      }
+      // optIn will prompt if needed.
+      await oneSignal.optIn()
+      oneSignalConfigStatus.value = t("pages.settings.oneSignal.success.subscribed")
+    } catch (error) {
+      oneSignalConfigError.value = error instanceof Error ? error.message : t("pages.settings.oneSignal.errors.subscribeFailed")
+    } finally {
+      isOneSignalBusy.value = false
+    }
+  }
+
+  async function onUnsubscribeOneSignal() {
+    resetOneSignalFeedback()
+    isOneSignalBusy.value = true
+    try {
+      if (!oneSignal.isInitialized.value) throw new Error(t("pages.settings.oneSignal.errors.notInitialized"))
+      await oneSignal.optOut()
+      oneSignalConfigStatus.value = t("pages.settings.oneSignal.success.unsubscribed")
+    } catch (error) {
+      oneSignalConfigError.value = error instanceof Error ? error.message : t("pages.settings.oneSignal.errors.unsubscribeFailed")
+    } finally {
+      isOneSignalBusy.value = false
+    }
+  }
+
   const storage = useTankLogRootFolderId()
   storage.hydrateFromStorage()
   
@@ -149,6 +314,7 @@
   function onResetLocalData() {
     onDisconnectTankLogFolder()
     onRemoveGoogleClientId()
+    onRemoveOneSignalConfig()
     isResetDialogOpen.value = false
   }
   
@@ -456,6 +622,147 @@
                 {{ $t("pages.settings.googleClientId.actions.remove") }}
               </Button>
             </div>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card id="settings-onesignal">
+        <CardHeader>
+          <CardTitle>{{ $t("pages.settings.oneSignal.title") }}</CardTitle>
+          <CardDescription>{{ $t("pages.settings.oneSignal.description") }}</CardDescription>
+        </CardHeader>
+        <CardContent class="text-sm text-muted-foreground">
+          <form class="space-y-4" @submit.prevent="onSaveOneSignalConfig">
+            <div>
+              <div class="text-foreground">{{ $t("pages.settings.oneSignal.statusLabel") }}</div>
+              <div class="space-y-1">
+                <div>
+                  <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.enabled") }}:</span>
+                  <span class="text-foreground"> {{ isOneSignalEnabled ? $t("pages.settings.oneSignal.values.yes") : $t("pages.settings.oneSignal.values.no") }}</span>
+                </div>
+                <div>
+                  <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.sdk") }}:</span>
+                  <span class="text-foreground"> {{ $t(`pages.settings.oneSignal.sdkStatus.${oneSignal.status}`) }}</span>
+                </div>
+                <div v-if="oneSignalWorkerInfo">
+                  <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.workerPath") }}:</span>
+                  <code class="ml-1 rounded bg-muted px-1 py-0.5">{{ oneSignalWorkerInfo.serviceWorkerPath }}</code>
+                </div>
+                <div v-if="oneSignal.isInitialized">
+                  <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.pushSupported") }}:</span>
+                  <span class="text-foreground"> {{ oneSignal.isSupported === null ? "—" : oneSignal.isSupported ? $t("pages.settings.oneSignal.values.yes") : $t("pages.settings.oneSignal.values.no") }}</span>
+                </div>
+                <div v-if="oneSignal.isInitialized">
+                  <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.permission") }}:</span>
+                  <span class="text-foreground"> {{ oneSignal.hasPermission === null ? "—" : oneSignal.hasPermission ? $t("pages.settings.oneSignal.values.granted") : $t("pages.settings.oneSignal.values.denied") }}</span>
+                </div>
+                <div v-if="oneSignal.isInitialized">
+                  <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.subscribed") }}:</span>
+                  <span class="text-foreground"> {{ oneSignal.isOptedIn === null ? "—" : oneSignal.isOptedIn ? $t("pages.settings.oneSignal.values.yes") : $t("pages.settings.oneSignal.values.no") }}</span>
+                </div>
+                <div v-if="oneSignal.isInitialized && oneSignal.subscriptionId">
+                  <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.subscriptionId") }}:</span>
+                  <code class="ml-1 rounded bg-muted px-1 py-0.5">{{ oneSignal.subscriptionId }}</code>
+                </div>
+                <div v-if="oneSignal.isInitialized && oneSignal.externalId">
+                  <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.externalId") }}:</span>
+                  <code class="ml-1 rounded bg-muted px-1 py-0.5">{{ oneSignal.externalId }}</code>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label for="settings-onesignal-app-id" class="text-foreground">
+                {{ $t("pages.settings.oneSignal.fields.appId.label") }}
+              </label>
+              <Input
+                id="settings-onesignal-app-id"
+                v-model="oneSignalAppIdInput"
+                type="text"
+                inputmode="text"
+                autocomplete="off"
+                spellcheck="false"
+                :placeholder="$t('pages.settings.oneSignal.fields.appId.placeholder')"
+                :aria-invalid="oneSignalConfigError ? 'true' : 'false'"
+                aria-describedby="settings-onesignal-app-id-hint settings-onesignal-feedback"
+              />
+              <p id="settings-onesignal-app-id-hint" class="text-xs text-muted-foreground">
+                {{ $t("pages.settings.oneSignal.fields.appId.hint") }}
+              </p>
+            </div>
+
+            <div class="space-y-2">
+              <label for="settings-onesignal-api-key" class="text-foreground">
+                {{ $t("pages.settings.oneSignal.fields.apiKey.label") }}
+              </label>
+              <Input
+                id="settings-onesignal-api-key"
+                v-model="oneSignalApiKeyInput"
+                type="password"
+                inputmode="text"
+                autocomplete="off"
+                spellcheck="false"
+                :placeholder="$t('pages.settings.oneSignal.fields.apiKey.placeholder')"
+                aria-describedby="settings-onesignal-api-key-hint settings-onesignal-feedback"
+              />
+              <p id="settings-onesignal-api-key-hint" class="text-xs text-muted-foreground">
+                {{ $t("pages.settings.oneSignal.fields.apiKey.hint") }}
+              </p>
+            </div>
+
+            <p v-if="oneSignalConfigError" id="settings-onesignal-feedback" class="text-sm text-destructive" role="alert">
+              {{ oneSignalConfigError }}
+            </p>
+            <p
+              v-else-if="oneSignalConfigStatus"
+              id="settings-onesignal-feedback"
+              class="text-sm text-foreground"
+              role="status"
+            >
+              {{ oneSignalConfigStatus }}
+            </p>
+            <p v-else id="settings-onesignal-feedback" class="sr-only"> </p>
+
+            <div class="flex flex-wrap gap-2">
+              <Button type="submit">{{ $t("pages.settings.oneSignal.actions.save") }}</Button>
+              <Button type="button" variant="secondary" @click="onRemoveOneSignalConfig">
+                {{ $t("pages.settings.oneSignal.actions.remove") }}
+              </Button>
+              <Button
+                v-if="!isOneSignalEnabled"
+                type="button"
+                variant="secondary"
+                :disabled="isOneSignalBusy"
+                @click="onEnableOneSignal"
+              >
+                {{ $t("pages.settings.oneSignal.actions.enable") }}
+              </Button>
+              <Button
+                v-else
+                type="button"
+                variant="secondary"
+                :disabled="isOneSignalBusy"
+                @click="onDisableOneSignal"
+              >
+                {{ $t("pages.settings.oneSignal.actions.disable") }}
+              </Button>
+              <Button type="button" variant="secondary" :disabled="isOneSignalBusy" @click="onRefreshOneSignalStatus">
+                {{ $t("pages.settings.oneSignal.actions.refresh") }}
+              </Button>
+            </div>
+
+            <div class="flex flex-wrap gap-2 pt-1">
+              <Button type="button" :disabled="isOneSignalBusy || !isOneSignalEnabled" @click="onSubscribeOneSignal">
+                {{ $t("pages.settings.oneSignal.actions.subscribe") }}
+              </Button>
+              <Button type="button" variant="secondary" :disabled="isOneSignalBusy || !oneSignal.isInitialized" @click="onUnsubscribeOneSignal">
+                {{ $t("pages.settings.oneSignal.actions.unsubscribe") }}
+              </Button>
+            </div>
+
+            <p class="text-xs text-muted-foreground">
+              {{ $t("pages.settings.oneSignal.securityNote") }}
+            </p>
           </form>
         </CardContent>
       </Card>

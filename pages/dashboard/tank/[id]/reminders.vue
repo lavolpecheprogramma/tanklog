@@ -32,6 +32,22 @@ const tank = computed(() => (tankId.value ? tanks.value.find((item) => item.id =
 const remindersApi = useReminders()
 const eventsApi = useEvents()
 
+const auth = useAuth()
+auth.hydrateFromStorage()
+const userEmail = computed(() => auth.user.value?.email ?? null)
+
+const oneSignalConfig = useTankLogOneSignalConfig()
+oneSignalConfig.hydrateFromStorage()
+const oneSignalApi = useOneSignalApi()
+
+const canCallOneSignalApi = computed(() => Boolean(oneSignalConfig.oneSignalAppId.value) && Boolean(oneSignalConfig.oneSignalApiKey.value))
+
+const canScheduleOneSignal = computed(() =>
+  oneSignalConfig.isOneSignalEnabled.value
+  && canCallOneSignalApi.value
+  && Boolean(userEmail.value)
+)
+
 type LoadStatus = "idle" | "loading" | "ready" | "error"
 const listStatus = ref<LoadStatus>("idle")
 const listError = ref<string | null>(null)
@@ -141,6 +157,89 @@ function isReminderEnded(reminder: TankReminder): boolean {
 
   const nextDueEpochMs = toDueEpochMs(reminder.nextDue)
   return nextDueEpochMs !== null && nextDueEpochMs > endEpochMs
+}
+
+function normalizeBaseUrl(value: string | null | undefined): string {
+  const trimmed = (value ?? "").trim()
+  if (!trimmed) return "/"
+  const withLeading = trimmed.startsWith("/") ? trimmed : `/${trimmed}`
+  return withLeading.endsWith("/") ? withLeading : `${withLeading}/`
+}
+
+function toAbsoluteAppUrl(appPath: string): string {
+  const config = useRuntimeConfig()
+  const baseURL = normalizeBaseUrl(config.app?.baseURL)
+  const relative = appPath.startsWith("/") ? appPath.slice(1) : appPath
+  const fullPath = `${baseURL}${relative}`.replace(/\/{2,}/g, "/")
+  return new URL(fullPath, window.location.origin).toString()
+}
+
+function shouldSchedulePushForReminder(reminder: TankReminder): boolean {
+  if (!canScheduleOneSignal.value) return false
+  if (isReminderEnded(reminder)) return false
+  if (reminder.repeatEveryDays === null && reminder.lastDone !== null) return false
+
+  const dueEpochMs = toDueEpochMs(reminder.nextDue)
+  if (dueEpochMs === null) return false
+  return dueEpochMs > Date.now()
+}
+
+async function schedulePushForReminder(reminder: TankReminder): Promise<string | null> {
+  if (!import.meta.client) return null
+  if (!tank.value) return null
+  if (!shouldSchedulePushForReminder(reminder)) return null
+
+  const appId = oneSignalConfig.oneSignalAppId.value
+  const apiKey = oneSignalConfig.oneSignalApiKey.value
+  const externalId = userEmail.value
+  if (!appId || !apiKey || !externalId) return null
+
+  const dueEpochMs = toDueEpochMs(reminder.nextDue)
+  if (dueEpochMs === null) return null
+
+  const sendAfter = new Date(dueEpochMs).toISOString()
+  const url = toAbsoluteAppUrl(localePath(`/dashboard/tank/${tankId.value}/reminders`))
+
+  const { messageId } = await oneSignalApi.schedulePushMessage({
+    appId,
+    apiKey,
+    externalId,
+    title: t("pages.reminders.notifications.heading"),
+    body: reminder.title,
+    sendAfter,
+    url,
+  })
+
+  await remindersApi.setReminderOneSignalMessageId({
+    spreadsheetId: tank.value.spreadsheetId,
+    reminderId: reminder.reminderId,
+    messageId,
+  })
+
+  return messageId
+}
+
+async function cancelPushForReminder(reminder: TankReminder, options: { clearInSheet?: boolean } = {}): Promise<void> {
+  if (!import.meta.client) return
+  if (!tank.value) return
+
+  const messageId = reminder.oneSignalMessageId
+  if (!messageId) return
+  if (!canCallOneSignalApi.value) return
+
+  const appId = oneSignalConfig.oneSignalAppId.value
+  const apiKey = oneSignalConfig.oneSignalApiKey.value
+  if (!appId || !apiKey) return
+
+  await oneSignalApi.cancelPushMessage({ appId, apiKey, messageId })
+
+  if (options.clearInSheet !== false) {
+    await remindersApi.setReminderOneSignalMessageId({
+      spreadsheetId: tank.value.spreadsheetId,
+      reminderId: reminder.reminderId,
+      messageId: null,
+    })
+  }
 }
 
 function localDayIndex(date: Date): number {
@@ -342,7 +441,7 @@ async function handleCreateReminder(payload: unknown) {
   if (!tank.value) throw new Error(t("pages.reminders.form.errors.noTank"))
   if (!isReminderFormPayload(payload)) throw new Error(t("pages.reminders.form.errors.saveFailed"))
 
-  await remindersApi.createReminder({
+  const created = await remindersApi.createReminder({
     spreadsheetId: tank.value.spreadsheetId,
     title: payload.description,
     nextDue: payload.nextDue,
@@ -354,6 +453,15 @@ async function handleCreateReminder(payload: unknown) {
     product: payload.product,
     notes: payload.note,
   })
+
+  if (canScheduleOneSignal.value) {
+    try {
+      await schedulePushForReminder(created)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t("pages.reminders.notifications.errors.scheduleFailed")
+      actionError.value = t("pages.reminders.notifications.errors.scheduleFailedWithMessage", { message })
+    }
+  }
 
   await loadReminders()
 }
@@ -385,18 +493,41 @@ async function onToggleDone(reminder: TankReminder) {
   const shouldLogEvent = reminder.repeatEveryDays !== null || reminder.lastDone === null
 
   try {
+    if (reminder.oneSignalMessageId) {
+      if (!canCallOneSignalApi.value) {
+        actionError.value = t("pages.reminders.notifications.errors.cancelMissingConfig")
+      } else {
+        try {
+          await cancelPushForReminder(reminder, { clearInSheet: false })
+        } catch (error) {
+          const message = error instanceof Error ? error.message : t("pages.reminders.notifications.errors.cancelFailed")
+          actionError.value = t("pages.reminders.notifications.errors.cancelFailedWithMessage", { message })
+        }
+      }
+    }
+
+    let updatedReminder: TankReminder | null = null
     if (reminder.repeatEveryDays === null) {
-      await remindersApi.setReminderDone({
+      updatedReminder = await remindersApi.setReminderDone({
         spreadsheetId: tank.value.spreadsheetId,
         reminderId: reminder.reminderId,
         done: reminder.lastDone === null,
       })
     } else {
-      await remindersApi.markReminderDone({
+      updatedReminder = await remindersApi.markReminderDone({
         spreadsheetId: tank.value.spreadsheetId,
         reminderId: reminder.reminderId,
         doneAt,
       })
+    }
+
+    if (updatedReminder && canScheduleOneSignal.value) {
+      try {
+        await schedulePushForReminder(updatedReminder)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : t("pages.reminders.notifications.errors.scheduleFailed")
+        actionError.value = t("pages.reminders.notifications.errors.scheduleFailedWithMessage", { message })
+      }
     }
 
     if (shouldLogEvent) {
@@ -434,9 +565,26 @@ async function onDeleteReminder(reminder: TankReminder) {
 
   actingReminderId.value = reminder.reminderId
   try {
+    let pushWarning: string | null = null
+    if (reminder.oneSignalMessageId) {
+      if (!canCallOneSignalApi.value) {
+        pushWarning = t("pages.reminders.notifications.errors.cancelMissingConfig")
+      } else {
+        try {
+          await cancelPushForReminder(reminder, { clearInSheet: false })
+        } catch (error) {
+          const message = error instanceof Error ? error.message : t("pages.reminders.notifications.errors.cancelFailed")
+          pushWarning = t("pages.reminders.notifications.errors.cancelFailedWithMessage", { message })
+        }
+      }
+    }
+
     await remindersApi.deleteReminder({ spreadsheetId: tank.value.spreadsheetId, reminderId: reminder.reminderId })
     await loadReminders()
-    actionStatus.value = t("pages.reminders.actions.statusDeleted")
+    actionError.value = null
+    actionStatus.value = pushWarning
+      ? t("pages.reminders.actions.statusDeletedWithWarning", { message: pushWarning })
+      : t("pages.reminders.actions.statusDeleted")
   } catch (error) {
     actionError.value = error instanceof Error ? error.message : t("pages.reminders.actions.errors.deleteFailed")
   } finally {

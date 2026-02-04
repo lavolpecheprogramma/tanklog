@@ -314,8 +314,8 @@ export function useTanks() {
       }),
       sheets.updateValues({
         spreadsheetId,
-        range: "REMINDERS!A1:L1",
-        values: [["id", "title", "next_due", "repeat_every_days", "last_done", "notes", "event_type", "quantity", "unit", "product", "start_due", "end_due"]],
+        range: "REMINDERS!A1:M1",
+        values: [["id", "title", "next_due", "repeat_every_days", "last_done", "notes", "event_type", "quantity", "unit", "product", "start_due", "end_due", "onesignal_message_id"]],
       }),
       sheets.updateValues({
         spreadsheetId,

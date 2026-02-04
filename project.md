@@ -51,7 +51,7 @@ The project is designed as:
 - Reminders: stored in Sheets, evaluated client-side
 - Notifications (baseline): Web Notifications API (when app is open)
 - Notifications (PWA): Service Worker notifications (best effort; device/browser dependent)
-- Optional (future): Web Push via a free provider (e.g. Firebase Cloud Messaging) for background delivery
+- Optional (future): Web Push via a provider (e.g. Firebase Cloud Messaging, OneSignal) for background delivery
 
 ### Authentication
 - **Google OAuth (client-side)**

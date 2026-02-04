@@ -3,6 +3,9 @@ import { useLocalStorage } from "@vueuse/core"
 
 const STORAGE_KEY = "tanklog.drive.rootFolderId.v1"
 const GOOGLE_CLIENT_ID_STORAGE_KEY = "tanklog.google.clientId.v1"
+const ONESIGNAL_APP_ID_STORAGE_KEY = "tanklog.onesignal.appId.v1"
+const ONESIGNAL_API_KEY_STORAGE_KEY = "tanklog.onesignal.apiKey.v1"
+const ONESIGNAL_ENABLED_STORAGE_KEY = "tanklog.onesignal.enabled.v1"
 
 export function normalizeDriveFolderId(input: string): string | null {
   const trimmed = input.trim()
@@ -20,6 +23,22 @@ export function normalizeGoogleClientId(input: string): string | null {
   const trimmed = input.trim()
   if (!trimmed) return null
   return trimmed
+}
+
+export function normalizeOneSignalAppId(input: string): string | null {
+  const trimmed = input.trim()
+  if (!trimmed) return null
+  const normalized = trimmed.toLowerCase()
+  // UUID v4-ish validation (OneSignal App IDs are UUID v4 format).
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(normalized)) return null
+  return normalized
+}
+
+export function normalizeOneSignalApiKey(input: string): string | null {
+  const trimmed = input.trim()
+  if (!trimmed) return null
+  // Users might paste the full header value like "Key xxxxx". Store just the token.
+  return trimmed.replace(/^key\s+/i, "").trim() || null
 }
 
 export function useTankLogRootFolderId() {
@@ -113,6 +132,106 @@ export function useTankLogGoogleClientId() {
     setGoogleClientId,
     setGoogleClientIdFromInput,
     clearGoogleClientId,
+  }
+}
+
+export function useTankLogOneSignalConfig() {
+  const storedAppId = useLocalStorage<string | null>(ONESIGNAL_APP_ID_STORAGE_KEY, null, { writeDefaults: false })
+  const storedApiKey = useLocalStorage<string | null>(ONESIGNAL_API_KEY_STORAGE_KEY, null, { writeDefaults: false })
+  const storedEnabled = useLocalStorage<boolean>(ONESIGNAL_ENABLED_STORAGE_KEY, false, { writeDefaults: false })
+
+  watchEffect(() => {
+    const raw = storedAppId.value
+    if (!raw) return
+
+    const normalized = normalizeOneSignalAppId(raw)
+    if (!normalized) {
+      storedAppId.value = null
+      return
+    }
+
+    if (normalized !== raw) storedAppId.value = normalized
+  })
+
+  watchEffect(() => {
+    const raw = storedApiKey.value
+    if (!raw) return
+
+    const normalized = normalizeOneSignalApiKey(raw)
+    if (!normalized) {
+      storedApiKey.value = null
+      return
+    }
+
+    if (normalized !== raw) storedApiKey.value = normalized
+  })
+
+  const oneSignalAppId = computed<string | null>(() => storedAppId.value || null)
+  const oneSignalApiKey = computed<string | null>(() => storedApiKey.value || null)
+  const isOneSignalEnabled = computed(() => Boolean(storedEnabled.value))
+
+  const hasOneSignalAppId = computed(() => Boolean(oneSignalAppId.value))
+  const hasOneSignalApiKey = computed(() => Boolean(oneSignalApiKey.value))
+  const hasOneSignalConfig = computed(() => hasOneSignalAppId.value && hasOneSignalApiKey.value)
+
+  function hydrateFromStorage() {
+    // Backward-compatible no-op: VueUse already hydrates from localStorage.
+  }
+
+  function setOneSignalAppId(next: string | null) {
+    const normalized = next ? normalizeOneSignalAppId(next) : null
+    storedAppId.value = normalized
+  }
+
+  function setOneSignalAppIdFromInput(input: string) {
+    setOneSignalAppId(input)
+    return oneSignalAppId.value
+  }
+
+  function clearOneSignalAppId() {
+    setOneSignalAppId(null)
+  }
+
+  function setOneSignalApiKey(next: string | null) {
+    const normalized = next ? normalizeOneSignalApiKey(next) : null
+    storedApiKey.value = normalized
+  }
+
+  function setOneSignalApiKeyFromInput(input: string) {
+    setOneSignalApiKey(input)
+    return oneSignalApiKey.value
+  }
+
+  function clearOneSignalApiKey() {
+    setOneSignalApiKey(null)
+  }
+
+  function setOneSignalEnabled(next: boolean) {
+    storedEnabled.value = Boolean(next)
+  }
+
+  function clearOneSignalConfig() {
+    clearOneSignalAppId()
+    clearOneSignalApiKey()
+    setOneSignalEnabled(false)
+  }
+
+  return {
+    oneSignalAppId: readonly(oneSignalAppId),
+    oneSignalApiKey: readonly(oneSignalApiKey),
+    isOneSignalEnabled: readonly(isOneSignalEnabled),
+    hasOneSignalAppId,
+    hasOneSignalApiKey,
+    hasOneSignalConfig,
+    hydrateFromStorage,
+    setOneSignalAppId,
+    setOneSignalAppIdFromInput,
+    clearOneSignalAppId,
+    setOneSignalApiKey,
+    setOneSignalApiKeyFromInput,
+    clearOneSignalApiKey,
+    setOneSignalEnabled,
+    clearOneSignalConfig,
   }
 }
 

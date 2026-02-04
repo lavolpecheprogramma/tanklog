@@ -831,11 +831,22 @@
         "statusUpdated": "Promemoria aggiornato.",
         "statusUpdatedAndLogged": "Promemoria aggiornato. Evento registrato.",
         "statusDeleted": "Promemoria eliminato.",
+        "statusDeletedWithWarning": "Promemoria eliminato, ma: {message}",
         "errors": {
           "updateFailed": "Impossibile aggiornare il promemoria.",
           "deleteFailed": "Impossibile eliminare il promemoria.",
           "eventLogFailed": "Impossibile creare l’evento collegato.",
           "eventLogFailedWithMessage": "Promemoria aggiornato, ma impossibile creare l’evento collegato. ({message})"
+        }
+      },
+      "notifications": {
+        "heading": "Promemoria TankLog",
+        "errors": {
+          "scheduleFailed": "Impossibile pianificare la notifica push.",
+          "scheduleFailedWithMessage": "Promemoria salvato, ma impossibile pianificare la notifica push. ({message})",
+          "cancelMissingConfig": "OneSignal non è configurato (API key mancante), quindi TankLog non può annullare la push pianificata.",
+          "cancelFailed": "Impossibile annullare la notifica push pianificata.",
+          "cancelFailedWithMessage": "Promemoria aggiornato, ma impossibile annullare la notifica push pianificata. ({message})"
         }
       },
       "form": {
@@ -973,6 +984,74 @@
           "saved": "Client ID salvato.",
           "removed": "Client ID rimosso."
         }
+      },
+      "oneSignal": {
+        "title": "Notifiche (OneSignal)",
+        "description": "Opzionale: abilita le notifiche push web tramite OneSignal (porta il tuo App ID + API key).",
+        "statusLabel": "Stato",
+        "status": {
+          "enabled": "Abilitato",
+          "sdk": "SDK",
+          "workerPath": "Service worker",
+          "pushSupported": "Push supportate",
+          "permission": "Permesso",
+          "subscribed": "Iscritto",
+          "subscriptionId": "ID iscrizione",
+          "externalId": "External ID"
+        },
+        "sdkStatus": {
+          "idle": "Non inizializzato",
+          "loading": "Caricamento…",
+          "ready": "Pronto",
+          "error": "Errore"
+        },
+        "values": {
+          "yes": "Sì",
+          "no": "No",
+          "granted": "Concesso",
+          "denied": "Negato"
+        },
+        "fields": {
+          "appId": {
+            "label": "App ID",
+            "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            "hint": "Lo trovi in OneSignal → Impostazioni → Keys & IDs."
+          },
+          "apiKey": {
+            "label": "App API key (opzionale, per pianificazione)",
+            "placeholder": "Incolla la tua App API key OneSignal",
+            "hint": "Serve per pianificare notifiche con send_after. Salvata localmente su questo dispositivo."
+          }
+        },
+        "actions": {
+          "save": "Salva",
+          "remove": "Rimuovi",
+          "enable": "Abilita",
+          "disable": "Disabilita",
+          "refresh": "Aggiorna stato",
+          "subscribe": "Iscrivi questo browser",
+          "unsubscribe": "Disiscrivi"
+        },
+        "errors": {
+          "invalidAppId": "Inserisci un App ID OneSignal valido.",
+          "invalidApiKey": "Inserisci una API key OneSignal valida.",
+          "initFailed": "Inizializzazione OneSignal non riuscita.",
+          "disableFailed": "Disattivazione OneSignal non riuscita.",
+          "refreshFailed": "Aggiornamento stato OneSignal non riuscito.",
+          "subscribeFailed": "Iscrizione alle notifiche push non riuscita.",
+          "unsubscribeFailed": "Disiscrizione dalle notifiche push non riuscita.",
+          "notInitialized": "Inizializza prima OneSignal."
+        },
+        "success": {
+          "saved": "Impostazioni OneSignal salvate.",
+          "removed": "Impostazioni OneSignal rimosse.",
+          "enabled": "OneSignal abilitato.",
+          "disabled": "OneSignal disabilitato.",
+          "refreshed": "Stato aggiornato.",
+          "subscribed": "Iscritto.",
+          "unsubscribed": "Disiscritto."
+        },
+        "securityNote": "Nota sicurezza: la API key OneSignal è salvata localmente nel tuo browser. Usala solo su dispositivi fidati."
       },
       "storage": {
         "title": "Storage (Google Drive)",
