@@ -3,19 +3,18 @@ type Env = {
    * OneSignal App API key (secret).
    * OneSignal dashboard → Settings → Keys & IDs → App API key
    */
-  ONESIGNAL_APP_API_KEY: string
+  ONESIGNAL_APP_API_KEY: {get: () => string}
 
   /**
    * Allowed origin for browser calls, e.g. "https://tanklog.example.com".
    * If empty, the worker will respond with "*" (not recommended).
    */
   ALLOWED_ORIGIN?: string
-
   /**
    * Optional shared secret checked against the request header `X-Tanklog-Proxy-Key`.
    * If set, TankLog must be configured with the same value.
    */
-  PROXY_KEY?: string
+  PROXY_KEY?: {get: () => string}
 }
 
 const ALLOWED_METHODS = "POST, DELETE, OPTIONS"
@@ -47,8 +46,9 @@ function isAllowedOrigin(origin: string | null, env: Env): boolean {
   return origin === allowedOrigin
 }
 
-function isAuthorized(request: Request, env: Env): boolean {
-  const required = env.PROXY_KEY?.trim()
+async function isAuthorized(request: Request, env: Env): Promise<boolean> {
+	const key = await env.PROXY_KEY?.get() || ''
+  const required = key.trim()
   if (!required) return true
   const provided = request.headers.get("X-Tanklog-Proxy-Key")?.trim()
   return Boolean(provided && provided === required)
@@ -75,7 +75,7 @@ export default {
       return withCors(new Response("Forbidden origin.", { status: 403 }), origin, env)
     }
 
-    if (!isAuthorized(request, env)) {
+    if (!(await isAuthorized(request, env))) {
       return withCors(new Response("Unauthorized.", { status: 401 }), origin, env)
     }
 
@@ -88,7 +88,7 @@ export default {
       return withCors(new Response("Method not allowed.", { status: 405 }), origin, env)
     }
 
-    const apiKey = env.ONESIGNAL_APP_API_KEY?.trim()
+    const apiKey = await env.ONESIGNAL_APP_API_KEY?.get() || ''
     if (!apiKey) {
       return withCors(new Response("Missing OneSignal API key (worker env).", { status: 500 }), origin, env)
     }

@@ -203,6 +203,9 @@ export function useOneSignal() {
           serviceWorkerParam: { scope: serviceWorkerScope },
           // Localhost support for development environments.
           allowLocalhostAsSecureOrigin: isLocalhostHost(window.location.hostname),
+          notifyButton: {
+            enable: true, // Shows the OneSignal bell icon
+          }
         })
       })
 
