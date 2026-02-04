@@ -646,7 +646,7 @@
                 </div>
                 <div v-if="oneSignalWorkerInfo">
                   <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.workerPath") }}:</span>
-                  <code class="ml-1 rounded bg-muted px-1 py-0.5">{{ oneSignalWorkerInfo.serviceWorkerPath }}</code>
+                  <code class="ml-1 rounded bg-muted px-1 py-0.5">{{ oneSignalWorkerInfo.serviceWorkerAbsolutePath }}</code>
                 </div>
                 <div v-if="oneSignal.isInitialized">
                   <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.pushSupported") }}:</span>

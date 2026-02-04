@@ -118,9 +118,18 @@ export function useOneSignal() {
 
   function getWorkerConfig() {
     const baseURL = normalizeBaseUrl(runtimeConfig.app?.baseURL)
+    const serviceWorkerAbsolutePath = joinBase(baseURL, "push/onesignal/OneSignalSDKWorker.js")
+
+    // OneSignal’s Web SDK expects `serviceWorkerPath` without a leading slash and will
+    // typically prefix it internally. If we pass an absolute path (e.g. "/push/..."),
+    // some SDK versions may accidentally create "//push/..." which becomes "https://push/..."
+    // (cross-origin) and fails registration.
+    const serviceWorkerPath = serviceWorkerAbsolutePath.replace(/^\/+/, "")
+
     return {
-      serviceWorkerPath: joinBase(baseURL, "push/onesignal/OneSignalSDKWorker.js"),
+      serviceWorkerPath,
       serviceWorkerScope: joinBase(baseURL, "push/onesignal/"),
+      serviceWorkerAbsolutePath,
       baseURL,
     }
   }
