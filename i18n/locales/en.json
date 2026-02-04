@@ -844,7 +844,7 @@
         "errors": {
           "scheduleFailed": "Failed to schedule the push notification.",
           "scheduleFailedWithMessage": "Reminder saved, but failed to schedule the push notification. ({message})",
-          "cancelMissingConfig": "OneSignal is not configured (missing API key), so TankLog can’t cancel the scheduled push.",
+          "cancelMissingConfig": "Scheduling proxy is not configured, so TankLog can’t cancel the scheduled push.",
           "cancelFailed": "Failed to cancel the scheduled push notification.",
           "cancelFailedWithMessage": "Reminder updated, but failed to cancel the scheduled push notification. ({message})"
         }
@@ -987,11 +987,13 @@
       },
       "oneSignal": {
         "title": "Notifications (OneSignal)",
-        "description": "Optional: enable web push notifications via OneSignal (bring your own App ID + API key).",
+        "description": "Optional: enable web push notifications via OneSignal. For scheduled reminders (send_after), configure a proxy.",
         "statusLabel": "Status",
         "status": {
           "enabled": "Enabled",
           "sdk": "SDK",
+          "schedulingProxy": "Scheduling proxy",
+          "proxyUrl": "Proxy URL",
           "workerPath": "Service worker",
           "pushSupported": "Push supported",
           "permission": "Permission",
@@ -1009,7 +1011,9 @@
           "yes": "Yes",
           "no": "No",
           "granted": "Granted",
-          "denied": "Denied"
+          "denied": "Denied",
+          "configured": "Configured",
+          "notConfigured": "Not configured"
         },
         "fields": {
           "appId": {
@@ -1021,6 +1025,16 @@
             "label": "App API key (optional, for scheduling)",
             "placeholder": "Paste your OneSignal App API key",
             "hint": "Required to schedule notifications with send_after. Stored locally on this device."
+          },
+          "proxyUrl": {
+            "label": "Scheduling proxy URL (required for send_after)",
+            "placeholder": "https://your-worker.example.workers.dev",
+            "hint": "OneSignal REST API blocks browser CORS. Use a small proxy (e.g. Cloudflare Worker) that adds the API key server-side."
+          },
+          "proxyKey": {
+            "label": "Proxy key (optional)",
+            "placeholder": "Shared secret to protect your proxy",
+            "hint": "If your proxy requires a key, paste it here (stored locally)."
           }
         },
         "actions": {
@@ -1035,6 +1049,7 @@
         "errors": {
           "invalidAppId": "Enter a valid OneSignal App ID.",
           "invalidApiKey": "Enter a valid OneSignal API key.",
+          "missingProxyUrl": "Enter a proxy URL to enable scheduled notifications.",
           "initFailed": "Failed to initialize OneSignal.",
           "disableFailed": "Failed to disable OneSignal.",
           "refreshFailed": "Failed to refresh OneSignal status.",
@@ -1051,7 +1066,7 @@
           "subscribed": "Subscribed.",
           "unsubscribed": "Unsubscribed."
         },
-        "securityNote": "Security note: the OneSignal API key is stored locally in your browser. Use this only on trusted devices."
+        "securityNote": "Note: OneSignal REST API calls are blocked by browser CORS. Scheduling requires a small server-side proxy. The proxy key (if used) is stored locally."
       },
       "storage": {
         "title": "Storage (Google Drive)",

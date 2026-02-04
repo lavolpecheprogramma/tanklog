@@ -40,7 +40,7 @@ const oneSignalConfig = useTankLogOneSignalConfig()
 oneSignalConfig.hydrateFromStorage()
 const oneSignalApi = useOneSignalApi()
 
-const canCallOneSignalApi = computed(() => Boolean(oneSignalConfig.oneSignalAppId.value) && Boolean(oneSignalConfig.oneSignalApiKey.value))
+const canCallOneSignalApi = computed(() => Boolean(oneSignalConfig.oneSignalAppId.value) && Boolean(oneSignalConfig.oneSignalProxyUrl.value))
 
 const canScheduleOneSignal = computed(() =>
   oneSignalConfig.isOneSignalEnabled.value
@@ -190,9 +190,10 @@ async function schedulePushForReminder(reminder: TankReminder): Promise<string |
   if (!shouldSchedulePushForReminder(reminder)) return null
 
   const appId = oneSignalConfig.oneSignalAppId.value
-  const apiKey = oneSignalConfig.oneSignalApiKey.value
+  const proxyUrl = oneSignalConfig.oneSignalProxyUrl.value
+  const proxyKey = oneSignalConfig.oneSignalProxyKey.value
   const externalId = userEmail.value
-  if (!appId || !apiKey || !externalId) return null
+  if (!appId || !proxyUrl || !externalId) return null
 
   const dueEpochMs = toDueEpochMs(reminder.nextDue)
   if (dueEpochMs === null) return null
@@ -202,7 +203,8 @@ async function schedulePushForReminder(reminder: TankReminder): Promise<string |
 
   const { messageId } = await oneSignalApi.schedulePushMessage({
     appId,
-    apiKey,
+    proxyUrl,
+    proxyKey,
     externalId,
     title: t("pages.reminders.notifications.heading"),
     body: reminder.title,
@@ -228,10 +230,11 @@ async function cancelPushForReminder(reminder: TankReminder, options: { clearInS
   if (!canCallOneSignalApi.value) return
 
   const appId = oneSignalConfig.oneSignalAppId.value
-  const apiKey = oneSignalConfig.oneSignalApiKey.value
-  if (!appId || !apiKey) return
+  const proxyUrl = oneSignalConfig.oneSignalProxyUrl.value
+  const proxyKey = oneSignalConfig.oneSignalProxyKey.value
+  if (!appId || !proxyUrl) return
 
-  await oneSignalApi.cancelPushMessage({ appId, apiKey, messageId })
+  await oneSignalApi.cancelPushMessage({ appId, proxyUrl, proxyKey, messageId })
 
   if (options.clearInSheet !== false) {
     await remindersApi.setReminderOneSignalMessageId({

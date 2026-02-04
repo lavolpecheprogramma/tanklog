@@ -88,11 +88,13 @@
   oneSignalConfig.hydrateFromStorage()
 
   const configuredOneSignalAppId = oneSignalConfig.oneSignalAppId
-  const configuredOneSignalApiKey = oneSignalConfig.oneSignalApiKey
+  const configuredOneSignalProxyUrl = oneSignalConfig.oneSignalProxyUrl
+  const configuredOneSignalProxyKey = oneSignalConfig.oneSignalProxyKey
   const isOneSignalEnabled = oneSignalConfig.isOneSignalEnabled
 
   const oneSignalAppIdInput = ref(configuredOneSignalAppId.value ?? "")
-  const oneSignalApiKeyInput = ref(configuredOneSignalApiKey.value ?? "")
+  const oneSignalProxyUrlInput = ref(configuredOneSignalProxyUrl.value ?? "")
+  const oneSignalProxyKeyInput = ref(configuredOneSignalProxyKey.value ?? "")
   const oneSignalConfigError = ref<string | null>(null)
   const oneSignalConfigStatus = ref<string | null>(null)
 
@@ -105,9 +107,17 @@
   )
 
   watch(
-    configuredOneSignalApiKey,
+    configuredOneSignalProxyUrl,
     (value) => {
-      oneSignalApiKeyInput.value = value ?? ""
+      oneSignalProxyUrlInput.value = value ?? ""
+    },
+    { immediate: true }
+  )
+
+  watch(
+    configuredOneSignalProxyKey,
+    (value) => {
+      oneSignalProxyKeyInput.value = value ?? ""
     },
     { immediate: true }
   )
@@ -137,16 +147,24 @@
       return
     }
 
-    const apiKeyRaw = oneSignalApiKeyInput.value.trim()
-    if (apiKeyRaw) {
-      const apiKey = oneSignalConfig.setOneSignalApiKeyFromInput(apiKeyRaw)
-      if (!apiKey) {
-        oneSignalConfigError.value = t("pages.settings.oneSignal.errors.invalidApiKey")
+    const proxyUrlRaw = oneSignalProxyUrlInput.value.trim()
+    if (proxyUrlRaw) {
+      const proxyUrl = oneSignalConfig.setOneSignalProxyUrlFromInput(proxyUrlRaw)
+      if (!proxyUrl) {
+        oneSignalConfigError.value = t("pages.settings.oneSignal.errors.missingProxyUrl")
         return
       }
+
+      const proxyKeyRaw = oneSignalProxyKeyInput.value.trim()
+      if (proxyKeyRaw) {
+        oneSignalConfig.setOneSignalProxyKeyFromInput(proxyKeyRaw)
+      } else {
+        oneSignalConfig.clearOneSignalProxyKey()
+      }
     } else {
-      // API key is optional (only needed for scheduling via REST API).
-      oneSignalConfig.clearOneSignalApiKey()
+      // Proxy is optional (only needed for scheduling via REST API).
+      oneSignalConfig.clearOneSignalProxyUrl()
+      oneSignalConfig.clearOneSignalProxyKey()
     }
 
     oneSignalConfigStatus.value = t("pages.settings.oneSignal.success.saved")
@@ -156,7 +174,8 @@
     resetOneSignalFeedback()
     oneSignalConfig.clearOneSignalConfig()
     oneSignalAppIdInput.value = ""
-    oneSignalApiKeyInput.value = ""
+    oneSignalProxyUrlInput.value = ""
+    oneSignalProxyKeyInput.value = ""
     oneSignalConfigStatus.value = t("pages.settings.oneSignal.success.removed")
   }
 
@@ -644,6 +663,20 @@
                   <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.sdk") }}:</span>
                   <span class="text-foreground"> {{ $t(`pages.settings.oneSignal.sdkStatus.${oneSignal.status}`) }}</span>
                 </div>
+                <div>
+                  <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.schedulingProxy") }}:</span>
+                  <span class="text-foreground">
+                    {{
+                      configuredOneSignalProxyUrl
+                        ? $t("pages.settings.oneSignal.values.configured")
+                        : $t("pages.settings.oneSignal.values.notConfigured")
+                    }}
+                  </span>
+                </div>
+                <div v-if="configuredOneSignalProxyUrl">
+                  <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.proxyUrl") }}:</span>
+                  <code class="ml-1 rounded bg-muted px-1 py-0.5">{{ configuredOneSignalProxyUrl }}</code>
+                </div>
                 <div v-if="oneSignalWorkerInfo">
                   <span class="text-muted-foreground">{{ $t("pages.settings.oneSignal.status.workerPath") }}:</span>
                   <code class="ml-1 rounded bg-muted px-1 py-0.5">{{ oneSignalWorkerInfo.serviceWorkerAbsolutePath }}</code>
@@ -692,21 +725,40 @@
             </div>
 
             <div class="space-y-2">
-              <label for="settings-onesignal-api-key" class="text-foreground">
-                {{ $t("pages.settings.oneSignal.fields.apiKey.label") }}
+              <label for="settings-onesignal-proxy-url" class="text-foreground">
+                {{ $t("pages.settings.oneSignal.fields.proxyUrl.label") }}
               </label>
               <Input
-                id="settings-onesignal-api-key"
-                v-model="oneSignalApiKeyInput"
+                id="settings-onesignal-proxy-url"
+                v-model="oneSignalProxyUrlInput"
+                type="text"
+                inputmode="url"
+                autocomplete="off"
+                spellcheck="false"
+                :placeholder="$t('pages.settings.oneSignal.fields.proxyUrl.placeholder')"
+                aria-describedby="settings-onesignal-proxy-url-hint settings-onesignal-feedback"
+              />
+              <p id="settings-onesignal-proxy-url-hint" class="text-xs text-muted-foreground">
+                {{ $t("pages.settings.oneSignal.fields.proxyUrl.hint") }}
+              </p>
+            </div>
+
+            <div class="space-y-2">
+              <label for="settings-onesignal-proxy-key" class="text-foreground">
+                {{ $t("pages.settings.oneSignal.fields.proxyKey.label") }}
+              </label>
+              <Input
+                id="settings-onesignal-proxy-key"
+                v-model="oneSignalProxyKeyInput"
                 type="password"
                 inputmode="text"
                 autocomplete="off"
                 spellcheck="false"
-                :placeholder="$t('pages.settings.oneSignal.fields.apiKey.placeholder')"
-                aria-describedby="settings-onesignal-api-key-hint settings-onesignal-feedback"
+                :placeholder="$t('pages.settings.oneSignal.fields.proxyKey.placeholder')"
+                aria-describedby="settings-onesignal-proxy-key-hint settings-onesignal-feedback"
               />
-              <p id="settings-onesignal-api-key-hint" class="text-xs text-muted-foreground">
-                {{ $t("pages.settings.oneSignal.fields.apiKey.hint") }}
+              <p id="settings-onesignal-proxy-key-hint" class="text-xs text-muted-foreground">
+                {{ $t("pages.settings.oneSignal.fields.proxyKey.hint") }}
               </p>
             </div>
 

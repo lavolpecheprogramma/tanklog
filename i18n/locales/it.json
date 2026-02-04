@@ -844,7 +844,7 @@
         "errors": {
           "scheduleFailed": "Impossibile pianificare la notifica push.",
           "scheduleFailedWithMessage": "Promemoria salvato, ma impossibile pianificare la notifica push. ({message})",
-          "cancelMissingConfig": "OneSignal non è configurato (API key mancante), quindi TankLog non può annullare la push pianificata.",
+          "cancelMissingConfig": "Il proxy di pianificazione non è configurato, quindi TankLog non può annullare la push pianificata.",
           "cancelFailed": "Impossibile annullare la notifica push pianificata.",
           "cancelFailedWithMessage": "Promemoria aggiornato, ma impossibile annullare la notifica push pianificata. ({message})"
         }
@@ -987,11 +987,13 @@
       },
       "oneSignal": {
         "title": "Notifiche (OneSignal)",
-        "description": "Opzionale: abilita le notifiche push web tramite OneSignal (porta il tuo App ID + API key).",
+        "description": "Opzionale: abilita le notifiche push web tramite OneSignal. Per promemoria pianificati (send_after) configura un proxy.",
         "statusLabel": "Stato",
         "status": {
           "enabled": "Abilitato",
           "sdk": "SDK",
+          "schedulingProxy": "Proxy pianificazione",
+          "proxyUrl": "URL proxy",
           "workerPath": "Service worker",
           "pushSupported": "Push supportate",
           "permission": "Permesso",
@@ -1009,7 +1011,9 @@
           "yes": "Sì",
           "no": "No",
           "granted": "Concesso",
-          "denied": "Negato"
+          "denied": "Negato",
+          "configured": "Configurato",
+          "notConfigured": "Non configurato"
         },
         "fields": {
           "appId": {
@@ -1021,6 +1025,16 @@
             "label": "App API key (opzionale, per pianificazione)",
             "placeholder": "Incolla la tua App API key OneSignal",
             "hint": "Serve per pianificare notifiche con send_after. Salvata localmente su questo dispositivo."
+          },
+          "proxyUrl": {
+            "label": "URL proxy per pianificazione (richiesto per send_after)",
+            "placeholder": "https://tuo-worker.example.workers.dev",
+            "hint": "Le API REST OneSignal sono bloccate dal CORS del browser. Usa un piccolo proxy (es. Cloudflare Worker) che aggiunge la API key lato server."
+          },
+          "proxyKey": {
+            "label": "Chiave proxy (opzionale)",
+            "placeholder": "Segreto condiviso per proteggere il proxy",
+            "hint": "Se il proxy richiede una chiave, incollala qui (salvata localmente)."
           }
         },
         "actions": {
@@ -1035,6 +1049,7 @@
         "errors": {
           "invalidAppId": "Inserisci un App ID OneSignal valido.",
           "invalidApiKey": "Inserisci una API key OneSignal valida.",
+          "missingProxyUrl": "Inserisci un URL proxy per abilitare le notifiche pianificate.",
           "initFailed": "Inizializzazione OneSignal non riuscita.",
           "disableFailed": "Disattivazione OneSignal non riuscita.",
           "refreshFailed": "Aggiornamento stato OneSignal non riuscito.",
@@ -1051,7 +1066,7 @@
           "subscribed": "Iscritto.",
           "unsubscribed": "Disiscritto."
         },
-        "securityNote": "Nota sicurezza: la API key OneSignal è salvata localmente nel tuo browser. Usala solo su dispositivi fidati."
+        "securityNote": "Nota: le chiamate REST a OneSignal sono bloccate dal CORS del browser. Per la pianificazione serve un proxy lato server. La chiave proxy (se usata) è salvata localmente."
       },
       "storage": {
         "title": "Storage (Google Drive)",

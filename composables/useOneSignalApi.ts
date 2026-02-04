@@ -17,18 +17,6 @@ type OneSignalCancelMessageResponse =
       errors?: unknown
     }
 
-function buildAuthorizationHeaderValue(apiKey: string): string {
-  const trimmed = apiKey.trim()
-  if (!trimmed) return "Key "
-  return /^key\s+/i.test(trimmed) ? trimmed : `Key ${trimmed}`
-}
-
-function toErrorMessage(value: unknown, fallback: string): string {
-  if (value instanceof Error) return value.message
-  if (typeof value === "string" && value.trim()) return value
-  return fallback
-}
-
 function extractOneSignalErrors(payload: unknown): string | null {
   if (!payload || typeof payload !== "object") return null
   const candidate = payload as Record<string, unknown>
@@ -50,7 +38,8 @@ function extractOneSignalErrors(payload: unknown): string | null {
 
 export type SchedulePushMessageInput = {
   appId: string
-  apiKey: string
+  proxyUrl: string
+  proxyKey?: string | null
   externalId: string
   title: string
   body: string
@@ -65,7 +54,8 @@ export type SchedulePushMessageResult = {
 
 export type CancelPushMessageInput = {
   appId: string
-  apiKey: string
+  proxyUrl: string
+  proxyKey?: string | null
   messageId: string
 }
 
@@ -73,16 +63,25 @@ export function useOneSignalApi() {
   async function schedulePushMessage(input: SchedulePushMessageInput): Promise<SchedulePushMessageResult> {
     if (!import.meta.client) throw new Error("OneSignal API can only be called in the browser.")
     if (!input.appId?.trim()) throw new Error("Missing OneSignal App ID.")
-    if (!input.apiKey?.trim()) throw new Error("Missing OneSignal API key.")
+    if (!input.proxyUrl?.trim()) throw new Error("Missing OneSignal proxy URL. Configure it in Settings.")
     if (!input.externalId?.trim()) throw new Error("Missing OneSignal external id.")
     if (!input.body?.trim()) throw new Error("Missing notification body.")
     if (!input.sendAfter?.trim()) throw new Error("Missing send_after value.")
 
-    const response = await fetch("https://api.onesignal.com/notifications?c=push", {
+    const base = input.proxyUrl.trim().replace(/\/+$/, "")
+    const endpoint = `${base}/notifications?c=push`
+
+    const headers: Record<string, string> = {
+      "content-type": "application/json; charset=utf-8",
+    }
+
+    const proxyKey = input.proxyKey?.trim()
+    if (proxyKey) headers["x-tanklog-proxy-key"] = proxyKey
+
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
-        "content-type": "application/json; charset=utf-8",
-        authorization: buildAuthorizationHeaderValue(input.apiKey),
+        ...headers,
       },
       body: JSON.stringify({
         app_id: input.appId.trim(),
@@ -120,17 +119,24 @@ export function useOneSignalApi() {
   async function cancelPushMessage(input: CancelPushMessageInput): Promise<boolean> {
     if (!import.meta.client) throw new Error("OneSignal API can only be called in the browser.")
     if (!input.appId?.trim()) throw new Error("Missing OneSignal App ID.")
-    if (!input.apiKey?.trim()) throw new Error("Missing OneSignal API key.")
+    if (!input.proxyUrl?.trim()) throw new Error("Missing OneSignal proxy URL. Configure it in Settings.")
     if (!input.messageId?.trim()) return false
 
-    const url = new URL(`https://api.onesignal.com/notifications/${encodeURIComponent(input.messageId.trim())}`)
+    const base = input.proxyUrl.trim().replace(/\/+$/, "")
+    const url = new URL(`${base}/notifications/${encodeURIComponent(input.messageId.trim())}`)
     url.searchParams.set("app_id", input.appId.trim())
+
+    const headers: Record<string, string> = {
+      "content-type": "application/json; charset=utf-8",
+    }
+
+    const proxyKey = input.proxyKey?.trim()
+    if (proxyKey) headers["x-tanklog-proxy-key"] = proxyKey
 
     const response = await fetch(url.toString(), {
       method: "DELETE",
       headers: {
-        "content-type": "application/json; charset=utf-8",
-        authorization: buildAuthorizationHeaderValue(input.apiKey),
+        ...headers,
       },
     })
 
