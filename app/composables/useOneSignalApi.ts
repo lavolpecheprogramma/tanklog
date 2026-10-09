@@ -1,3 +1,5 @@
+import { toIdempotencyUuid } from '~/utils/idempotencyKey'
+
 type OneSignalCreateMessageResponse =
   | {
       id?: string
@@ -78,6 +80,11 @@ export function useOneSignalApi() {
     const proxyKey = input.proxyKey?.trim()
     if (proxyKey) headers["x-tanklog-proxy-key"] = proxyKey
 
+    const rawIdempotency = input.idempotencyKey?.trim()
+    const idempotencyKey = rawIdempotency
+      ? await toIdempotencyUuid(rawIdempotency)
+      : undefined
+
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
@@ -97,7 +104,7 @@ export function useOneSignalApi() {
         },
         url: input.url?.trim() || undefined,
         send_after: input.sendAfter.trim(),
-        idempotency_key: input.idempotencyKey?.trim() || undefined,
+        idempotency_key: idempotencyKey,
       }),
     })
 
