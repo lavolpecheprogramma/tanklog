@@ -1,21 +1,21 @@
 export type EventTargetType = 'tank' | 'livestock'
 
-export type TankEventType =
-  | 'water_change'
-  | 'dosing'
-  | 'maintenance'
-  | 'livestock_addition'
-  | 'livestock_removal'
+export type TankEventType
+  = | 'water_change'
+    | 'dosing'
+    | 'maintenance'
+    | 'livestock_addition'
+    | 'livestock_removal'
 
-export type LivestockEventType =
-  | 'feeding'
-  | 'health'
-  | 'treatment'
-  | 'observation'
-  | 'molt'
-  | 'spawn'
-  | 'fragging'
-  | 'other'
+export type LivestockEventType
+  = | 'feeding'
+    | 'health'
+    | 'treatment'
+    | 'observation'
+    | 'molt'
+    | 'spawn'
+    | 'fragging'
+    | 'other'
 
 export type TankLogEventType = TankEventType | LivestockEventType
 

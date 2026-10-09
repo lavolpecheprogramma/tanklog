@@ -23,7 +23,7 @@ export function useSupabaseClient(): SupabaseClient | null {
     return cached.client
   }
 
-  let host = 'default'
+  let host: string
   try {
     host = new URL(url.value).hostname
   } catch {

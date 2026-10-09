@@ -90,19 +90,6 @@ export default defineNuxtConfig({
     enabled: true
   },
 
-  css: ['~/assets/css/main.css'],
-
-  colorMode: {
-    preference: 'dark',
-    fallback: 'dark'
-  },
-
-  runtimeConfig: {
-    public: {
-      siteUrl
-    }
-  },
-
   app: {
     baseURL,
     head: {
@@ -120,20 +107,44 @@ export default defineNuxtConfig({
           innerHTML: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'WebApplication',
-            name: siteName,
-            description: seoDescription,
+            'name': siteName,
+            'description': seoDescription,
             ...(siteUrl ? { url: absoluteUrl('') } : {}),
-            applicationCategory: 'LifestyleApplication',
-            operatingSystem: 'Web',
-            offers: {
+            'applicationCategory': 'LifestyleApplication',
+            'operatingSystem': 'Web',
+            'offers': {
               '@type': 'Offer',
-              price: '0',
-              priceCurrency: 'USD'
+              'price': '0',
+              'priceCurrency': 'USD'
             },
-            image: ogImage
+            'image': ogImage
           })
         }
       ] as Array<Record<string, string>>
+    }
+  },
+
+  css: ['~/assets/css/main.css'],
+
+  colorMode: {
+    preference: 'dark',
+    fallback: 'dark'
+  },
+
+  runtimeConfig: {
+    public: {
+      siteUrl
+    }
+  },
+
+  compatibilityDate: '2026-06-30',
+
+  eslint: {
+    config: {
+      stylistic: {
+        commaDangle: 'never',
+        braceStyle: '1tbs'
+      }
     }
   },
 
@@ -187,17 +198,6 @@ export default defineNuxtConfig({
     },
     client: {
       installPrompt: true
-    }
-  },
-
-  compatibilityDate: '2026-06-30',
-
-  eslint: {
-    config: {
-      stylistic: {
-        commaDangle: 'never',
-        braceStyle: '1tbs'
-      }
     }
   }
 })

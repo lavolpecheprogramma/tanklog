@@ -23,17 +23,17 @@ useHead({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'WebApplication',
-        name: t('app.name'),
-        description: t('app.seoDescription'),
+        'name': t('app.name'),
+        'description': t('app.seoDescription'),
         ...(site.siteUrl.value ? { url: site.absoluteUrl('') } : {}),
-        applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'Web',
-        offers: {
+        'applicationCategory': 'LifestyleApplication',
+        'operatingSystem': 'Web',
+        'offers': {
           '@type': 'Offer',
-          price: '0',
-          priceCurrency: 'USD'
+          'price': '0',
+          'priceCurrency': 'USD'
         },
-        image: site.ogImage.value
+        'image': site.ogImage.value
       })
     }
   ]

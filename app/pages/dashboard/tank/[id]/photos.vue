@@ -459,7 +459,7 @@ onMounted(load)
         >
           <button
             type="button"
-            class="w-full rounded-lg text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
+            class="w-full rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400"
             :aria-pressed="compareMode ? compareIds.includes(photo.id) : undefined"
             @click="openFullscreen(photo)"
           >

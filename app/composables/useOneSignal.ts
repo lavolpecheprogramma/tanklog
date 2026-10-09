@@ -1,4 +1,40 @@
-type OneSignalDeferredFunction = (OneSignal: any) => void | Promise<void>
+type OneSignalPushSubscriptionChangeEvent = {
+  current?: {
+    id?: string | null
+    optedIn?: boolean
+  }
+}
+
+/** Minimal typing for the OneSignal Web SDK v16 surface we use. */
+type OneSignalSdk = {
+  init: (config: Record<string, unknown>) => Promise<void> | void
+  login: (externalId: string) => Promise<void> | void
+  logout: () => Promise<void> | void
+  Notifications?: {
+    permission?: boolean
+    isPushSupported?: () => boolean
+    requestPermission: () => Promise<void> | void
+    addEventListener?: (event: string, cb: (permission: boolean) => void) => void
+  }
+  User: {
+    onesignalId?: string | null
+    externalId?: string | null
+    setLanguage: (language: string) => Promise<void> | void
+    addEventListener?: (event: string, cb: () => void) => void
+    PushSubscription: {
+      id?: string | null
+      optedIn?: boolean
+      optIn: () => Promise<void> | void
+      optOut: () => Promise<void> | void
+      addEventListener?: (
+        event: string,
+        cb: (event: OneSignalPushSubscriptionChangeEvent) => void
+      ) => void
+    }
+  }
+}
+
+type OneSignalDeferredFunction = (OneSignal: OneSignalSdk) => void | Promise<void>
 
 declare global {
   interface Window {
@@ -6,25 +42,25 @@ declare global {
   }
 }
 
-type OneSignalStatus = "idle" | "loading" | "ready" | "error"
+type OneSignalStatus = 'idle' | 'loading' | 'ready' | 'error'
 
-const ONESIGNAL_SDK_URL = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+const ONESIGNAL_SDK_URL = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js'
 
 let sdkLoadPromise: Promise<void> | null = null
 let initPromise: Promise<void> | null = null
 let listenersBound = false
 
 function normalizeBaseUrl(value: string | null | undefined): string {
-  const trimmed = (value ?? "").trim()
-  if (!trimmed) return "/"
-  const withLeading = trimmed.startsWith("/") ? trimmed : `/${trimmed}`
-  return withLeading.endsWith("/") ? withLeading : `${withLeading}/`
+  const trimmed = (value ?? '').trim()
+  if (!trimmed) return '/'
+  const withLeading = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
+  return withLeading.endsWith('/') ? withLeading : `${withLeading}/`
 }
 
 function joinBase(baseUrl: string, path: string): string {
   const base = normalizeBaseUrl(baseUrl)
-  const suffix = path.startsWith("/") ? path.slice(1) : path
-  return `${base}${suffix}`.replace(/\/{2,}/g, "/")
+  const suffix = path.startsWith('/') ? path.slice(1) : path
+  return `${base}${suffix}`.replace(/\/{2,}/g, '/')
 }
 
 function ensureDeferredArray() {
@@ -41,48 +77,48 @@ function ensureSdkLoaded(timeoutMs = 15_000): Promise<void> {
   sdkLoadPromise = new Promise<void>((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${ONESIGNAL_SDK_URL}"]`)
     if (existing) {
-      if ((existing as HTMLScriptElement).dataset.loaded === "true") {
+      if ((existing as HTMLScriptElement).dataset.loaded === 'true') {
         resolve()
         return
       }
 
-      existing.addEventListener("load", () => resolve(), { once: true })
-      existing.addEventListener("error", () => reject(new Error("Failed to load OneSignal SDK.")), { once: true })
+      existing.addEventListener('load', () => resolve(), { once: true })
+      existing.addEventListener('error', () => reject(new Error('Failed to load OneSignal SDK.')), { once: true })
       return
     }
 
-    const script = document.createElement("script")
+    const script = document.createElement('script')
     script.src = ONESIGNAL_SDK_URL
     script.defer = true
-    script.dataset.loaded = "false"
+    script.dataset.loaded = 'false'
     script.addEventListener(
-      "load",
+      'load',
       () => {
-        script.dataset.loaded = "true"
+        script.dataset.loaded = 'true'
         resolve()
       },
       { once: true }
     )
-    script.addEventListener("error", () => reject(new Error("Failed to load OneSignal SDK.")), { once: true })
+    script.addEventListener('error', () => reject(new Error('Failed to load OneSignal SDK.')), { once: true })
     document.head.appendChild(script)
 
     // Safety timeout: if load never resolves, surface an error.
     window.setTimeout(() => {
-      if (script.dataset.loaded === "true") return
-      reject(new Error("OneSignal SDK did not load in time."))
+      if (script.dataset.loaded === 'true') return
+      reject(new Error('OneSignal SDK did not load in time.'))
     }, timeoutMs)
   })
 
   return sdkLoadPromise
 }
 
-async function runDeferred<T>(handler: (OneSignal: any) => Promise<T> | T): Promise<T> {
-  if (!import.meta.client) throw new Error("OneSignal is only available in the browser.")
+async function runDeferred<T>(handler: (OneSignal: OneSignalSdk) => Promise<T> | T): Promise<T> {
+  if (!import.meta.client) throw new Error('OneSignal is only available in the browser.')
   ensureDeferredArray()
   await ensureSdkLoaded()
 
   return new Promise<T>((resolve, reject) => {
-    window.OneSignalDeferred!.push(async (OneSignal: any) => {
+    window.OneSignalDeferred!.push(async (OneSignal) => {
       try {
         resolve(await handler(OneSignal))
       } catch (error) {
@@ -94,23 +130,23 @@ async function runDeferred<T>(handler: (OneSignal: any) => Promise<T> | T): Prom
 
 function isLocalhostHost(hostname: string): boolean {
   const normalized = hostname.trim().toLowerCase()
-  return normalized === "localhost" || normalized === "127.0.0.1"
+  return normalized === 'localhost' || normalized === '127.0.0.1'
 }
 
 export function useOneSignal() {
   const runtimeConfig = useRuntimeConfig()
 
-  const status = useState<OneSignalStatus>("onesignal.status", () => "idle")
-  const error = useState<string | null>("onesignal.error", () => null)
+  const status = useState<OneSignalStatus>('onesignal.status', () => 'idle')
+  const error = useState<string | null>('onesignal.error', () => null)
 
-  const isInitialized = useState<boolean>("onesignal.initialized", () => false)
-  const isSupported = useState<boolean | null>("onesignal.pushSupported", () => null)
-  const hasPermission = useState<boolean | null>("onesignal.permission", () => null)
-  const isOptedIn = useState<boolean | null>("onesignal.optedIn", () => null)
-  const subscriptionId = useState<string | null>("onesignal.subscriptionId", () => null)
+  const isInitialized = useState<boolean>('onesignal.initialized', () => false)
+  const isSupported = useState<boolean | null>('onesignal.pushSupported', () => null)
+  const hasPermission = useState<boolean | null>('onesignal.permission', () => null)
+  const isOptedIn = useState<boolean | null>('onesignal.optedIn', () => null)
+  const subscriptionId = useState<string | null>('onesignal.subscriptionId', () => null)
 
-  const oneSignalId = useState<string | null>("onesignal.onesignalId", () => null)
-  const externalId = useState<string | null>("onesignal.externalId", () => null)
+  const oneSignalId = useState<string | null>('onesignal.onesignalId', () => null)
+  const externalId = useState<string | null>('onesignal.externalId', () => null)
 
   function resetError() {
     error.value = null
@@ -118,19 +154,19 @@ export function useOneSignal() {
 
   function getWorkerConfig() {
     const baseURL = normalizeBaseUrl(runtimeConfig.app?.baseURL)
-    const serviceWorkerAbsolutePath = joinBase(baseURL, "push/onesignal/OneSignalSDKWorker.js")
+    const serviceWorkerAbsolutePath = joinBase(baseURL, 'push/onesignal/OneSignalSDKWorker.js')
 
     // OneSignal’s Web SDK expects `serviceWorkerPath` without a leading slash and will
     // typically prefix it internally. If we pass an absolute path (e.g. "/push/..."),
     // some SDK versions may accidentally create "//push/..." which becomes "https://push/..."
     // (cross-origin) and fails registration.
-    const serviceWorkerPath = serviceWorkerAbsolutePath.replace(/^\/+/, "")
+    const serviceWorkerPath = serviceWorkerAbsolutePath.replace(/^\/+/, '')
 
     return {
       serviceWorkerPath,
-      serviceWorkerScope: joinBase(baseURL, "push/onesignal/"),
+      serviceWorkerScope: joinBase(baseURL, 'push/onesignal/'),
       serviceWorkerAbsolutePath,
-      baseURL,
+      baseURL
     }
   }
 
@@ -153,7 +189,7 @@ export function useOneSignal() {
         }
 
         try {
-          isOptedIn.value = typeof OneSignal.User?.PushSubscription?.optedIn === "boolean" ? OneSignal.User.PushSubscription.optedIn : null
+          isOptedIn.value = typeof OneSignal.User?.PushSubscription?.optedIn === 'boolean' ? OneSignal.User.PushSubscription.optedIn : null
         } catch {
           isOptedIn.value = null
         }
@@ -178,7 +214,7 @@ export function useOneSignal() {
       })
     } catch (err) {
       // Non-fatal: state refresh may fail if OneSignal isn't ready yet.
-      error.value = err instanceof Error ? err.message : "Failed to read OneSignal state."
+      error.value = err instanceof Error ? err.message : 'Failed to read OneSignal state.'
     }
   }
 
@@ -187,11 +223,11 @@ export function useOneSignal() {
     resetError()
 
     const appId = options.appId.trim()
-    if (!appId) throw new Error("Missing OneSignal App ID.")
+    if (!appId) throw new Error('Missing OneSignal App ID.')
 
     if (initPromise) return initPromise
 
-    status.value = "loading"
+    status.value = 'loading'
     initPromise = (async () => {
       const { serviceWorkerPath, serviceWorkerScope } = getWorkerConfig()
 
@@ -210,7 +246,7 @@ export function useOneSignal() {
       })
 
       isInitialized.value = true
-      status.value = "ready"
+      status.value = 'ready'
 
       await bindListeners()
       await refreshState()
@@ -221,8 +257,8 @@ export function useOneSignal() {
     } catch (err) {
       initPromise = null
       isInitialized.value = false
-      status.value = "error"
-      error.value = err instanceof Error ? err.message : "Failed to initialize OneSignal."
+      status.value = 'error'
+      error.value = err instanceof Error ? err.message : 'Failed to initialize OneSignal.'
       throw err
     }
   }
@@ -235,7 +271,7 @@ export function useOneSignal() {
 
     await runDeferred((OneSignal) => {
       try {
-        OneSignal.Notifications?.addEventListener?.("permissionChange", (permission: boolean) => {
+        OneSignal.Notifications?.addEventListener?.('permissionChange', (permission: boolean) => {
           hasPermission.value = Boolean(permission)
           void refreshState()
         })
@@ -244,9 +280,9 @@ export function useOneSignal() {
       }
 
       try {
-        OneSignal.User?.PushSubscription?.addEventListener?.("change", (event: any) => {
+        OneSignal.User?.PushSubscription?.addEventListener?.('change', (event) => {
           subscriptionId.value = event?.current?.id ?? subscriptionId.value
-          isOptedIn.value = typeof event?.current?.optedIn === "boolean" ? event.current.optedIn : isOptedIn.value
+          isOptedIn.value = typeof event?.current?.optedIn === 'boolean' ? event.current.optedIn : isOptedIn.value
           void refreshState()
         })
       } catch {
@@ -254,7 +290,7 @@ export function useOneSignal() {
       }
 
       try {
-        OneSignal.User?.addEventListener?.("change", () => {
+        OneSignal.User?.addEventListener?.('change', () => {
           void refreshState()
         })
       } catch {
@@ -266,9 +302,10 @@ export function useOneSignal() {
   async function requestPermission() {
     if (!import.meta.client) return
     resetError()
-    if (!isInitialized.value) throw new Error("OneSignal is not initialized.")
+    if (!isInitialized.value) throw new Error('OneSignal is not initialized.')
 
     await runDeferred(async (OneSignal) => {
+      if (!OneSignal.Notifications) throw new Error('OneSignal Notifications unavailable.')
       await OneSignal.Notifications.requestPermission()
     })
 
@@ -278,7 +315,7 @@ export function useOneSignal() {
   async function optIn() {
     if (!import.meta.client) return
     resetError()
-    if (!isInitialized.value) throw new Error("OneSignal is not initialized.")
+    if (!isInitialized.value) throw new Error('OneSignal is not initialized.')
 
     await runDeferred(async (OneSignal) => {
       await OneSignal.User.PushSubscription.optIn()
@@ -290,7 +327,7 @@ export function useOneSignal() {
   async function optOut() {
     if (!import.meta.client) return
     resetError()
-    if (!isInitialized.value) throw new Error("OneSignal is not initialized.")
+    if (!isInitialized.value) throw new Error('OneSignal is not initialized.')
 
     await runDeferred(async (OneSignal) => {
       await OneSignal.User.PushSubscription.optOut()
@@ -302,9 +339,9 @@ export function useOneSignal() {
   async function login(nextExternalId: string) {
     if (!import.meta.client) return
     resetError()
-    if (!isInitialized.value) throw new Error("OneSignal is not initialized.")
+    if (!isInitialized.value) throw new Error('OneSignal is not initialized.')
     const normalized = nextExternalId.trim()
-    if (!normalized) throw new Error("Missing external id.")
+    if (!normalized) throw new Error('Missing external id.')
 
     await runDeferred(async (OneSignal) => {
       await OneSignal.login(normalized)
@@ -352,7 +389,6 @@ export function useOneSignal() {
     optOut,
     login,
     logout,
-    setLanguage,
+    setLanguage
   }
 }
-

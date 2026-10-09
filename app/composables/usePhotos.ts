@@ -279,8 +279,7 @@ export function usePhotos() {
 
     if (storagePath) {
       await client.storage.from(BUCKET).remove([storagePath]).catch(() => undefined)
-      const next = { ...signedCache.value }
-      delete next[storagePath]
+      const { [storagePath]: _removed, ...next } = signedCache.value
       signedCache.value = next
     }
 

@@ -30,7 +30,7 @@ async function saveConfig() {
   }
   try {
     // Validate URL shape before persisting
-    // eslint-disable-next-line no-new
+
     new URL(nextUrl)
   } catch {
     configError.value = t('auth.errors.invalidUrl')

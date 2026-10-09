@@ -255,201 +255,201 @@ onMounted(load)
       </section>
 
       <div class="grid gap-6 lg:grid-cols-2">
-      <section class="rounded-xl border border-cyan-500/15 bg-slate-900/40 p-5">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="font-display text-lg font-semibold text-cyan-100">
-            {{ t('overview.latestTest') }}
-          </h2>
-          <UButton
-            :to="`/dashboard/tank/${tankId}/water-test`"
-            size="xs"
-            color="neutral"
-            variant="ghost"
-          >
-            {{ t('overview.seeAll') }}
-          </UButton>
-        </div>
-
-        <div
-          v-if="!latestSession"
-          class="mt-6 text-center"
-        >
-          <p class="text-sm text-slate-400">
-            {{ t('overview.noTests') }}
-          </p>
-          <UButton
-            class="mt-4"
-            :to="`/dashboard/tank/${tankId}/water-test`"
-            color="primary"
-            size="sm"
-          >
-            {{ t('overview.newTest') }}
-          </UButton>
-        </div>
-
-        <div
-          v-else
-          class="mt-4"
-        >
-          <p class="text-sm text-slate-400">
-            {{ formatDateTime(latestSession.measuredAt, locale) }}
-            · {{ t('waterTests.measurementCount', { count: latestSession.measurements.length }) }}
-          </p>
-          <ul class="mt-3 flex flex-wrap gap-2">
-            <li
-              v-for="m in latestSession.measurements"
-              :key="m.id"
+        <section class="rounded-xl border border-cyan-500/15 bg-slate-900/40 p-5">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="font-display text-lg font-semibold text-cyan-100">
+              {{ t('overview.latestTest') }}
+            </h2>
+            <UButton
+              :to="`/dashboard/tank/${tankId}/water-test`"
+              size="xs"
+              color="neutral"
+              variant="ghost"
             >
-              <UBadge
-                :color="verdictTone(evaluateMeasurement(m.parameter, m.value, rangeRows))"
-                variant="subtle"
+              {{ t('overview.seeAll') }}
+            </UButton>
+          </div>
+
+          <div
+            v-if="!latestSession"
+            class="mt-6 text-center"
+          >
+            <p class="text-sm text-slate-400">
+              {{ t('overview.noTests') }}
+            </p>
+            <UButton
+              class="mt-4"
+              :to="`/dashboard/tank/${tankId}/water-test`"
+              color="primary"
+              size="sm"
+            >
+              {{ t('overview.newTest') }}
+            </UButton>
+          </div>
+
+          <div
+            v-else
+            class="mt-4"
+          >
+            <p class="text-sm text-slate-400">
+              {{ formatDateTime(latestSession.measuredAt, locale) }}
+              · {{ t('waterTests.measurementCount', { count: latestSession.measurements.length }) }}
+            </p>
+            <ul class="mt-3 flex flex-wrap gap-2">
+              <li
+                v-for="m in latestSession.measurements"
+                :key="m.id"
               >
-                {{ m.parameter }} {{ m.value }}
-              </UBadge>
+                <UBadge
+                  :color="verdictTone(evaluateMeasurement(m.parameter, m.value, rangeRows))"
+                  variant="subtle"
+                >
+                  {{ m.parameter }} {{ m.value }}
+                </UBadge>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="rounded-xl border border-cyan-500/15 bg-slate-900/40 p-5">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="font-display text-lg font-semibold text-cyan-100">
+              {{ t('overview.dueReminders') }}
+            </h2>
+            <UButton
+              :to="`/dashboard/tank/${tankId}/reminders`"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+            >
+              {{ t('overview.seeAll') }}
+            </UButton>
+          </div>
+
+          <p
+            v-if="!dueReminders.length"
+            class="mt-6 text-sm text-slate-400"
+          >
+            {{ t('overview.noDue') }}
+          </p>
+          <ul
+            v-else
+            class="mt-4 space-y-3"
+          >
+            <li
+              v-for="reminder in dueReminders"
+              :key="reminder.id"
+              class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-cyan-500/10 bg-slate-950/40 px-3 py-2"
+            >
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="font-medium text-white">
+                    {{ reminder.title }}
+                  </p>
+                  <UBadge
+                    :color="dueTone(reminder.nextDue)"
+                    variant="subtle"
+                    size="sm"
+                  >
+                    {{ t(`reminders.dueStatus.${getReminderDueStatus(reminder.nextDue)}`) }}
+                  </UBadge>
+                </div>
+                <p class="text-xs text-slate-400">
+                  {{ formatDateTime(reminder.nextDue, locale) }}
+                </p>
+              </div>
+              <UButton
+                size="xs"
+                color="primary"
+                variant="soft"
+                :loading="markingId === reminder.id"
+                @click="markReminderDone(reminder.id)"
+              >
+                {{ t('reminders.markDone') }}
+              </UButton>
             </li>
           </ul>
-        </div>
-      </section>
+        </section>
 
-      <section class="rounded-xl border border-cyan-500/15 bg-slate-900/40 p-5">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="font-display text-lg font-semibold text-cyan-100">
-            {{ t('overview.dueReminders') }}
-          </h2>
-          <UButton
-            :to="`/dashboard/tank/${tankId}/reminders`"
-            size="xs"
-            color="neutral"
-            variant="ghost"
-          >
-            {{ t('overview.seeAll') }}
-          </UButton>
-        </div>
+        <section class="rounded-xl border border-cyan-500/15 bg-slate-900/40 p-5 lg:col-span-2">
+          <div class="flex items-center justify-between gap-2">
+            <h2 class="font-display text-lg font-semibold text-cyan-100">
+              {{ t('overview.recentEvents') }}
+            </h2>
+            <UButton
+              :to="`/dashboard/tank/${tankId}/events`"
+              size="xs"
+              color="neutral"
+              variant="ghost"
+            >
+              {{ t('overview.seeAll') }}
+            </UButton>
+          </div>
 
-        <p
-          v-if="!dueReminders.length"
-          class="mt-6 text-sm text-slate-400"
-        >
-          {{ t('overview.noDue') }}
-        </p>
-        <ul
-          v-else
-          class="mt-4 space-y-3"
-        >
-          <li
-            v-for="reminder in dueReminders"
-            :key="reminder.id"
-            class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-cyan-500/10 bg-slate-950/40 px-3 py-2"
+          <p
+            v-if="!recentEvents.length"
+            class="mt-6 text-sm text-slate-400"
           >
-            <div class="min-w-0">
-              <div class="flex flex-wrap items-center gap-2">
+            {{ t('overview.noEvents') }}
+          </p>
+          <ul
+            v-else
+            class="mt-4 divide-y divide-cyan-500/10"
+          >
+            <li
+              v-for="event in recentEvents"
+              :key="event.id"
+              class="flex flex-wrap items-baseline justify-between gap-2 py-3 first:pt-0 last:pb-0"
+            >
+              <div>
                 <p class="font-medium text-white">
-                  {{ reminder.title }}
+                  {{ event.description }}
                 </p>
-                <UBadge
-                  :color="dueTone(reminder.nextDue)"
-                  variant="subtle"
-                  size="sm"
-                >
-                  {{ t(`reminders.dueStatus.${getReminderDueStatus(reminder.nextDue)}`) }}
-                </UBadge>
+                <p class="text-sm text-slate-400">
+                  {{ t(`events.types.${event.type}`) }}
+                </p>
               </div>
               <p class="text-xs text-slate-400">
-                {{ formatDateTime(reminder.nextDue, locale) }}
+                {{ formatDateTime(event.occurredAt, locale) }}
               </p>
-            </div>
-            <UButton
-              size="xs"
-              color="primary"
-              variant="soft"
-              :loading="markingId === reminder.id"
-              @click="markReminderDone(reminder.id)"
-            >
-              {{ t('reminders.markDone') }}
-            </UButton>
-          </li>
-        </ul>
-      </section>
+            </li>
+          </ul>
+        </section>
 
-      <section class="rounded-xl border border-cyan-500/15 bg-slate-900/40 p-5 lg:col-span-2">
-        <div class="flex items-center justify-between gap-2">
-          <h2 class="font-display text-lg font-semibold text-cyan-100">
-            {{ t('overview.recentEvents') }}
-          </h2>
+        <div class="flex flex-wrap gap-2 lg:col-span-2">
+          <UButton
+            :to="`/dashboard/tank/${tankId}/reminders`"
+            color="neutral"
+            variant="soft"
+            size="sm"
+          >
+            {{ t('overview.newReminder') }}
+          </UButton>
           <UButton
             :to="`/dashboard/tank/${tankId}/events`"
-            size="xs"
             color="neutral"
-            variant="ghost"
+            variant="soft"
+            size="sm"
           >
-            {{ t('overview.seeAll') }}
+            {{ t('overview.logEvent') }}
+          </UButton>
+          <UButton
+            :to="`/dashboard/tank/${tankId}/photos`"
+            color="neutral"
+            variant="soft"
+            size="sm"
+          >
+            {{ t('overview.openPhotos') }}
+          </UButton>
+          <UButton
+            :to="`/dashboard/tank/${tankId}/equipment`"
+            color="neutral"
+            variant="soft"
+            size="sm"
+          >
+            {{ t('tanks.nav.equipment') }}
           </UButton>
         </div>
-
-        <p
-          v-if="!recentEvents.length"
-          class="mt-6 text-sm text-slate-400"
-        >
-          {{ t('overview.noEvents') }}
-        </p>
-        <ul
-          v-else
-          class="mt-4 divide-y divide-cyan-500/10"
-        >
-          <li
-            v-for="event in recentEvents"
-            :key="event.id"
-            class="flex flex-wrap items-baseline justify-between gap-2 py-3 first:pt-0 last:pb-0"
-          >
-            <div>
-              <p class="font-medium text-white">
-                {{ event.description }}
-              </p>
-              <p class="text-sm text-slate-400">
-                {{ t(`events.types.${event.type}`) }}
-              </p>
-            </div>
-            <p class="text-xs text-slate-400">
-              {{ formatDateTime(event.occurredAt, locale) }}
-            </p>
-          </li>
-        </ul>
-      </section>
-
-      <div class="flex flex-wrap gap-2 lg:col-span-2">
-        <UButton
-          :to="`/dashboard/tank/${tankId}/reminders`"
-          color="neutral"
-          variant="soft"
-          size="sm"
-        >
-          {{ t('overview.newReminder') }}
-        </UButton>
-        <UButton
-          :to="`/dashboard/tank/${tankId}/events`"
-          color="neutral"
-          variant="soft"
-          size="sm"
-        >
-          {{ t('overview.logEvent') }}
-        </UButton>
-        <UButton
-          :to="`/dashboard/tank/${tankId}/photos`"
-          color="neutral"
-          variant="soft"
-          size="sm"
-        >
-          {{ t('overview.openPhotos') }}
-        </UButton>
-        <UButton
-          :to="`/dashboard/tank/${tankId}/equipment`"
-          color="neutral"
-          variant="soft"
-          size="sm"
-        >
-          {{ t('tanks.nav.equipment') }}
-        </UButton>
-      </div>
       </div>
     </div>
   </section>

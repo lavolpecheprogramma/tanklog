@@ -195,8 +195,7 @@ export function useParameterTimers() {
     const existing = timers.value[parameter]
     if (!existing) return
     await cancelPush(existing.oneSignalMessageId)
-    const next = { ...timers.value }
-    delete next[parameter]
+    const { [parameter]: _removed, ...next } = timers.value
     timers.value = next
     save()
   }

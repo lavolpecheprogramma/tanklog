@@ -78,7 +78,6 @@ async function saveConfig() {
   message.value = null
   error.value = null
   try {
-    // eslint-disable-next-line no-new
     new URL(projectUrl.value.trim())
     config.setConfig({
       url: projectUrl.value.trim(),

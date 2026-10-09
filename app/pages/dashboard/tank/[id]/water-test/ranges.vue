@@ -179,12 +179,24 @@ function parseNullableNumber(raw: string): number | null {
       <table class="min-w-full text-left text-sm">
         <thead class="bg-slate-900/80 text-slate-300">
           <tr>
-            <th class="px-3 py-2 font-medium">{{ t('ranges.parameter') }}</th>
-            <th class="px-3 py-2 font-medium">{{ t('ranges.min') }}</th>
-            <th class="px-3 py-2 font-medium">{{ t('ranges.max') }}</th>
-            <th class="px-3 py-2 font-medium">{{ t('ranges.unit') }}</th>
-            <th class="px-3 py-2 font-medium">{{ t('ranges.statusLabel') }}</th>
-            <th class="px-3 py-2 font-medium">{{ t('ranges.color') }}</th>
+            <th class="px-3 py-2 font-medium">
+              {{ t('ranges.parameter') }}
+            </th>
+            <th class="px-3 py-2 font-medium">
+              {{ t('ranges.min') }}
+            </th>
+            <th class="px-3 py-2 font-medium">
+              {{ t('ranges.max') }}
+            </th>
+            <th class="px-3 py-2 font-medium">
+              {{ t('ranges.unit') }}
+            </th>
+            <th class="px-3 py-2 font-medium">
+              {{ t('ranges.statusLabel') }}
+            </th>
+            <th class="px-3 py-2 font-medium">
+              {{ t('ranges.color') }}
+            </th>
             <th class="px-3 py-2" />
           </tr>
         </thead>
@@ -202,14 +214,14 @@ function parseNullableNumber(raw: string): number | null {
             </td>
             <td class="px-3 py-2">
               <UInput
-                :model-value="row.minValue ?? ''"
+                :model-value="row.minValue == null ? '' : String(row.minValue)"
                 class="min-w-20"
                 @update:model-value="(v: string | number) => { row.minValue = parseNullableNumber(String(v)) }"
               />
             </td>
             <td class="px-3 py-2">
               <UInput
-                :model-value="row.maxValue ?? ''"
+                :model-value="row.maxValue == null ? '' : String(row.maxValue)"
                 class="min-w-20"
                 @update:model-value="(v: string | number) => { row.maxValue = parseNullableNumber(String(v)) }"
               />

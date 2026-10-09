@@ -19,13 +19,13 @@ import {
   type MigrateTankReport
 } from '~/utils/migrate/importTank'
 
-export type MigrateStep =
-  | 'clientId'
-  | 'connect'
-  | 'pickRoot'
-  | 'pickTanks'
-  | 'running'
-  | 'done'
+export type MigrateStep
+  = | 'clientId'
+    | 'connect'
+    | 'pickRoot'
+    | 'pickTanks'
+    | 'running'
+    | 'done'
 
 export type MigrateRootFolder = {
   id: string

@@ -1,11 +1,11 @@
-export type EquipmentType =
-  | 'light'
-  | 'pump'
-  | 'filter'
-  | 'heater'
-  | 'skimmer'
-  | 'ato'
-  | 'other'
+export type EquipmentType
+  = | 'light'
+    | 'pump'
+    | 'filter'
+    | 'heater'
+    | 'skimmer'
+    | 'ato'
+    | 'other'
 
 export const EQUIPMENT_TYPES: EquipmentType[] = [
   'light',

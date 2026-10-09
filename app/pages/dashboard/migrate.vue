@@ -57,7 +57,7 @@ function statusColor(status: 'ok' | 'skipped' | 'error') {
         ]"
         :key="label"
         class="rounded-full border px-2.5 py-1"
-        :class="index <= ['clientId','connect','pickRoot','pickTanks','running','done'].indexOf(migrate.step.value)
+        :class="index <= ['clientId', 'connect', 'pickRoot', 'pickTanks', 'running', 'done'].indexOf(migrate.step.value)
           ? 'border-cyan-500/40 text-cyan-200'
           : 'border-slate-700'"
       >

@@ -27,7 +27,13 @@ async function load() {
   }
 }
 
-watch(() => props.storagePath, () => { void load() }, { immediate: true })
+watch(
+  () => props.storagePath,
+  () => {
+    void load()
+  },
+  { immediate: true }
+)
 </script>
 
 <template>

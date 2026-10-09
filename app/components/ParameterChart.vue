@@ -108,7 +108,7 @@ async function syncChart() {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (ctx) => `${props.label}: ${ctx.parsed.y}`
+            label: ctx => `${props.label}: ${ctx.parsed.y}`
           }
         }
       },

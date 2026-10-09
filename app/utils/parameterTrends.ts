@@ -99,7 +99,7 @@ export function computeParameterTrends(
       : null
 
     const delta = previous ? latest.value - previous.value : null
-    let direction: ParameterTrend['direction'] = 'unknown'
+    let direction: ParameterTrend['direction']
     if (delta === null) direction = 'unknown'
     else if (Math.abs(delta) < 1e-9) direction = 'flat'
     else direction = delta > 0 ? 'up' : 'down'
@@ -135,7 +135,7 @@ export function computeParameterTrends(
     const worsening = alert || driftingWorse
     const improving = !worsening && (verdictBetter || driftingBetter)
 
-    let signal: TrendSignal = 'unknown'
+    let signal: TrendSignal
     if (!previous) signal = 'unknown'
     else if (worsening) signal = 'worsening'
     else if (improving) signal = 'improving'

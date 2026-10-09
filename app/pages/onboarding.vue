@@ -59,7 +59,6 @@ async function saveKeys() {
   message.value = null
   error.value = null
   try {
-    // eslint-disable-next-line no-new
     new URL(projectUrl.value.trim())
   } catch {
     error.value = t('auth.errors.invalidUrl')
