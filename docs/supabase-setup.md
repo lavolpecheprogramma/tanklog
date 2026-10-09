@@ -27,6 +27,18 @@ Data model: [`docs/v2-data-model.md`](v2-data-model.md)
 2. Ensure **Email** is enabled
 3. For local/hobby use you may disable “Confirm email” temporarily (optional); production should keep confirmation on
 
+### 2b. Redirect URLs (password reset)
+
+TankLog can send a **forgot password** email and finish recovery on `/dashboard/reset-password`.
+
+1. Project → **Authentication** → **URL Configuration**
+2. Set **Site URL** to your TankLog origin (include the repo subpath if you use GitHub project pages), e.g. `https://you.github.io/tanklog/`
+3. Add to **Redirect URLs**:
+   - `http://localhost:3000/dashboard/reset-password` (local)
+   - `https://<your-tanklog-host><baseURL>/dashboard/reset-password` (production)
+
+Without these entries, the reset link from email will fail or land on the wrong page.
+
 ### 3. Apply TankLog schema
 
 1. Project → **SQL** → **New query**

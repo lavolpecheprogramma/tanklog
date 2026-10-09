@@ -14,10 +14,21 @@ const configOpen = ref(!config.isConfigured.value)
 const configMessage = ref<string | null>(null)
 const configError = ref<string | null>(null)
 
-const mode = ref<'signin' | 'signup'>('signin')
+const mode = ref<'signin' | 'signup' | 'forgot'>('signin')
 const email = ref('')
 const password = ref('')
 const formMessage = ref<string | null>(null)
+
+onMounted(() => {
+  if (route.query.mode === 'forgot') mode.value = 'forgot'
+})
+
+watch(
+  () => route.query.mode,
+  (value) => {
+    if (value === 'forgot') mode.value = 'forgot'
+  }
+)
 
 async function saveConfig() {
   configError.value = null
@@ -54,6 +65,11 @@ async function submitAuth() {
   }
 
   try {
+    if (mode.value === 'forgot') {
+      await auth.requestPasswordReset(email.value)
+      formMessage.value = t('auth.reset.emailSent')
+      return
+    }
     if (mode.value === 'signin') {
       await auth.signInWithPassword(email.value, password.value)
     } else {
@@ -153,7 +169,7 @@ async function submitAuth() {
       class="mt-8 space-y-4"
       @submit.prevent="submitAuth"
     >
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
         <UButton
           type="button"
           size="sm"
@@ -172,7 +188,23 @@ async function submitAuth() {
         >
           {{ t('auth.signUp') }}
         </UButton>
+        <UButton
+          type="button"
+          size="sm"
+          :color="mode === 'forgot' ? 'primary' : 'neutral'"
+          :variant="mode === 'forgot' ? 'solid' : 'ghost'"
+          @click="mode = 'forgot'"
+        >
+          {{ t('auth.reset.forgot') }}
+        </UButton>
       </div>
+
+      <p
+        v-if="mode === 'forgot'"
+        class="text-sm text-slate-400"
+      >
+        {{ t('auth.reset.requestBody') }}
+      </p>
 
       <UFormField :label="t('auth.email')">
         <UInput
@@ -183,7 +215,10 @@ async function submitAuth() {
           class="w-full"
         />
       </UFormField>
-      <UFormField :label="t('auth.password')">
+      <UFormField
+        v-if="mode !== 'forgot'"
+        :label="t('auth.password')"
+      >
         <UInput
           v-model="password"
           type="password"
@@ -201,7 +236,13 @@ async function submitAuth() {
         :loading="auth.busy.value"
         :disabled="auth.busy.value"
       >
-        {{ mode === 'signin' ? t('auth.signIn') : t('auth.signUp') }}
+        {{
+          mode === 'signin'
+            ? t('auth.signIn')
+            : mode === 'signup'
+              ? t('auth.signUp')
+              : t('auth.reset.sendEmail')
+        }}
       </UButton>
 
       <p
