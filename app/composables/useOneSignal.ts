@@ -39,7 +39,14 @@ type OneSignalDeferredFunction = (OneSignal: OneSignalSdk) => void | Promise<voi
 declare global {
   interface Window {
     OneSignalDeferred?: OneSignalDeferredFunction[]
+    OneSignal?: OneSignalSdk
   }
+}
+
+function getWindowOneSignal(): OneSignalSdk | null {
+  if (!import.meta.client) return null
+  const candidate = window.OneSignal
+  return candidate && typeof candidate.init === 'function' ? candidate : null
 }
 
 type OneSignalStatus = 'idle' | 'loading' | 'ready' | 'error'
@@ -128,6 +135,16 @@ async function runDeferred<T>(handler: (OneSignal: OneSignalSdk) => Promise<T> |
   })
 }
 
+/** Prefer the live SDK instance so permission prompts stay inside a user gesture. */
+async function callSdk<T>(
+  initialized: boolean,
+  handler: (OneSignal: OneSignalSdk) => Promise<T> | T
+): Promise<T> {
+  const direct = getWindowOneSignal()
+  if (initialized && direct) return await handler(direct)
+  return runDeferred(handler)
+}
+
 function isLocalhostHost(hostname: string): boolean {
   const normalized = hostname.trim().toLowerCase()
   return normalized === 'localhost' || normalized === '127.0.0.1'
@@ -142,6 +159,10 @@ export function useOneSignal() {
   const isInitialized = useState<boolean>('onesignal.initialized', () => false)
   const isSupported = useState<boolean | null>('onesignal.pushSupported', () => null)
   const hasPermission = useState<boolean | null>('onesignal.permission', () => null)
+  const permissionNative = useState<NotificationPermission | 'unsupported' | null>(
+    'onesignal.permissionNative',
+    () => null
+  )
   const isOptedIn = useState<boolean | null>('onesignal.optedIn', () => null)
   const subscriptionId = useState<string | null>('onesignal.subscriptionId', () => null)
 
@@ -175,7 +196,13 @@ export function useOneSignal() {
     if (!isInitialized.value) return
 
     try {
-      await runDeferred(async (OneSignal) => {
+      if (typeof Notification === 'undefined') {
+        permissionNative.value = 'unsupported'
+      } else {
+        permissionNative.value = Notification.permission
+      }
+
+      await callSdk(isInitialized.value, async (OneSignal) => {
         try {
           isSupported.value = Boolean(OneSignal.Notifications?.isPushSupported?.())
         } catch {
@@ -304,7 +331,12 @@ export function useOneSignal() {
     resetError()
     if (!isInitialized.value) throw new Error('OneSignal is not initialized.')
 
-    await runDeferred(async (OneSignal) => {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+      throw new Error('Browser notifications are blocked for this site.')
+    }
+
+    // Call the live SDK directly so Safari/Chrome keep the user-gesture chain.
+    await callSdk(true, async (OneSignal) => {
       if (!OneSignal.Notifications) throw new Error('OneSignal Notifications unavailable.')
       await OneSignal.Notifications.requestPermission()
     })
@@ -317,7 +349,7 @@ export function useOneSignal() {
     resetError()
     if (!isInitialized.value) throw new Error('OneSignal is not initialized.')
 
-    await runDeferred(async (OneSignal) => {
+    await callSdk(true, async (OneSignal) => {
       await OneSignal.User.PushSubscription.optIn()
     })
 
@@ -329,7 +361,7 @@ export function useOneSignal() {
     resetError()
     if (!isInitialized.value) throw new Error('OneSignal is not initialized.')
 
-    await runDeferred(async (OneSignal) => {
+    await callSdk(true, async (OneSignal) => {
       await OneSignal.User.PushSubscription.optOut()
     })
 
@@ -343,7 +375,7 @@ export function useOneSignal() {
     const normalized = nextExternalId.trim()
     if (!normalized) throw new Error('Missing external id.')
 
-    await runDeferred(async (OneSignal) => {
+    await callSdk(true, async (OneSignal) => {
       await OneSignal.login(normalized)
     })
     await refreshState()
@@ -354,7 +386,7 @@ export function useOneSignal() {
     resetError()
     if (!isInitialized.value) return
 
-    await runDeferred(async (OneSignal) => {
+    await callSdk(true, async (OneSignal) => {
       await OneSignal.logout()
     })
     await refreshState()
@@ -366,7 +398,7 @@ export function useOneSignal() {
     const normalized = language.trim()
     if (!normalized) return
 
-    await runDeferred(async (OneSignal) => {
+    await callSdk(true, async (OneSignal) => {
       await OneSignal.User.setLanguage(normalized)
     })
   }
@@ -377,6 +409,7 @@ export function useOneSignal() {
     isInitialized: readonly(isInitialized),
     isSupported: readonly(isSupported),
     hasPermission: readonly(hasPermission),
+    permissionNative: readonly(permissionNative),
     isOptedIn: readonly(isOptedIn),
     subscriptionId: readonly(subscriptionId),
     oneSignalId: readonly(oneSignalId),

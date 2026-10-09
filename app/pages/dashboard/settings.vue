@@ -45,6 +45,15 @@ const oneSignalStatusLabel = computed(() => {
   return t('settings.oneSignal.status.ready')
 })
 
+const oneSignalPermissionLabel = computed(() => {
+  const native = oneSignal.permissionNative.value
+  if (native === 'unsupported') return t('settings.oneSignal.permission.unsupported')
+  if (native === 'granted') return t('settings.oneSignal.permission.granted')
+  if (native === 'denied') return t('settings.oneSignal.permission.denied')
+  if (native === 'default') return t('settings.oneSignal.permission.default')
+  return t('settings.oneSignal.permission.unknown')
+})
+
 onMounted(() => {
   void health.check({ force: true })
   oneSignalConfig.hydrateFromStorage()
@@ -170,7 +179,7 @@ async function exportJson() {
   }
 }
 
-function saveOneSignalConfig() {
+async function saveOneSignalConfig() {
   oneSignalMessage.value = null
   oneSignalError.value = null
 
@@ -196,7 +205,17 @@ function saveOneSignalConfig() {
   }
 
   oneSignalConfig.setEnabled(true)
-  oneSignalMessage.value = t('settings.oneSignal.saved')
+  oneSignalBusy.value = true
+  try {
+    if (!oneSignal.isInitialized.value) {
+      await oneSignal.init({ appId })
+    }
+    oneSignalMessage.value = t('settings.oneSignal.savedReady')
+  } catch (e) {
+    oneSignalError.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    oneSignalBusy.value = false
+  }
 }
 
 async function subscribeOneSignal() {
@@ -204,21 +223,42 @@ async function subscribeOneSignal() {
   oneSignalError.value = null
   oneSignalBusy.value = true
   try {
-    if (!oneSignalConfig.appId.value) {
+    const appId = oneSignalConfig.appId.value || oneSignalConfig.setAppIdFromInput(oneSignalAppIdInput.value)
+    if (!appId) {
       throw new Error(t('settings.oneSignal.errors.invalidAppId'))
     }
     oneSignalConfig.setEnabled(true)
+
+    // Init must happen before the permission click when possible. If we init inside
+    // this click, Safari/Chrome often consume the user-gesture and skip the prompt.
     if (!oneSignal.isInitialized.value) {
-      await oneSignal.init({ appId: oneSignalConfig.appId.value })
+      await oneSignal.init({ appId })
+      oneSignalMessage.value = t('settings.oneSignal.clickSubscribeAgain')
+      return
     }
+
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+      throw new Error(t('settings.oneSignal.errors.permissionDenied'))
+    }
+
     await oneSignal.requestPermission()
     await oneSignal.optIn()
     const userId = auth.user.value?.id
     if (userId) await oneSignal.login(userId)
     await oneSignal.refreshState()
+
+    if (typeof Notification !== 'undefined' && Notification.permission !== 'granted') {
+      throw new Error(t('settings.oneSignal.errors.permissionNotGranted'))
+    }
+
     oneSignalMessage.value = t('settings.oneSignal.subscribed')
   } catch (e) {
-    oneSignalError.value = e instanceof Error ? e.message : String(e)
+    const raw = e instanceof Error ? e.message : String(e)
+    if (raw.toLowerCase().includes('blocked')) {
+      oneSignalError.value = t('settings.oneSignal.errors.permissionDenied')
+    } else {
+      oneSignalError.value = raw
+    }
   } finally {
     oneSignalBusy.value = false
   }
@@ -428,6 +468,12 @@ async function disableOneSignal() {
           <span v-if="oneSignalConfig.hasSchedulingProxy.value">
             · {{ t('settings.oneSignal.schedulingReady') }}
           </span>
+        </p>
+        <p class="mt-1 text-sm text-slate-400">
+          {{ oneSignalPermissionLabel }}
+        </p>
+        <p class="mt-2 text-xs text-slate-500">
+          {{ t('settings.oneSignal.subscribeHint') }}
         </p>
       </div>
 

@@ -288,12 +288,22 @@
       "proxyKey": "Chiave proxy (opzionale)",
       "save": "Salva config OneSignal",
       "subscribe": "Iscriviti su questo browser",
+      "subscribeHint": "Il prompt dei permessi del browser compare solo dopo “Iscriviti” (non è automatico). Prima Salva, aspetta lo stato Pronto, poi Iscriviti.",
       "disable": "Disabilita",
       "saved": "Impostazioni OneSignal salvate.",
+      "savedReady": "OneSignal salvato. Ora tocca “Iscriviti su questo browser” per il prompt dei permessi.",
+      "clickSubscribeAgain": "SDK pronto. Tocca di nuovo “Iscriviti su questo browser” per il prompt dei permessi.",
       "subscribed": "Questo browser è iscritto alle push.",
       "disabled": "OneSignal disabilitato su questo dispositivo.",
       "schedulingReady": "proxy di scheduling configurato",
       "docsHint": "Dettagli in docs/onesignal.md · ",
+      "permission": {
+        "unsupported": "Permesso browser: non supportato",
+        "default": "Permesso browser: non ancora chiesto",
+        "granted": "Permesso browser: consentito",
+        "denied": "Permesso browser: bloccato — resetta nelle impostazioni del sito",
+        "unknown": "Permesso browser: sconosciuto"
+      },
       "status": {
         "off": "Spento",
         "loading": "Caricamento SDK…",
@@ -303,7 +313,9 @@
       },
       "errors": {
         "invalidAppId": "Inserisci un OneSignal App ID valido (UUID).",
-        "invalidProxyUrl": "L’URL del proxy deve essere http(s) valido."
+        "invalidProxyUrl": "L’URL del proxy deve essere http(s) valido.",
+        "permissionDenied": "Le notifiche sono bloccate per questo sito. Nelle impostazioni del browser/PWA metti Notifiche su Consenti, poi riprova Iscriviti.",
+        "permissionNotGranted": "Prompt negato o chiuso. Tocca di nuovo Iscriviti e scegli Consenti."
       }
     }
   },
@@ -493,6 +505,10 @@
     "save": "Salva reminder",
     "created": "Reminder salvato.",
     "updated": "Reminder aggiornato.",
+    "push": {
+      "scheduled": "Push programmata",
+      "failed": "Push non programmata"
+    },
     "markedDone": "Reminder completato.",
     "notFound": "Reminder non trovato.",
     "snoozed": "Reminder posticipato.",

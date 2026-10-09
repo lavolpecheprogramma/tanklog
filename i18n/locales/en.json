@@ -288,12 +288,22 @@
       "proxyKey": "Proxy key (optional)",
       "save": "Save OneSignal config",
       "subscribe": "Subscribe this browser",
+      "subscribeHint": "The browser permission prompt only appears after you tap Subscribe (it is not automatic). Save config first, wait until status is Ready, then Subscribe.",
       "disable": "Disable",
       "saved": "OneSignal settings saved.",
+      "savedReady": "OneSignal saved. Now tap “Subscribe this browser” to show the permission prompt.",
+      "clickSubscribeAgain": "SDK ready. Tap “Subscribe this browser” again to show the permission prompt.",
       "subscribed": "This browser is subscribed for push.",
       "disabled": "OneSignal disabled on this device.",
       "schedulingReady": "scheduling proxy configured",
       "docsHint": "Setup details in docs/onesignal.md · ",
+      "permission": {
+        "unsupported": "Browser permission: unsupported",
+        "default": "Browser permission: not asked yet",
+        "granted": "Browser permission: allowed",
+        "denied": "Browser permission: blocked — reset it in browser site settings",
+        "unknown": "Browser permission: unknown"
+      },
       "status": {
         "off": "Off",
         "loading": "Loading SDK…",
@@ -303,7 +313,9 @@
       },
       "errors": {
         "invalidAppId": "Enter a valid OneSignal App ID (UUID).",
-        "invalidProxyUrl": "Proxy URL must be a valid http(s) URL."
+        "invalidProxyUrl": "Proxy URL must be a valid http(s) URL.",
+        "permissionDenied": "Notifications are blocked for this site. In the browser/PWA site settings, set Notifications to Allow, then try Subscribe again.",
+        "permissionNotGranted": "Permission prompt was dismissed or denied. Tap Subscribe again and choose Allow."
       }
     }
   },
@@ -493,6 +505,10 @@
     "save": "Save reminder",
     "created": "Reminder saved.",
     "updated": "Reminder updated.",
+    "push": {
+      "scheduled": "Push scheduled",
+      "failed": "Push not scheduled"
+    },
     "markedDone": "Reminder marked done.",
     "notFound": "Reminder not found.",
     "snoozed": "Reminder snoozed.",
