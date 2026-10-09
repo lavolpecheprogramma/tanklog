@@ -1,7 +1,6 @@
 import {
   BEA_AEQUILIBRIUM_PROTOCOL_KEY,
-  BEA_AEQUILIBRIUM_VARIANTS,
-  type BeaAequilibriumVariant
+  BEA_AEQUILIBRIUM_VARIANTS
 } from './beaAequilibrium'
 
 export type ProtocolDefinition = {

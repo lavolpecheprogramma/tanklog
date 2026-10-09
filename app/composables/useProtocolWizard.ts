@@ -57,7 +57,7 @@ export function useProtocolWizard() {
     start: Date
     volumeLiters: number
     runId?: string
-  }): Promise<{ created: number; runId: string; failed: number; lastError: string | null }> {
+  }): Promise<{ created: number, runId: string, failed: number, lastError: string | null }> {
     const preview = buildPreview(options)
     const inputs = localizeInputs(previewToReminderInputs(options.tankId, preview))
 

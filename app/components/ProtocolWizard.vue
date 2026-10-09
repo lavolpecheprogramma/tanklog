@@ -15,7 +15,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  applied: [payload: { created: number; runId: string }]
+  applied: [payload: { created: number, runId: string }]
 }>()
 
 const { t, locale } = useI18n()
