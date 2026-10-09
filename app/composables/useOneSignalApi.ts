@@ -103,7 +103,8 @@ export function useOneSignalApi() {
           en: input.body.trim()
         },
         url: input.url?.trim() || undefined,
-        send_after: input.sendAfter.trim(),
+        // OneSignal expects ISO-8601; prefer second precision (avoid `.mmmZ` quirks).
+        send_after: input.sendAfter.trim().replace(/\.\d{3}Z$/, 'Z'),
         idempotency_key: idempotencyKey
       })
     })

@@ -2,7 +2,7 @@
 import { TANK_EVENT_TYPES, type TankEventType } from '~/types/event'
 import type { Reminder } from '~/types/reminder'
 import { formatDateTime, fromDatetimeLocalValue, toDatetimeLocalValue } from '~/utils/datetime'
-import { getReminderDueStatus } from '~/utils/reminderDue'
+import { getReminderDueStatus, isReminderTimeDue } from '~/utils/reminderDue'
 
 definePageMeta({
   title: 'Reminders'
@@ -124,8 +124,13 @@ function dueTone(status: ReturnType<typeof getReminderDueStatus>) {
 }
 
 function notifyDueReminders() {
-  const { overdue, today } = remindersApi.dueBuckets.value
-  for (const reminder of [...overdue, ...today]) {
+  // Local Notification is an in-app fallback. Only fire once the clock time is due —
+  // calendar "today" must not notify hours early. When OneSignal already scheduled
+  // a push for this reminder, skip local to avoid an instant duplicate.
+  for (const reminder of remindersApi.reminders.value) {
+    if (!isReminderTimeDue(reminder.nextDue)) continue
+    if (oneSignalConfig.canSchedule.value && reminder.oneSignalMessageId) continue
+
     const status = getReminderDueStatus(reminder.nextDue)
     notifications.notifyOnce(
       reminder.id,

@@ -18,6 +18,12 @@ export function getReminderDueStatus(nextDueIso: string, now = new Date()): Remi
   return 'upcoming'
 }
 
+/** True when the reminder's clock time has already been reached (not just calendar day). */
+export function isReminderTimeDue(nextDueIso: string, now = new Date()): boolean {
+  const dueMs = Date.parse(nextDueIso)
+  return Number.isFinite(dueMs) && dueMs <= now.getTime()
+}
+
 /** Advance `from` by `days`, skipping forward until strictly after `now` when needed. */
 export function advanceNextDue(fromIso: string, days: number, now = new Date()): Date {
   const stepMs = days * 86_400_000
