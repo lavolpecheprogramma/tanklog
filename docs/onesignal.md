@@ -62,9 +62,21 @@ In TankLog → **Dashboard → Settings → Notifications (OneSignal)**:
 2. (Optional) Paste your **Scheduling proxy URL** (required for scheduled reminders)
 3. (Optional) Paste your **Proxy key** (only if your proxy requires it)
 4. Click **Save OneSignal config**
-5. Click **Subscribe this browser**
+5. Click **Subscribe this browser** and accept the **browser/OS permission** prompt
 
 Config is stored in **localStorage** on this device (`useOneSignalConfig`). Identity uses the Supabase Auth `user.id` as OneSignal `external_id` (`app/plugins/onesignal.client.ts`).
+
+### Permissions checklist (push not showing)
+
+Scheduled reminders use **OneSignal web push**, not the in-app toast. You need:
+
+1. TankLog **Subscribe this browser** succeeded (Settings shows Subscribed)
+2. Browser site notifications **Allowed** for your TankLog origin
+3. OS notifications enabled for the browser / PWA (macOS Focus off while testing; on iPhone the site must be **Add to Home Screen**)
+4. Proxy URL configured (otherwise TankLog cannot call `send_after`)
+5. After saving a future reminder, the toast **Push scheduled** with the due time — if you see **Push not scheduled**, fix the error text first
+
+When the scheduling proxy is configured, TankLog does **not** fire local `Notification` alerts for reminders (to avoid an instant fake “push” on save). Delivery is only via OneSignal at `send_after`.
 
 Related code:
 

@@ -124,12 +124,13 @@ function dueTone(status: ReturnType<typeof getReminderDueStatus>) {
 }
 
 function notifyDueReminders() {
-  // Local Notification is an in-app fallback. Only fire once the clock time is due —
-  // calendar "today" must not notify hours early. When OneSignal already scheduled
-  // a push for this reminder, skip local to avoid an instant duplicate.
+  // Local Notification is only a fallback when OneSignal scheduling is NOT configured.
+  // Otherwise OneSignal owns delivery via send_after — firing local alerts on save
+  // looked like "instant push" and raced with the scheduled message.
+  if (oneSignalConfig.canSchedule.value) return
+
   for (const reminder of remindersApi.reminders.value) {
     if (!isReminderTimeDue(reminder.nextDue)) continue
-    if (oneSignalConfig.canSchedule.value && reminder.oneSignalMessageId) continue
 
     const status = getReminderDueStatus(reminder.nextDue)
     notifications.notifyOnce(
@@ -137,6 +138,30 @@ function notifyDueReminders() {
       reminder.title,
       t(`reminders.dueStatus.${status}`)
     )
+  }
+}
+
+function toastPushResult() {
+  const result = remindersApi.lastPushResult.value
+  if (!oneSignalConfig.canSchedule.value) return
+  if (!result) return
+
+  if (result.messageId && result.sendAfter) {
+    toast.add({
+      title: t('reminders.push.scheduled'),
+      description: formatDateTime(result.sendAfter, locale.value),
+      color: 'success',
+      icon: 'i-lucide-bell'
+    })
+    return
+  }
+  if (result.error) {
+    toast.add({
+      title: t('reminders.push.failed'),
+      description: result.error,
+      color: 'warning',
+      icon: 'i-lucide-bell-off'
+    })
   }
 }
 
@@ -221,6 +246,7 @@ async function submit() {
       await remindersApi.create(payload)
       toast.add({ title: t('reminders.created'), color: 'success', icon: 'i-lucide-check' })
     }
+    toastPushResult()
     closeForm()
     notifyDueReminders()
   } catch (e) {

@@ -1,3 +1,5 @@
+import { toOffsetIsoString } from '~/utils/datetime'
+
 export type ParameterTimerState = {
   parameter: string
   endsAt: number
@@ -130,7 +132,7 @@ export function useParameterTimers() {
         externalId,
         title: t('app.name'),
         body: t('waterTests.timer.readyBody', { parameter }),
-        sendAfter: sendAfter.toISOString(),
+        sendAfter: toOffsetIsoString(sendAfter),
         url: window.location.href,
         idempotencyKey: `param-timer:${parameter}:${endsAt}`
       })

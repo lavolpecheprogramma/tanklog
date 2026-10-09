@@ -1,8 +1,15 @@
 import type { Reminder } from '~/types/reminder'
+import { toOffsetIsoString } from '~/utils/datetime'
+
+export type ScheduleReminderResult = {
+  messageId: string | null
+  sendAfter: string | null
+  error: string | null
+}
 
 /**
  * Best-effort OneSignal schedule/cancel for reminders.
- * Never throws to callers — returns null / false on failure.
+ * Returns structured result so the UI can show schedule success/failure.
  */
 export function useReminderPush() {
   const config = useOneSignalConfig()
@@ -41,14 +48,20 @@ export function useReminderPush() {
     }
   }
 
-  async function scheduleReminder(reminder: Reminder): Promise<string | null> {
-    if (!canSchedule()) return null
+  async function scheduleReminder(reminder: Reminder): Promise<ScheduleReminderResult> {
+    if (!canSchedule()) {
+      return { messageId: null, sendAfter: null, error: null }
+    }
 
     const dueMs = Date.parse(reminder.nextDue)
-    if (!Number.isFinite(dueMs) || dueMs <= Date.now()) return null
+    if (!Number.isFinite(dueMs) || dueMs <= Date.now()) {
+      return { messageId: null, sendAfter: null, error: null }
+    }
 
     const externalId = auth.user.value?.id
-    if (!externalId || !config.appId.value || !config.proxyUrl.value) return null
+    if (!externalId || !config.appId.value || !config.proxyUrl.value) {
+      return { messageId: null, sendAfter: null, error: null }
+    }
 
     try {
       // Ensure identity is linked before targeting by external_id
@@ -57,8 +70,11 @@ export function useReminderPush() {
       }
 
       const sendAfter = prefs.clampOutsideQuiet(new Date(dueMs))
-      if (sendAfter.getTime() <= Date.now()) return null
+      if (sendAfter.getTime() <= Date.now()) {
+        return { messageId: null, sendAfter: null, error: null }
+      }
 
+      const sendAfterIso = toOffsetIsoString(sendAfter)
       const result = await api.schedulePushMessage({
         appId: config.appId.value,
         proxyUrl: config.proxyUrl.value,
@@ -66,13 +82,17 @@ export function useReminderPush() {
         externalId,
         title: t('app.name'),
         body: reminder.title,
-        sendAfter: sendAfter.toISOString(),
+        sendAfter: sendAfterIso,
         url: reminderUrl(reminder.tankId),
         idempotencyKey: `reminder:${reminder.id}:${sendAfter.toISOString()}`
       })
-      return result.messageId
-    } catch {
-      return null
+      return { messageId: result.messageId, sendAfter: sendAfterIso, error: null }
+    } catch (e) {
+      return {
+        messageId: null,
+        sendAfter: null,
+        error: e instanceof Error ? e.message : String(e)
+      }
     }
   }
 

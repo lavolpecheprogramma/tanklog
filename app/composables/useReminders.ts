@@ -58,6 +58,11 @@ export function useReminders() {
   const reminders = useState<Reminder[]>('tanklog.reminders', () => [])
   const loading = useState<boolean>('tanklog.reminders.loading', () => false)
   const error = useState<string | null>('tanklog.reminders.error', () => null)
+  const lastPushResult = useState<{
+    messageId: string | null
+    sendAfter: string | null
+    error: string | null
+  } | null>('tanklog.reminders.lastPush', () => null)
   const push = useReminderPush()
   const notifications = useNotifications()
   const eventsApi = useEvents()
@@ -102,16 +107,24 @@ export function useReminders() {
     return mapped
   }
 
-  async function syncPushAfterSave(reminder: Reminder, previousMessageId?: string | null): Promise<Reminder> {
+  async function syncPushAfterSave(reminder: Reminder, previousMessageId?: string | null): Promise<{
+    reminder: Reminder
+    push: Awaited<ReturnType<typeof push.scheduleReminder>>
+  }> {
     if (previousMessageId) {
       await push.cancelMessage(previousMessageId)
     }
 
-    const messageId = await push.scheduleReminder(reminder)
-    if (messageId === reminder.oneSignalMessageId) return reminder
+    const scheduled = await push.scheduleReminder(reminder)
+    if (scheduled.messageId === reminder.oneSignalMessageId) {
+      return { reminder, push: scheduled }
+    }
 
-    const updated = await persistMessageId(reminder.id, messageId)
-    return updated ?? { ...reminder, oneSignalMessageId: messageId }
+    const updated = await persistMessageId(reminder.id, scheduled.messageId)
+    return {
+      reminder: updated ?? { ...reminder, oneSignalMessageId: scheduled.messageId },
+      push: scheduled
+    }
   }
 
   async function listByTank(tankId: string): Promise<Reminder[]> {
@@ -179,7 +192,9 @@ export function useReminders() {
       (a, b) => Date.parse(a.nextDue) - Date.parse(b.nextDue)
     )
 
-    mapped = await syncPushAfterSave(mapped)
+    const synced = await syncPushAfterSave(mapped)
+    mapped = synced.reminder
+    lastPushResult.value = synced.push
     return mapped
   }
 
@@ -226,7 +241,11 @@ export function useReminders() {
 
     const dueChanged = input.nextDue !== undefined || input.title !== undefined
     if (dueChanged) {
-      mapped = await syncPushAfterSave(mapped, previous?.oneSignalMessageId)
+      const synced = await syncPushAfterSave(mapped, previous?.oneSignalMessageId)
+      mapped = synced.reminder
+      lastPushResult.value = synced.push
+    } else {
+      lastPushResult.value = null
     }
     return mapped
   }
@@ -305,7 +324,9 @@ export function useReminders() {
     let mapped = mapRow(data as ReminderRow)
     replaceLocal(mapped)
 
-    mapped = await syncPushAfterSave(mapped)
+    const synced = await syncPushAfterSave(mapped)
+    mapped = synced.reminder
+    lastPushResult.value = synced.push
 
     notifications.clearNotified(id)
 
@@ -316,6 +337,7 @@ export function useReminders() {
     reminders,
     loading,
     error,
+    lastPushResult,
     dueBuckets,
     listByTank,
     create,
