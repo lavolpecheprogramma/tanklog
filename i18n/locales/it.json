@@ -1,1208 +1,584 @@
 {
-  "a11y": {
-    "skipToContent": "Vai al contenuto",
-    "googleAccount": "Account Google",
-    "googleAccountWithLabel": "Account Google: {label}",
-    "openNavigation": "Apri menu",
-    "switchToLightMode": "Passa al tema chiaro",
-    "switchToDarkMode": "Passa al tema scuro",
-    "startTimerForParameter": "Avvia timer per {parameter}",
-    "stopTimerForParameter": "Ferma timer per {parameter}"
+  "app": {
+    "name": "TankLog",
+    "tagline": "Il log tecnico della tua vasca."
   },
   "nav": {
     "home": "Home",
-    "tanks": "Vasche",
-    "tank": "Vasca",
-    "overview": "Panoramica",
-    "tests": "Test acqua",
-    "photos": "Foto",
-    "livestock": "Fauna e flora",
-    "events": "Eventi",
-    "reminders": "Promemoria",
-    "configuration": "Configurazione",
-    "settings": "Impostazioni"
+    "main": "Navigazione principale",
+    "dashboard": "Dashboard",
+    "login": "Accedi",
+    "settings": "Impostazioni",
+    "docs": "Documentazione",
+    "setup": "Setup schema",
+    "onboarding": "Inizia",
+    "privacy": "Privacy",
+    "switchLocale": "Cambia lingua in {locale}"
   },
-  "language": {
-    "label": "Lingua",
-    "options": {
-      "it": "Italiano",
-      "en": "Inglese"
-    }
+  "landing": {
+    "title": "Monitora stabilità e trend",
+    "subtitle": "Test acqua, eventi, reminder e foto — i dati restano nel tuo progetto Supabase.",
+    "ctaStart": "Inizia",
+    "ctaSignIn": "Accedi",
+    "ctaDashboard": "Apri dashboard",
+    "ctaConnect": "Collega Supabase",
+    "ctaDocs": "Leggi le specs",
+    "byoHint": "Usa il tuo progetto Supabase gratuito. "
   },
-  "tank": {
-    "activeLabel": "Vasca attiva",
-    "selector": {
-      "loading": "Caricamento vasche…",
-      "empty": "Nessuna vasca trovata",
-      "error": "Impossibile caricare le vasche"
-    }
+  "onboarding": {
+    "title": "Configura TankLog in pochi minuti",
+    "subtitle": "Crea un progetto Supabase, applica lo schema, incolla le chiavi, poi crea l’account.",
+    "steps": {
+      "1": "Progetto",
+      "2": "Schema",
+      "3": "Chiavi",
+      "4": "Account"
+    },
+    "step1Title": "Crea un progetto Supabase",
+    "step1a": "Apri supabase.com e crea un progetto free.",
+    "step1b": "Abilita Email auth (Providers → Email).",
+    "step1c": "Consigliato: Data API ON, auto-expose tables OFF, automatic RLS ON.",
+    "step2Title": "Applica lo SQL TankLog",
+    "step3Title": "Incolla le chiavi del progetto",
+    "step3Body": "Da Project Settings → API: Project URL e anon public key. Non usare mai la service_role.",
+    "step4Title": "Crea il tuo account",
+    "openSupabase": "Apri Supabase",
+    "next": "Avanti",
+    "back": "Indietro",
+    "openDashboard": "Apri dashboard",
+    "haveAccount": "Già configurato? Accedi",
+    "schemaStillMissing": "Schema non ancora rilevato — completa lo step SQL e riprova."
   },
-  "footer": {
-    "tagline": "TankLog — solo frontend, statico, dati sotto il tuo controllo.",
-    "privacy": "Informativa privacy"
+  "privacy": {
+    "title": "Privacy",
+    "subtitle": "TankLog è un’app statica. I dati della vasca restano nel progetto Supabase che controlli tu.",
+    "byoTitle": "Bring your own Supabase",
+    "byoBody": "TankLog non gestisce un database multi-tenant condiviso. Auth, righe Postgres e file foto restano nel tuo progetto. Il sito statico parla solo con URL e anon key che incolli in locale.",
+    "localTitle": "Cosa resta su questo dispositivo",
+    "localBody": "URL Supabase, anon key, lingua, vasca attiva, opzionale App ID / proxy OneSignal e (opzionale) un Google Client ID temporaneo per la migrazione sono in localStorage di questo browser. Le sessioni usano lo storage auth di Supabase per quel progetto.",
+    "googleTitle": "Google (solo migrazione opzionale)",
+    "googleBody": "L’uso quotidiano non richiede Google. Il wizard di migrazione può chiedere un Client ID OAuth temporaneo e accesso in sola lettura a Drive/Sheets per importare i dati v1 una volta. Lo scollegamento cancella il Client ID dal dispositivo.",
+    "oneSignalTitle": "OneSignal (opzionale)",
+    "oneSignalBody": "Le web push in background sono opzionali e BYO: crei tu l’app OneSignal. App ID e URL proxy restano in localStorage. La REST API key OneSignal deve stare solo nel proxy di scheduling (es. Cloudflare Worker), mai nel browser.",
+    "controlTitle": "Il tuo controllo",
+    "controlBody": "Puoi esportare JSON da Impostazioni, scollegare il progetto (cancella le chiavi locali), cancellare i dati dalla dashboard Supabase o smettere di usare il sito statico in qualsiasi momento."
   },
-  "actions": {
-    "logout": "Esci",
-    "loggingOut": "Uscita…",
-    "backToHome": "Torna alla Home",
-    "backToTank": "Torna alla vasca",
-    "goToPhotos": "Vai a Foto",
-    "goToEvents": "Vai a Eventi",
-    "goToReminders": "Vai a Promemoria",
-    "goToSettings": "Vai a Impostazioni",
-    "goToWaterTests": "Vai a Test acqua",
-    "openActiveTank": "Apri vasca attiva",
-    "openWaterTests": "Apri Test acqua",
-    "previewAddTest": "Anteprima “Aggiungi test acqua”",
-    "signInWithGoogle": "Accedi con Google",
+  "auth": {
+    "title": "Accedi a TankLog",
+    "subtitle": "Collega il tuo progetto Supabase, poi crea un account o accedi.",
+    "projectConfig": "Progetto Supabase",
+    "projectConfigured": "URL e anon key salvati su questo dispositivo.",
+    "projectMissing": "Incolla URL e anon key del tuo progetto (BYO).",
+    "supabaseUrl": "Supabase URL",
+    "anonKey": "Anon key",
+    "saveProject": "Salva progetto",
+    "configSaved": "Progetto salvato in locale.",
+    "email": "Email",
+    "password": "Password",
     "signIn": "Accedi",
-    "signingIn": "Accesso…",
-    "editRanges": "Modifica range",
+    "signUp": "Registrati",
+    "signOut": "Esci",
+    "checkEmail": "Controlla la email per confermare l’account, poi accedi.",
+    "firstTime": "Prima volta? Setup guidato",
+    "errors": {
+      "configRequired": "Configura prima URL e anon key di Supabase.",
+      "invalidUrl": "URL Supabase non valido."
+    }
+  },
+  "setup": {
+    "title": "Applica lo schema TankLog",
+    "subtitle": "Il tuo progetto Supabase non espone ancora le tabelle TankLog (o manca lo SQL).",
+    "statusOk": "Schema OK — puoi usare la dashboard.",
+    "statusMissing": "Schema mancante o non raggiungibile.",
+    "step1": "Apri il SQL Editor del tuo progetto Supabase.",
+    "step2": "Copia lo SQL TankLog (pulsante sotto) e incollalo nella query.",
+    "step3": "Esegui lo script (Run).",
+    "step4": "Torna qui e premi “Ricontrolla”.",
+    "copySql": "Copia schema.sql",
+    "downloadSql": "Scarica SQL",
+    "recheck": "Ricontrolla",
+    "copied": "SQL copiato negli appunti.",
+    "docsHint": "Guida completa:"
+  },
+  "dashboard": {
+    "title": "Le tue vasche",
+    "signedInAs": "Accesso come {email}",
+    "emptyTitle": "Nessuna vasca ancora",
+    "emptyBody": "Crea la prima vasca per iniziare a registrare test e eventi.",
+    "emptyHint": "Arrivi da TankLog v1?",
+    "migrateHint": "Importa da Google"
+  },
+  "tanks": {
+    "create": "Nuova vasca",
+    "createTitle": "Crea vasca",
+    "name": "Nome",
+    "type": "Tipo",
+    "volume": "Volume (litri)",
+    "startDate": "Data avvio",
+    "notes": "Note",
+    "open": "Apri",
+    "setActive": "Imposta attiva",
+    "active": "Attiva",
+    "detailTitle": "Vasca",
+    "detailSubtitle": "Modifica i metadati della vasca.",
+    "configTitle": "Configurazione",
+    "tankValue": "Valore vasca",
+    "tankValueTotal": "Valore stimato: {amount}",
+    "tankValueBreakdown": "Livestock {livestock} · Attrezzatura {equipment}",
+    "tankValueHint": "Somma dei costi su livestock attivo e tutta l’attrezzatura. Inserisci i costi in quelle pagine.",
+    "saved": "Vasca salvata.",
+    "notFound": "Vasca non trovata.",
+    "confirmDelete": "Eliminare la vasca “{name}”? L’operazione cancella anche i dati collegati.",
+    "nav": {
+      "label": "Sezioni vasca",
+      "overview": "Panoramica",
+      "waterTests": "Test acqua",
+      "ranges": "Range",
+      "events": "Eventi",
+      "reminders": "Reminder",
+      "livestock": "Livestock",
+      "equipment": "Attrezzatura",
+      "photos": "Foto",
+      "configuration": "Configurazione"
+    },
+    "types": {
+      "freshwater": "Acqua dolce",
+      "planted": "Piantato",
+      "marine": "Marino",
+      "reef": "Reef"
+    }
+  },
+  "ranges": {
+    "title": "Range parametri",
+    "subtitle": "Bande optimal / acceptable / critical per gli alert.",
+    "applyPreset": "Applica preset tipo vasca",
+    "addRow": "Aggiungi riga",
+    "saved": "Range salvati.",
+    "parameter": "Parametro",
+    "min": "Min",
+    "max": "Max",
+    "unit": "Unità",
+    "statusLabel": "Stato",
+    "color": "Colore",
+    "alert": "Fuori range",
+    "status": {
+      "optimal": "Optimal",
+      "acceptable": "Acceptable",
+      "critical": "Critical"
+    },
+    "verdict": {
+      "ok": "ok",
+      "warning": "attenzione",
+      "critical": "critico",
+      "unknown": "n/d"
+    }
+  },
+  "charts": {
+    "parameter": "Parametro",
+    "range": "Periodo",
+    "days7": "7 giorni",
+    "days30": "30 giorni",
+    "days90": "90 giorni",
+    "empty": "Nessun dato nel periodo selezionato.",
+    "summary": "{count} punti · min {min} · max {max} · ultimo {last}"
+  },
+  "waterTests": {
+    "title": "Test acqua",
+    "newSession": "Nuova sessione",
+    "editSession": "Modifica sessione",
+    "history": "Storico",
+    "detail": "Dettaglio test",
+    "date": "Data e ora",
+    "method": "Metodo / kit",
+    "note": "Nota",
+    "save": "Salva test",
+    "created": "Test salvato.",
+    "updated": "Test aggiornato.",
+    "confirmDelete": "Eliminare questa sessione di test?",
+    "emptyHistory": "Nessun test ancora.",
+    "emptyHint": "Tocca “Nuova sessione” per registrare il primo test.",
+    "noParameters": "Nessun parametro definito per questa vasca. I range vengono creati alla creazione vasca.",
+    "valuePlaceholder": "opzionale",
+    "measurementCount": "{count} misure",
+    "timer": {
+      "title": "Timer di attesa — {parameter}",
+      "body": "Scegli quanto aspettare prima di leggere il risultato del kit.",
+      "preset": "{n} min",
+      "custom": "Minuti personalizzati",
+      "start": "Avvia",
+      "openAria": "Avvia timer di attesa per {parameter}",
+      "cancelAria": "Annulla timer di attesa per {parameter}",
+      "readyTitle": "{parameter} pronto",
+      "readyBody": "Tempo scaduto — puoi leggere {parameter}.",
+      "invalidDuration": "Inserisci un tempo di attesa di almeno alcuni secondi."
+    },
+    "errors": {
+      "invalidDate": "Data non valida.",
+      "invalidValue": "Valore non valido per {parameter}.",
+      "needOne": "Inserisci almeno un parametro."
+    }
+  },
+  "settings": {
+    "subtitle": "Gestisci il progetto Supabase collegato a questo dispositivo.",
+    "disconnectProject": "Scollega progetto",
+    "schemaSection": "Schema database",
+    "schemaOk": "Schema rilevato correttamente.",
+    "schemaMissing": "Schema non rilevato — applica lo SQL TankLog.",
+    "migrateSection": "Importa da Google (v1)",
+    "migrateBody": "Wizard una tantum: OAuth Google temporaneo, poi i dati finiscono nel tuo Supabase.",
+    "migrateCta": "Apri wizard migrazione",
+    "exportSection": "Esporta backup",
+    "exportBody": "Scarica uno snapshot JSON delle tabelle TankLog (i file foto restano in Storage; i path sono inclusi).",
+    "exportCta": "Scarica JSON",
+    "exportOk": "Export scaricato.",
+    "exportHtmlCta": "Scarica snapshot HTML",
+    "exportHtmlOk": "Snapshot HTML scaricato.",
+    "exportHtmlBody": "Riepilogo autonomo da condividere offline — non è un link pubblico. I file foto non sono incorporati.",
+    "quiet": {
+      "title": "Ore silenziose",
+      "body": "Sopprime le notifiche browser in-app e ritarda le push OneSignal programmate che cadono in questa fascia oraria locale.",
+      "enable": "Abilita ore silenziose",
+      "start": "Inizio",
+      "end": "Fine",
+      "save": "Salva ore silenziose",
+      "saved": "Ore silenziose salvate."
+    },
+    "oneSignal": {
+      "title": "Notifiche (OneSignal)",
+      "body": "Web push in background opzionale. Porta la tua app OneSignal. Per programmare i reminder serve un piccolo proxy (docs/onesignal.md) — la REST API key non lascia mai il worker.",
+      "appId": "OneSignal App ID",
+      "appIdPlaceholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+      "proxyUrl": "URL proxy scheduling (opzionale)",
+      "proxyUrlPlaceholder": "https://….workers.dev",
+      "proxyKey": "Chiave proxy (opzionale)",
+      "save": "Salva config OneSignal",
+      "subscribe": "Iscriviti su questo browser",
+      "disable": "Disabilita",
+      "saved": "Impostazioni OneSignal salvate.",
+      "subscribed": "Questo browser è iscritto alle push.",
+      "disabled": "OneSignal disabilitato su questo dispositivo.",
+      "schedulingReady": "proxy di scheduling configurato",
+      "docsHint": "Dettagli in docs/onesignal.md · ",
+      "status": {
+        "off": "Spento",
+        "loading": "Caricamento SDK…",
+        "ready": "Pronto — iscrivi questo browser",
+        "subscribed": "Iscritto",
+        "error": "Errore SDK"
+      },
+      "errors": {
+        "invalidAppId": "Inserisci un OneSignal App ID valido (UUID).",
+        "invalidProxyUrl": "L’URL del proxy deve essere http(s) valido."
+      }
+    }
+  },
+  "migrate": {
+    "title": "Migra da Google",
+    "subtitle": "Importa una cartella TankLog v1 da Drive nel tuo progetto Supabase. L’accesso Google è temporaneo.",
+    "steps": {
+      "clientId": "Client ID",
+      "connect": "Collega",
+      "root": "Cartella",
+      "tanks": "Vasche",
+      "run": "Import"
+    },
+    "clientIdTitle": "Google OAuth Client ID",
+    "clientIdBody": "Crea un Client ID Web in Google Cloud (Sheets + Drive in sola lettura). Vedi docs/google-setup.md. Serve solo per questo import.",
+    "clientId": "Client ID",
+    "clientIdPlaceholder": "….apps.googleusercontent.com",
+    "saveClientId": "Salva Client ID",
+    "connectGoogle": "Collega Google",
+    "scopesHint": "Scope: spreadsheets.readonly + drive.readonly.",
+    "rootTitle": "Scegli la cartella TankLog",
+    "noRoots": "Nessuna cartella Drive chiamata “TankLog”. Controlla account e nome cartella.",
+    "refreshRoots": "Aggiorna cartelle",
+    "tanksTitle": "Vasche da importare",
+    "noTanks": "Nessuna cartella vasca con foglio trovata in questa root.",
+    "runImport": "Importa vasche selezionate",
+    "reportTitle": "Report import",
+    "status": {
+      "ok": "OK",
+      "skipped": "Saltata",
+      "error": "Errore"
+    },
+    "counts": "livestock {livestock} · range {ranges} · test {waterTests} · eventi {events} · reminder {reminders} · equipment {equipment} · foto {photos}",
+    "moreErrors": "+{n} altri avvisi",
+    "goDashboard": "Vai alla dashboard",
+    "disconnectGoogle": "Scollega Google e cancella Client ID"
+  },
+  "events": {
+    "title": "Eventi",
+    "new": "Nuovo evento",
+    "edit": "Modifica evento",
+    "history": "Storico",
+    "empty": "Nessun evento ancora.",
+    "emptyHint": "Registra un intervento con “Nuovo evento”.",
+    "save": "Salva evento",
+    "created": "Evento salvato.",
+    "updated": "Evento aggiornato.",
+    "confirmDelete": "Eliminare questo evento?",
+    "occurredAt": "Data e ora",
+    "targetLabel": "Target",
+    "target": {
+      "tank": "Vasca",
+      "livestock": "Livestock"
+    },
+    "livestock": "Livestock",
+    "livestockPlaceholder": "Seleziona livestock",
+    "noLivestock": "Nessun livestock attivo — aggiungilo nella sezione Livestock, oppure registra un evento vasca.",
+    "type": "Tipo",
+    "description": "Descrizione",
+    "quantity": "Quantità",
+    "unit": "Unità",
+    "product": "Prodotto",
+    "note": "Nota",
+    "types": {
+      "water_change": "Cambio acqua",
+      "dosing": "Dosaggio",
+      "maintenance": "Manutenzione",
+      "livestock_addition": "Aggiunta livestock",
+      "livestock_removal": "Rimozione livestock",
+      "feeding": "Alimentazione",
+      "health": "Salute",
+      "treatment": "Trattamento",
+      "observation": "Osservazione",
+      "molt": "Muta",
+      "spawn": "Riproduzione",
+      "fragging": "Fragging",
+      "other": "Altro"
+    },
+    "errors": {
+      "invalidDate": "Data non valida.",
+      "invalidQuantity": "Quantità non valida."
+    }
+  },
+  "equipment": {
+    "title": "Attrezzatura",
+    "new": "Aggiungi attrezzatura",
+    "edit": "Modifica attrezzatura",
+    "save": "Salva attrezzatura",
+    "created": "Attrezzatura salvata.",
+    "updated": "Attrezzatura aggiornata.",
+    "confirmDelete": "Eliminare questa voce di attrezzatura?",
+    "inventory": "Inventario",
+    "empty": "Nessuna attrezzatura ancora.",
+    "emptyHint": "Aggiungi filtri, luci, pompe e altro per questa vasca.",
+    "type": "Tipo",
+    "typeCustom": "Tipo personalizzato",
+    "brandModel": "Marca / modello",
+    "installationDate": "Data installazione",
+    "maintenanceInterval": "Intervallo manutenzione",
+    "intervalPlaceholder": "es. 30d",
+    "intervalLabel": "ogni {interval}",
+    "installedOn": "Installato {date}",
+    "cost": "Costo",
+    "costHint": "Costo di acquisto opzionale (EUR)",
+    "totalValue": "Valore attrezzatura: {amount}",
+    "notes": "Note",
+    "types": {
+      "light": "Luce",
+      "pump": "Pompa",
+      "filter": "Filtro",
+      "heater": "Riscaldatore",
+      "skimmer": "Skimmer",
+      "ato": "ATO",
+      "other": "Altro"
+    }
+  },
+  "livestock": {
+    "title": "Livestock",
+    "detailTitle": "Dettaglio livestock",
+    "new": "Aggiungi livestock",
+    "edit": "Modifica livestock",
+    "save": "Salva livestock",
+    "created": "Livestock salvato.",
+    "updated": "Livestock aggiornato.",
+    "confirmDelete": "Eliminare questa voce livestock?",
+    "notFound": "Livestock non trovato.",
+    "inventory": "Inventario",
+    "empty": "Nessun livestock con questi filtri.",
+    "emptyHint": "Aggiungi una voce, oppure togli i filtri.",
+    "open": "Apri",
+    "nameCommon": "Nome comune",
+    "nameScientific": "Nome scientifico",
+    "category": "Categoria",
+    "subCategory": "Sotto-categoria",
+    "tankZone": "Zona vasca",
+    "origin": "Origine",
+    "dateAdded": "Data inserimento",
+    "dateRemoved": "Data rimozione",
+    "status": "Stato",
+    "notes": "Note",
+    "zoneNone": "—",
+    "originNone": "—",
+    "addedOn": "Inserito il {date}",
+    "cost": "Costo",
+    "costHint": "Costo di acquisto opzionale (EUR)",
+    "activeValue": "Valore livestock attivo: {amount}",
+    "relatedEvents": "Eventi collegati",
+    "noRelatedEvents": "Nessun evento legato a questo livestock.",
+    "logEvent": "Registra un evento",
+    "relatedPhotos": "Foto collegate",
+    "noRelatedPhotos": "Nessuna foto legata a questo livestock.",
+    "viewPhotos": "Apri foto",
+    "filters": {
+      "category": "Categoria",
+      "status": "Stato",
+      "allCategories": "Tutte le categorie",
+      "allStatuses": "Tutti gli stati"
+    },
+    "categories": {
+      "fish": "Pesce",
+      "coral": "Corallo",
+      "invertebrate": "Invertebrato",
+      "plant": "Pianta"
+    },
+    "statuses": {
+      "active": "Attivo",
+      "removed": "Rimosso",
+      "dead": "Deceduto"
+    },
+    "zones": {
+      "top": "Alto",
+      "mid": "Medio",
+      "bottom": "Basso",
+      "rock": "Roccia",
+      "sand": "Sabbia"
+    },
+    "origins": {
+      "wild": "Wild",
+      "captive": "Captive",
+      "frag": "Frag"
+    }
+  },
+  "reminders": {
+    "title": "Reminder",
+    "new": "Nuovo reminder",
+    "edit": "Modifica reminder",
+    "save": "Salva reminder",
+    "created": "Reminder salvato.",
+    "updated": "Reminder aggiornato.",
+    "markedDone": "Reminder completato.",
+    "notFound": "Reminder non trovato.",
+    "snoozed": "Reminder posticipato.",
+    "snooze1h": "+1h",
+    "snooze1d": "+1d",
+    "confirmDelete": "Eliminare questo reminder?",
+    "fieldTitle": "Titolo",
+    "nextDue": "Prossima scadenza",
+    "eventType": "Tipo evento",
+    "repeatEveryDays": "Ripeti ogni (giorni)",
+    "repeatPlaceholder": "Vuoto = una tantum",
+    "endDue": "Data fine (opzionale)",
+    "notes": "Note",
+    "markDone": "Segna fatto",
+    "createEventOnDone": "Crea evento quando segni fatto",
+    "everyNDays": "ogni {n} giorni",
+    "emptyBucket": "Niente qui.",
+    "buckets": {
+      "overdue": "Scaduti",
+      "today": "Oggi",
+      "upcoming": "In arrivo"
+    },
+    "dueStatus": {
+      "overdue": "Scaduto",
+      "today": "Oggi",
+      "upcoming": "In arrivo"
+    },
+    "notifications": {
+      "title": "Notifiche browser",
+      "enable": "Abilita notifiche",
+      "unsupported": "Questo browser non supporta le notifiche.",
+      "granted": "Notifiche attive mentre l’app è aperta.",
+      "denied": "Notifiche bloccate — le scadenze restano nella lista.",
+      "default": "Opzionale: avvisi per reminder scaduti / in scadenza oggi."
+    },
+    "oneSignal": {
+      "title": "Push in background (OneSignal)",
+      "off": "Non configurato — imposta in Impostazioni per le push a app chiusa.",
+      "enabled": "OneSignal attivo — iscrivi questo browser in Impostazioni.",
+      "subscribed": "Iscritto — per lo scheduling serve l’URL proxy in Impostazioni.",
+      "scheduled": "Iscritto con scheduling — i reminder futuri possono notificare in background.",
+      "openSettings": "Apri Impostazioni"
+    },
+    "errors": {
+      "invalidDate": "Data di scadenza non valida.",
+      "invalidRepeat": "L’intervallo di ripetizione deve essere un intero positivo.",
+      "invalidQuantity": "Quantità non valida."
+    }
+  },
+  "photos": {
+    "title": "Foto",
+    "upload": "Carica foto",
+    "timeline": "Timeline",
+    "empty": "Nessuna foto ancora.",
+    "emptyHint": "Tocca “Carica foto” per aggiungere la prima immagine.",
+    "save": "Carica",
+    "uploaded": "Foto caricata.",
+    "confirmDelete": "Eliminare questa foto?",
+    "file": "File immagine",
+    "fileHint": "JPEG, PNG, WebP o HEIC · max 10 MiB",
+    "takenAt": "Scattata il",
+    "relatedLabel": "Collegata a",
+    "related": {
+      "tank": "Vasca",
+      "livestock": "Livestock"
+    },
+    "livestock": "Livestock",
+    "livestockPlaceholder": "Seleziona livestock",
+    "note": "Nota",
+    "compare": "Confronta",
+    "compareExit": "Esci dal confronto",
+    "compareHint": "Seleziona due foto ({count}/2).",
+    "tags": "Tag",
+    "tagsPlaceholder": "crescita, frag, lato — separati da virgola",
+    "growth": "Crescita (livestock)",
+    "growthNone": "Nessun filtro crescita",
+    "growthCompare": "Più vecchia vs più recente",
+    "growthNeedTwo": "Servono almeno due foto per quel livestock.",
+    "filters": {
+      "label": "Filtro",
+      "all": "Tutte",
+      "tag": "Tag",
+      "allTags": "Tutti i tag"
+    },
+    "errors": {
+      "needFile": "Scegli un file immagine.",
+      "invalidDate": "Data non valida."
+    }
+  },
+  "overview": {
+    "latestTest": "Ultimo test acqua",
+    "dueReminders": "Reminder in scadenza",
+    "recentEvents": "Eventi recenti",
+    "seeAll": "Vedi tutti",
+    "noTests": "Nessun test ancora.",
+    "noDue": "Niente in scadenza oggi.",
+    "noEvents": "Nessun evento ancora.",
+    "newTest": "Registra test",
+    "newReminder": "Aggiungi reminder",
+    "logEvent": "Registra evento",
+    "openPhotos": "Foto",
+    "stability": "Stabilità",
+    "stabilitySummary": "{inRange}/{total} in range · {worsening} peggiorano · {improving} migliorano",
+    "stabilityOk": "I test recenti sono stabili — nessun drift chiaro verso o lontano dall’ottimale.",
+    "stabilityAlert": "{count} parametro/i in peggioramento",
+    "worsening": "peggiora",
+    "worseningMild": "leggero peggioramento",
+    "improving": "migliora",
+    "staleCache": "Dati dell’ultimo salvataggio locale del {when} (offline o errore di rete).",
+    "equipmentCount": "{count} attrezzature registrate"
+  },
+  "common": {
+    "loading": "Caricamento…",
+    "empty": "Nessun dato",
     "cancel": "Annulla",
-    "close": "Chiudi"
-  },
-  "components": {
-    "drivePhoto": {
-      "loading": "Caricamento foto…",
-      "idle": "Anteprima foto non ancora caricata.",
-      "actions": {
-        "retry": "Riprova"
-      },
-      "errors": {
-        "missingFileId": "ID file Drive mancante.",
-        "loadFailed": "Impossibile caricare la foto."
-      }
-    }
-  },
-  "errors": {
-    "auth": {
-      "sessionExpired": "La sessione è scaduta. Accedi di nuovo."
-    },
-    "drive": {
-      "notFound": "Elemento Google Drive non trovato. Verifica ID cartella/file e permessi di accesso."
-    },
-    "sheets": {
-      "notFound": "Foglio della vasca non trovato. Verifica che il file esista e di aver effettuato l’accesso con l’account Google corretto.",
-      "missingTab": "Nel foglio della vasca manca la tab “{sheet}”. Creala (o crea una nuova vasca) per continuare."
-    }
-  },
-  "pages": {
-    "landing": {
-      "metaTitle": "Benvenuto",
-      "kicker": "Registro acquariofilo solo frontend",
-      "title": "TankLog",
-      "description": "Registra test acqua, eventi, promemoria e foto. I dati restano nel tuo account Google (Drive + Sheets).",
-      "actions": {
-        "openDashboard": "Apri dashboard",
-        "privacy": "Privacy"
-      },
-      "cards": {
-        "what": {
-          "title": "Cosa puoi fare",
-          "description": "Tutto ciò che registri resta in Google Drive/Sheets.",
-          "bullets": {
-            "tests": "Registra test acqua (una sessione, più misurazioni)",
-            "trends": "Vedi trend e individua valori fuori range",
-            "events": "Tieni traccia degli eventi (cambi acqua, dosaggi, manutenzione)",
-            "reminders": "Crea promemoria e attività in scadenza",
-            "photos": "Carica foto su Drive e sfoglia la timeline"
-          }
-        },
-        "how": {
-          "title": "Come funziona",
-          "description": "Nessun backend: è un’app statica che parla direttamente con le API Google dal browser.",
-          "steps": {
-            "signIn": "Accedi con Google",
-            "connectDrive": "Collega (o crea) la cartella TankLog su Google Drive",
-            "createTank": "Crea una vasca (o scegli una esistente)",
-            "startLogging": "Inizia a registrare test, eventi, promemoria e foto"
-          }
-        }
-      },
-      "footerNote": "Suggerimento: TankLog può essere installata come PWA e usare la cache per la navigazione offline."
-    },
-    "home": {
-      "metaTitle": "Home",
-      "heroTitle": "TankLog",
-      "heroDescription": "Un registro acquariofilo solo frontend per salvare test, eventi e foto e individuare trend nel tempo.",
-      "sprint1": {
-        "title": "Per iniziare",
-        "description": "Collega la cartella TankLog, poi scegli una vasca per iniziare a registrare.",
-        "bullets": [
-          "Tutte le route principali esistono: vasche, test, foto, eventi, promemoria, impostazioni",
-          "La vasca attiva viene salvata su questo dispositivo",
-          "Navigazione mobile-friendly (tab scorrevoli)"
-        ]
-      }
-    },
-    "tank": {
-      "metaTitle": "Vasca",
-      "featuredPhotoAlt": "Foto in evidenza per {tank}",
-      "title": "Vasca",
-      "description": "Questa diventerà la dashboard principale per vasca (ultimi valori, avvisi, grafici, foto ed eventi).",
-      "sprint1": {
-        "title": "Informazioni pagina",
-        "descriptionPrefix": "ID vasca:",
-        "nextUpLabel": "Prossimi passi:",
-        "bullets": [
-          "Leggere le vasche reali dalla cartella TankLog su Drive",
-          "Riunire qui test, range e grafici"
-        ]
-      },
-      "dashboard": {
-        "latest": {
-          "title": "Ultimi valori",
-          "description": "Le misurazioni più recenti e gli avvisi per questa vasca.",
-          "loading": "Caricamento ultimi valori…",
-          "emptyHint": "Aggiungi un test acqua per vedere qui ultimi valori e avvisi.",
-        "lastTestLabel": "Ultimo test acqua"
-        },
-        "trends": {
-          "rangeLabel": "Periodo",
-          "ranges": {
-            "d7": "7 gg",
-            "d30": "30 gg",
-            "d90": "90 gg"
-          },
-          "summary": "{parameter} — ultimi {days} giorni ({count} punto(i))"
-        },
-        "events": {
-          "description": "Interventi e manutenzioni recenti per questa vasca.",
-          "loading": "Caricamento eventi…",
-          "empty": "Nessun evento ancora.",
-          "emptyHint": "Aggiungi un cambio acqua, un dosaggio o una manutenzione per costruire uno storico qui.",
-          "count": "{count} evento(i)"
-        },
-        "reminders": {
-          "title": "Prossimi promemoria",
-          "description": "Le prossime attività in scadenza per questa vasca."
-        }
-      },
-      "unknown": {
-        "title": "Vasca sconosciuta",
-        "descriptionPrefix": "Questo id vasca non è ancora riconosciuto:",
-        "body": "Questa vasca non è stata trovata nella tua cartella TankLog. Torna alla Home e scegli una vasca valida."
-      }
-    },
-    "tankConfiguration": {
-      "metaTitle": "Configurazione",
-      "title": "Configurazione",
-      "description": "Modifica le info della vasca e gestisci la cartella.",
-      "form": {
-        "title": "Info vasca",
-        "description": "Questi campi sono salvati nella scheda TANK_INFO di tank_data.xlsx.",
-        "loading": "Caricamento info vasca…",
-        "save": "Salva modifiche",
-        "saving": "Salvataggio…",
-        "reload": "Ricarica",
-        "success": {
-          "saved": "Salvato."
-        },
-        "errors": {
-          "missingName": "Inserisci un nome vasca.",
-          "invalidType": "Seleziona un tipo vasca valido.",
-          "invalidVolume": "Inserisci un volume valido in litri.",
-          "invalidStartDate": "Inserisci una data avvio valida (YYYY-MM-DD).",
-          "loadFailed": "Caricamento info vasca non riuscito.",
-          "saveFailed": "Salvataggio non riuscito."
-        }
-      },
-      "danger": {
-        "title": "Zona pericolosa",
-        "description": "Eliminando la vasca verrà rimossa la sua cartella su Drive (inclusi tank_data.xlsx e le foto).",
-        "deleteAction": "Elimina vasca",
-        "confirmTitle": "Eliminare questa vasca?",
-        "confirmDescription": "La cartella della vasca (e tutto il contenuto) verrà spostata nel Cestino di Google Drive.",
-        "deleteConfirm": "Sì, elimina",
-        "deleting": "Eliminazione…",
-        "errors": {
-          "deleteFailed": "Eliminazione vasca non riuscita."
-        }
-      }
-    },
-    "tests": {
-      "metaTitle": "Test acqua",
-      "title": "Test acqua",
-      "description": "Registra misurazioni, consulta lo storico e individua trend nel tempo.",
-      "comingTitle": "Suggerimento",
-      "comingDescription": "Registra test con costanza per individuare trend e valori fuori range in anticipo.",
-      "plannedLabel": "Include:",
-      "plannedBullets": [
-        "Aggiungere un test (scrittura su Google Sheets)",
-        "Storico + dettaglio",
-        "Valori fuori range + grafici"
-      ],
-      "trends": {
-        "title": "Trend",
-        "description": "Seleziona un parametro per vedere un grafico trend accurato nel tempo.",
-        "loading": "Caricamento grafico…",
-        "points": "{count} punto(i)",
-        "fields": {
-          "parameter": "Parametro"
-        },
-        "axes": {
-          "date": "Data",
-          "value": "Valore"
-        },
-        "ariaLabel": "Grafico trend per {parameter}",
-        "empty": {
-          "noHistory": "Nessun dato ancora.",
-          "noHistoryHint": "Aggiungi il primo test qui sopra per vedere i trend qui.",
-          "noParameterData": "Nessuna misurazione ancora per questo parametro."
-        }
-      },
-      "dialog": {
-        "title": "Aggiungi test acqua",
-        "description": "Aggiungi una nuova sessione di test per questa vasca.",
-        "body": "Le misurazioni vengono salvate nel foglio della vasca su Google Sheets."
-      },
-      "form": {
-        "title": "Aggiungi test acqua",
-        "description": "Salva una sessione di test come più misurazioni (una riga per parametro) nel foglio della vasca. Parametri e unità vengono da PARAMETER_RANGES.",
-        "locked": "Collega prima la cartella TankLog su Drive.",
-        "loadingTanks": "Caricamento vasche…",
-        "noTanks": "Nessuna vasca trovata. Crea la prima vasca in Impostazioni per iniziare a registrare i test.",
-        "save": "Salva test",
-        "saving": "Salvataggio…",
-        "fields": {
-          "date": "Data e ora",
-          "tank": "Vasca",
-          "parameters": "Parametri",
-          "method": "Metodo (opzionale)",
-          "note": "Nota (opzionale)"
-        },
-        "hints": {
-          "date": "Viene salvato come timestamp ISO nel foglio (UTC).",
-          "tank": "Il test verrà salvato nel foglio della vasca che hai aperto.",
-          "parameters": "Compila solo ciò che hai misurato — i campi vuoti vengono ignorati. Parametri e unità arrivano dai range."
-        },
-        "placeholders": {
-          "value": "Valore",
-          "method": "es. Salifert",
-          "note": "Opzionale"
-        },
-        "errors": {
-          "noTank": "Seleziona prima una vasca attiva.",
-          "missingDate": "Seleziona data e ora.",
-          "invalidDate": "Inserisci una data/ora valida.",
-          "noMeasurements": "Aggiungi almeno una misurazione.",
-          "mustBePositive": "Inserisci un valore ≥ 0.",
-          "fixFields": "Correggi i campi evidenziati.",
-          "saveFailed": "Salvataggio del test non riuscito."
-        },
-        "success": {
-          "saved": "Salvate {count} misurazione(i) su Google Sheets."
-        }
-      },
-      "history": {
-        "title": "Storico",
-        "description": "Consulta le sessioni di test passate e apri i dettagli.",
-        "loadingTanks": "Caricamento vasche…",
-        "loading": "Caricamento storico test…",
-        "refresh": "Aggiorna storico",
-        "refreshing": "Aggiornamento…",
-        "results": "{count} sessione(i)",
-        "measurements": "{count} misurazione(i)",
-        "empty": "Nessun test acqua ancora.",
-        "emptyHint": "Aggiungi il primo test qui sopra — apparirà qui.",
-        "noResults": "Nessun risultato con questi filtri.",
-        "labels": {
-          "method": "Metodo",
-          "note": "Nota"
-        },
-        "filters": {
-          "from": "Da",
-          "to": "A",
-          "parameter": "Parametro",
-          "anyParameter": "Tutti i parametri",
-          "clear": "Rimuovi filtri"
-        },
-        "errors": {
-          "loadFailed": "Impossibile caricare i test acqua."
-        }
-      },
-      "rangesEditor": {
-        "metaTitle": "Range parametri",
-        "title": "Range parametri",
-        "description": "Modifica i range ottimali, accettabili e critici usati per evidenziare i valori fuori range e come riferimento. Sono salvati nel foglio della vasca (PARAMETER_RANGES).",
-        "loading": "Caricamento range…",
-        "preset": {
-          "title": "Preset",
-          "description": "Parti velocemente da un preset e poi personalizza i valori per la tua vasca.",
-          "tankTypeLabel": "Tipo vasca:",
-          "sourceLabel": "Preset di partenza",
-          "apply": "Applica preset",
-          "confirmTitle": "Applicare il preset?",
-          "confirmDescription": "Questo sostituirà i parametri nell’editor. Non cambierà il foglio finché non premi Salva.",
-          "confirmApply": "Applica",
-          "note": "I preset sono solo un punto di partenza. Regola sempre in base a fauna e gestione."
-        },
-        "actions": {
-          "backToTests": "Torna ai test acqua",
-          "reload": "Ricarica dal foglio",
-          "addRow": "Aggiungi parametro",
-          "removeRow": "Rimuovi",
-          "save": "Salva range",
-          "saving": "Salvataggio…"
-        },
-        "table": {
-          "title": "Range",
-          "description": "Ogni scheda ti permette di impostare min/max per i range ottimale, accettabile e critico (lascia vuota una fascia per non usarla).",
-          "caption": "Tabella modificabile dei range dei parametri",
-          "count": "{count} parametro(i)",
-          "empty": "Nessun parametro. Aggiungine uno o applica un preset.",
-          "placeholders": {
-            "none": "—"
-          },
-          "columns": {
-            "parameter": "Parametro",
-            "status": "Stato",
-            "min": "Min",
-            "max": "Max",
-            "unit": "Unità",
-            "color": "Colore",
-            "actions": "Azioni"
-          },
-          "removeRowAria": "Rimuovi riga {row} {parameter}"
-        },
-        "status": {
-          "options": {
-            "optimal": "Ottimale",
-            "acceptable": "Accettabile",
-            "critical": "Critico"
-          }
-        },
-        "validation": {
-          "bannerTitle": "Correggi {count} problema(i) prima di salvare",
-          "parameterRequired": "Il nome del parametro è obbligatorio.",
-          "duplicateParameter": "Parametro duplicato: {parameter}.",
-          "duplicateParameterStatus": "Range duplicato per {parameter} ({status}).",
-          "unitRequired": "L’unità è obbligatoria per {parameter}.",
-          "minOrMaxRequired": "Imposta almeno un min o max per {parameter}.",
-          "minGreaterThanMax": "Min deve essere ≤ max per {parameter}.",
-          "minGreaterThanMaxStatus": "Min deve essere ≤ max per {parameter} ({status})."
-        },
-        "errors": {
-          "loadFailed": "Impossibile caricare i range.",
-          "saveFailed": "Impossibile salvare i range.",
-          "noTank": "Seleziona prima una vasca attiva.",
-          "fixErrors": "Correggi i problemi evidenziati prima di salvare."
-        },
-        "success": {
-          "saved": "Salvati {count} range su Google Sheets."
-        }
-      },
-      "ranges": {
-        "loading": "Caricamento range parametri…",
-        "emptyHint": "Nessun range parametri configurato. Compila la tab PARAMETER_RANGES nel foglio della vasca per abilitare selezione parametri e avvisi.",
-        "expected": "Atteso:",
-        "expectedLabel": "Atteso: {range}",
-        "verdict": {
-          "optimal": "Ottimale",
-          "acceptable": "Accettabile",
-          "critical": "Critico",
-          "worst": "Fuori range",
-          "unknown": "Sconosciuto"
-        },
-        "low": "Basso",
-        "high": "Alto",
-        "sessionAlerts": "{count} avviso(i)",
-        "banner": {
-          "title": "Fuori range ({count})",
-          "description": "Queste misurazioni sono fuori dai range configurati per questo tipo di vasca."
-        },
-        "errors": {
-          "loadFailed": "Impossibile caricare i range dei parametri."
-        }
-      },
-      "detail": {
-        "title": "Dettaglio test acqua",
-        "description": "Apri una sessione di test per vedere tutte le misurazioni.",
-        "groupId": "ID sessione",
-        "tableCaption": "Misurazioni nella sessione di test acqua",
-        "columns": {
-          "parameter": "Parametro",
-          "value": "Valore",
-          "unit": "Unità",
-          "range": "Intervallo",
-          "result": "Esito"
-        }
-      }
-    },
-    "photos": {
-      "metaTitle": "Foto",
-      "title": "Foto",
-      "description": "Carica foto su Google Drive e inizia a costruire una timeline visiva dei progressi della vasca.",
-      "comingTitle": "Timeline",
-      "comingDescription": "Carica foto su Google Drive e salva i metadati in Google Sheets.",
-      "plannedLabel": "Include:",
-      "plannedBullets": [
-        "Caricamento foto (Drive)",
-        "Galleria timeline (per vasca)",
-        "Confronto base"
-      ],
-      "locked": "Collega prima la cartella TankLog su Drive.",
-      "loadingTanks": "Caricamento vasche…",
-      "noTanks": {
-        "title": "Nessuna vasca ancora",
-        "description": "Nessuna vasca trovata. Crea la prima vasca in Impostazioni per iniziare a caricare foto."
-      },
-      "form": {
-        "title": "Carica foto",
-        "description": "Carica una foto della vasca su Google Drive e salva i metadati nella tab PHOTOS per questa vasca.",
-        "save": "Carica foto",
-        "saving": "Caricamento…",
-        "fields": {
-          "date": "Data e ora",
-          "file": "Foto",
-          "note": "Descrizione (opzionale)"
-        },
-        "hints": {
-          "date": "Viene salvata come timestamp ISO nel foglio (UTC).",
-          "file": "Scegli un file immagine (JPG, PNG, WebP…)."
-        },
-        "placeholders": {
-          "note": "Opzionale"
-        },
-        "errors": {
-          "noTank": "Seleziona prima una vasca attiva.",
-          "missingDate": "Seleziona data e ora.",
-          "invalidDate": "Inserisci una data/ora valida.",
-          "missingFile": "Scegli un file foto.",
-          "invalidFile": "Scegli un file immagine.",
-          "saveFailed": "Caricamento foto non riuscito."
-        },
-        "success": {
-          "saved": "Foto caricata e salvata su Google Sheets."
-        }
-      },
-      "list": {
-        "title": "Foto caricate",
-        "description": "Foto caricate per questa vasca (dalla tab PHOTOS).",
-        "loading": "Caricamento foto…",
-        "refresh": "Aggiorna foto",
-        "refreshing": "Aggiornamento…",
-        "empty": "Nessuna foto ancora.",
-        "emptyHint": "Carica la prima foto qui sopra — apparirà qui.",
-        "labels": {
-          "note": "Descrizione",
-          "openInDrive": "Apri su Drive"
-        },
-        "errors": {
-          "loadFailed": "Impossibile caricare le foto."
-        }
-      },
-      "timeline": {
-        "title": "Timeline",
-        "description": "Sfoglia le foto della vasca nel tempo. Clicca una foto per aprirla a schermo intero.",
-        "viewModes": {
-          "gallery": "Galleria",
-          "list": "Lista"
-        },
-        "selection": {
-          "selectedCount": "{count} selezionate"
-        },
-        "actions": {
-          "loadPreview": "Carica anteprima",
-          "loadingPreview": "Caricamento…",
-          "retryPreview": "Riprova",
-          "selectForCompare": "Seleziona per confronto",
-          "unselectForCompare": "Deseleziona",
-          "clearSelection": "Annulla selezione",
-          "compare": "Confronta",
-          "previous": "Precedente",
-          "next": "Successiva",
-          "swap": "Inverti"
-        },
-        "alt": {
-          "tankPhoto": "Foto della vasca del {date}"
-        },
-        "errors": {
-          "previewFailed": "Impossibile caricare l’anteprima della foto."
-        }
-      },
-      "viewer": {
-        "description": "Visualizzatore foto a schermo intero."
-      },
-      "compare": {
-        "title": "Confronta foto",
-        "description": "Confronta due foto affiancate o alternale.",
-        "modes": {
-          "sideBySide": "Affiancate",
-          "toggle": "Alterna"
-        },
-        "actions": {
-          "showFirst": "Mostra prima",
-          "showSecond": "Mostra seconda"
-        },
-        "errors": {
-          "needTwo": "Seleziona due foto da confrontare."
-        }
-      }
-    },
-    "livestock": {
-      "metaTitle": "Fauna e flora",
-      "title": "Fauna e flora",
-      "description": "Gestisci fauna e flora di questa vasca (pesci, coralli, invertebrati, piante).",
-      "actions": {
-        "add": "Aggiungi fauna e flora",
-        "open": "Apri",
-        "backToList": "Torna a fauna e flora"
-      },
-      "filters": {
-        "all": "Tutti",
-        "fish": "Pesci",
-        "coral": "Coralli",
-        "invertebrate": "Invertebrati",
-        "plant": "Piante",
-        "searchPlaceholder": "Cerca fauna e flora…"
-      },
-      "list": {
-        "title": "Elenco fauna e flora",
-        "description": "Tutte le righe del foglio LIVESTOCK per questa vasca.",
-        "loading": "Caricamento fauna e flora…",
-        "refresh": "Aggiorna",
-        "refreshing": "Aggiornamento…",
-        "results": "{count} elemento(i)",
-        "empty": "Nessun elemento ancora.",
-        "emptyHint": "Aggiungi il primo elemento per iniziare a tracciarlo.",
-        "errors": {
-          "loadFailed": "Impossibile caricare fauna e flora."
-        }
-      },
-      "detail": {
-        "title": "Dettaglio fauna e flora",
-        "description": "Modifica le proprietà e salvale su Google Sheets.",
-        "loading": "Caricamento fauna e flora…",
-        "notFound": "Elemento non trovato."
-      },
-      "photos": {
-        "metaTitle": "Foto",
-        "metaTitleWithName": "Foto — {name}",
-        "title": "Foto",
-        "titleWithName": "Foto — {name}",
-        "description": "Carica foto per questo elemento e sfogliale nel tempo.",
-        "uploadDescription": "Carica una foto dell’elemento su Google Drive e salva i metadati nella tab PHOTOS per questa vasca.",
-        "timelineDescription": "Sfoglia le foto di questo elemento nel tempo. Clicca una foto per aprirla a schermo intero.",
-        "cardTitle": "Foto",
-        "cardDescription": "L’ultima foto caricata diventa l’immagine in evidenza per questo elemento.",
-        "loading": "Caricamento foto…",
-        "empty": "Nessuna foto ancora.",
-        "emptyHint": "Carica la prima foto qui sopra — apparirà qui.",
-        "actions": {
-          "open": "Foto",
-          "openTimeline": "Apri timeline",
-          "addFirst": "Aggiungi prima foto",
-          "refresh": "Aggiorna"
-        },
-        "errors": {
-          "loadFailed": "Impossibile caricare le foto dell’elemento."
-        },
-        "alt": {
-          "featured": "Foto in evidenza per {name}",
-          "noPhoto": "Nessuna foto per {name}",
-          "photo": "Foto di {name} del {date}"
-        }
-      },
-      "timeline": {
-        "cardTitle": "Cronologia",
-        "cardDescription": "Foto ed eventi per questo elemento, ordinati per data.",
-        "loading": "Caricamento cronologia…",
-        "empty": "Nessuna attività ancora.",
-        "emptyHint": "Carica una foto o registra un evento per iniziare a costruire uno storico.",
-        "actions": {
-          "refresh": "Aggiorna",
-          "addEvent": "Registra evento"
-        },
-        "eventDialog": {
-          "title": "Registra evento",
-          "description": "Aggiungi un evento per questo elemento (salvato nella tab EVENTS della vasca)."
-        }
-      },
-      "form": {
-        "title": "Fauna e flora",
-        "description": "Questi campi sono salvati nella tab LIVESTOCK di tank_data.xlsx.",
-        "save": "Salva",
-        "saving": "Salvataggio…",
-        "success": {
-          "saved": "Salvato."
-        },
-        "fields": {
-          "nameCommon": "Nome comune",
-          "nameScientific": "Nome scientifico (opzionale)",
-          "category": "Categoria",
-          "subCategory": "Sottocategoria (opzionale)",
-          "tankZone": "Zona vasca (opzionale)",
-          "origin": "Origine (opzionale)",
-          "dateAdded": "Data inserimento",
-          "dateRemoved": "Data rimozione (opzionale)",
-          "status": "Stato",
-          "notes": "Note (opzionale)"
-        },
-        "placeholders": {
-          "nameCommon": "es. Pesce pagliaccio",
-          "nameScientific": "es. Amphiprion ocellaris",
-          "category": "Seleziona una categoria…",
-          "subCategory": "es. SPS, shrimp, snail…",
-          "tankZone": "Seleziona una zona…",
-          "origin": "Seleziona un'origine…",
-          "status": "Seleziona uno stato…",
-          "notes": "Opzionale"
-        },
-        "errors": {
-          "missingNameCommon": "Inserisci un nome comune.",
-          "missingCategory": "Seleziona una categoria.",
-          "invalidCategory": "Seleziona una categoria valida.",
-          "missingDateAdded": "Seleziona la data di inserimento.",
-          "invalidDateAdded": "Inserisci una data valida (YYYY-MM-DD).",
-          "missingStatus": "Seleziona uno stato.",
-          "invalidStatus": "Seleziona uno stato valido.",
-          "invalidDateRemoved": "Inserisci una data rimozione valida (YYYY-MM-DD).",
-          "dateRemovedMustBeEmptyForActive": "La data rimozione deve essere vuota quando lo stato è attivo.",
-          "dateRemovedRequiredForInactive": "La data rimozione è obbligatoria quando lo stato è rimosso o morto.",
-          "saveFailed": "Salvataggio non riuscito."
-        }
-      },
-      "options": {
-        "category": {
-          "fish": "Pesce",
-          "coral": "Corallo",
-          "invertebrate": "Invertebrato",
-          "plant": "Pianta"
-        },
-        "status": {
-          "active": "Attivo",
-          "removed": "Rimosso",
-          "dead": "Morto"
-        },
-        "tankZone": {
-          "top": "Alto",
-          "mid": "Centro",
-          "bottom": "Basso",
-          "rock": "Roccia",
-          "sand": "Sabbia"
-        },
-        "origin": {
-          "wild": "Cattura",
-          "captive": "Allevamento",
-          "frag": "Frag"
-        }
-      }
-    },
-    "events": {
-      "metaTitle": "Eventi",
-      "title": "Eventi",
-      "description": "Traccia interventi come cambi d’acqua, dosaggi, sostituzioni e manutenzione.",
-      "locked": "Collega prima la cartella TankLog su Drive.",
-      "loadingTanks": "Caricamento vasche…",
-      "noTanks": {
-        "title": "Nessuna vasca ancora",
-        "description": "Nessuna vasca trovata. Crea la prima vasca in Impostazioni per iniziare a registrare gli eventi."
-      },
-      "types": {
-        "water_change": "Cambio acqua",
-        "dosing": "Dosaggio",
-        "maintenance": "Manutenzione",
-        "livestock_addition": "Inserimento fauna",
-        "livestock_removal": "Rimozione fauna",
-        "feeding": "Alimentazione",
-        "health": "Salute",
-        "treatment": "Trattamento",
-        "observation": "Osservazione",
-        "molt": "Muta",
-        "spawn": "Riproduzione",
-        "fragging": "Talea",
-        "other": "Altro"
-      },
-      "targets": {
-        "tank": "Vasca",
-        "livestockWithName": "Elemento: {name}",
-        "livestockWithId": "ID elemento: {id}"
-      },
-      "form": {
-        "title": "Aggiungi evento",
-        "description": "Salva un intervento come una singola riga nella tab EVENTS per questa vasca.",
-        "save": "Salva evento",
-        "saving": "Salvataggio…",
-        "fields": {
-          "target": "Riferimento",
-          "livestock": "Fauna e flora",
-          "date": "Data e ora",
-          "type": "Tipo",
-          "description": "Descrizione",
-          "quantity": "Quantità (opzionale)",
-          "unit": "Unità (opzionale)",
-          "product": "Prodotto (opzionale)",
-          "note": "Nota (opzionale)"
-        },
-        "targets": {
-          "tank": "Vasca",
-          "livestock": "Fauna e flora"
-        },
-        "hints": {
-          "target": "Scegli se l’evento riguarda la vasca o un elemento specifico.",
-          "livestock": "Seleziona l’elemento a cui si riferisce l’evento.",
-          "date": "Viene salvato come timestamp ISO nel foglio (UTC).",
-          "type": "Scegli cosa hai fatto (cambio acqua, dosaggio, manutenzione…).",
-          "description": "Breve e chiaro (es. “Cambio acqua 20%”, “Pulito skimmer”).",
-          "quantity": "Opzionale. Usala con l’unità quando serve (es. 20 L, 5 ml).",
-          "unit": "Opzionale. Esempi: L, ml, g."
-        },
-        "placeholders": {
-          "livestock": "Seleziona elemento…",
-          "type": "Seleziona un tipo…",
-          "description": "Cosa è stato fatto?",
-          "quantity": "es. 20",
-          "unit": "es. L",
-          "product": "es. Integratore reef",
-          "note": "Opzionale"
-        },
-        "errors": {
-          "noTank": "Seleziona prima una vasca attiva.",
-          "missingLivestockTarget": "Seleziona un elemento.",
-          "loadLivestockFailed": "Impossibile caricare fauna e flora.",
-          "missingDate": "Seleziona data e ora.",
-          "invalidDate": "Inserisci una data/ora valida.",
-          "missingType": "Seleziona un tipo evento.",
-          "missingDescription": "Inserisci una descrizione.",
-          "invalidQuantity": "Inserisci una quantità ≥ 0.",
-          "saveFailed": "Salvataggio evento non riuscito."
-        },
-        "success": {
-          "saved": "Evento salvato su Google Sheets."
-        }
-      },
-      "list": {
-        "title": "Storico",
-        "description": "Consulta gli eventi passati per questa vasca.",
-        "loading": "Caricamento eventi…",
-        "refresh": "Aggiorna eventi",
-        "refreshing": "Aggiornamento…",
-        "empty": "Nessun evento ancora.",
-        "emptyHint": "Aggiungi il primo evento qui sopra — apparirà qui.",
-        "labels": {
-          "product": "Prodotto",
-          "note": "Nota"
-        },
-        "errors": {
-          "loadFailed": "Impossibile caricare gli eventi."
-        }
-      },
-      "actions": {
-        "edit": "Modifica",
-        "delete": "Elimina",
-        "saveChanges": "Salva modifiche",
-        "savingChanges": "Salvataggio…",
-        "confirmDelete": "Eliminare l’evento “{description}”?",
-        "statusUpdated": "Evento aggiornato.",
-        "statusDeleted": "Evento eliminato.",
-        "errors": {
-          "updateFailed": "Impossibile aggiornare l’evento.",
-          "deleteFailed": "Impossibile eliminare l’evento."
-        }
-      },
-      "editDialog": {
-        "title": "Modifica evento",
-        "description": "Aggiorna i dettagli di questo evento."
-      },
-      "comingTitle": "Eventi",
-      "comingDescription": "Gli eventi vengono salvati nel foglio della vasca su Google Sheets.",
-      "plannedLabel": "Include:",
-      "plannedBullets": [
-        "Creare eventi (tipo, data, note, vasca)",
-        "Lista e filtri per vasca"
-      ]
-    },
-    "reminders": {
-      "metaTitle": "Promemoria",
-      "title": "Promemoria",
-      "description": "Traccia attività (cambi d’acqua, dosaggi, manutenzione) e vedi cosa è in arrivo o scaduto.",
-      "locked": "Collega prima la cartella TankLog su Drive.",
-      "loadingTanks": "Caricamento vasche…",
-      "noTanks": {
-        "title": "Nessuna vasca ancora",
-        "description": "Nessuna vasca trovata. Crea la prima vasca in Impostazioni per iniziare a usare i promemoria."
-      },
-      "actions": {
-        "done": "Fatto",
-        "undo": "Annulla",
-        "delete": "Elimina",
-        "confirmDelete": "Eliminare il promemoria “{title}”?",
-        "statusUpdated": "Promemoria aggiornato.",
-        "statusUpdatedAndLogged": "Promemoria aggiornato. Evento registrato.",
-        "statusDeleted": "Promemoria eliminato.",
-        "statusDeletedWithWarning": "Promemoria eliminato, ma: {message}",
-        "errors": {
-          "updateFailed": "Impossibile aggiornare il promemoria.",
-          "deleteFailed": "Impossibile eliminare il promemoria.",
-          "eventLogFailed": "Impossibile creare l’evento collegato.",
-          "eventLogFailedWithMessage": "Promemoria aggiornato, ma impossibile creare l’evento collegato. ({message})"
-        }
-      },
-      "notifications": {
-        "heading": "Promemoria TankLog",
-        "errors": {
-          "scheduleFailed": "Impossibile pianificare la notifica push.",
-          "scheduleFailedWithMessage": "Promemoria salvato, ma impossibile pianificare la notifica push. ({message})",
-          "cancelMissingConfig": "Il proxy di pianificazione non è configurato, quindi TankLog non può annullare la push pianificata.",
-          "cancelFailed": "Impossibile annullare la notifica push pianificata.",
-          "cancelFailedWithMessage": "Promemoria aggiornato, ma impossibile annullare la notifica push pianificata. ({message})"
-        }
-      },
-      "form": {
-        "title": "Aggiungi promemoria",
-        "description": "Salva un’attività come una singola riga nella tab REMINDERS per questa vasca.",
-        "save": "Salva promemoria",
-        "saving": "Salvataggio…",
-        "fields": {
-          "title": "Titolo",
-          "nextDue": "Prossima scadenza",
-          "endDue": "Data fine (opzionale)",
-          "repeatEveryDays": "Ripeti ogni (giorni, opzionale)",
-          "notes": "Note (opzionale)"
-        },
-        "hints": {
-          "nextDue": "Viene salvato come timestamp ISO nel foglio (UTC).",
-          "endDue": "Opzionale. Dopo questa data, il promemoria viene considerato terminato.",
-          "repeatEveryDays": "Lascia vuoto per promemoria una tantum."
-        },
-        "placeholders": {
-          "title": "es. Cambio acqua",
-          "repeatEveryDays": "es. 7",
-          "notes": "Opzionale"
-        },
-        "errors": {
-          "noTank": "Seleziona prima una vasca attiva.",
-          "missingTitle": "Inserisci un titolo.",
-          "missingNextDue": "Seleziona data e ora di scadenza.",
-          "invalidNextDue": "Inserisci una data/ora valida.",
-          "invalidEndDue": "Inserisci una data fine valida (YYYY-MM-DD).",
-          "endDueBeforeNextDue": "La data fine deve essere uguale o successiva alla prima scadenza.",
-          "invalidRepeatEveryDays": "Inserisci un numero intero di giorni > 0.",
-          "saveFailed": "Salvataggio promemoria non riuscito."
-        },
-        "success": {
-          "saved": "Promemoria salvato su Google Sheets."
-        }
-      },
-      "list": {
-        "title": "In arrivo e scaduti",
-        "description": "Cosa richiede attenzione per primo.",
-        "loading": "Caricamento promemoria…",
-        "refresh": "Aggiorna promemoria",
-        "refreshing": "Aggiornamento…",
-        "empty": "Nessun promemoria ancora.",
-        "emptyHint": "Aggiungi il primo promemoria qui sopra — apparirà qui.",
-        "sections": {
-          "overdue": "Scaduti",
-          "upcoming": "In arrivo",
-          "completed": "Completati"
-        },
-        "labels": {
-          "initial": "Inizio",
-          "end": "Fine",
-          "repeatEveryDays": "Ripetizione",
-          "notes": "Note",
-          "lastDone": "Ultima esecuzione"
-        },
-        "badges": {
-          "dueToday": "Scade oggi",
-          "overdue": "Scaduto",
-          "upcoming": "In arrivo",
-          "done": "Completato",
-          "ended": "Terminato"
-        },
-        "errors": {
-          "loadFailed": "Impossibile caricare i promemoria."
-        }
-      }
-    },
-    "settings": {
-      "metaTitle": "Impostazioni",
-      "title": "Impostazioni",
-      "description": "Qui trovi account, lingua e storage di TankLog.",
-      "onboarding": {
-        "title": "Primi passi",
-        "description": "Segui questi passaggi per configurare TankLog in pochi minuti.",
-        "template": {
-          "summary": "Struttura del foglio (template)",
-          "hint": "Se colleghi un foglio vasca già esistente, assicurati che contenga queste tab (TankLog le crea automaticamente per le nuove vasche)."
-        },
-        "steps": {
-          "storage": {
-            "title": "Collega la cartella TankLog",
-            "description": "Collega la cartella TankLog su Google Drive (incolla link/ID, cercala, oppure creala).",
-            "cta": "Vai a Storage",
-            "done": "Cartella collegata."
-          },
-          "tanks": {
-            "title": "Crea la tua prima vasca",
-            "description": "TankLog creerà la struttura delle cartelle su Drive e inizializzerà tank_data.xlsx con i fogli richiesti.",
-            "cta": "Vai a Vasche",
-            "locked": "Collega prima la cartella TankLog.",
-            "done": "Trovate {count} vasche."
-          },
-          "next": {
-            "title": "Inizia a registrare",
-            "description": "Aggiungi test acqua, eventi, foto e promemoria.",
-            "ctaHome": "Vai alla Home",
-            "ctaTank": "Apri vasca attiva",
-            "loadingTanks": "Caricamento vasche…",
-            "noTanks": "Nessuna vasca ancora — creane una sopra per continuare."
-          }
-        }
-      },
-      "language": {
-        "title": "Lingua",
-        "description": "Scegli la lingua dell’interfaccia."
-      },
-      "account": {
-        "title": "Account",
-        "description": "Accesso con Google (OAuth solo frontend).",
-        "googleUserLabel": "Utente Google",
-        "profileUnavailable": "Profilo non disponibile (sessione solo token).",
-        "tokenExpiresLabel": "Scadenza token",
-        "scopesLabel": "Scope"
-      },
-      "googleClientId": {
-        "title": "Client ID Google OAuth",
-        "description": "TankLog usa il tuo Client ID OAuth personale (salvato localmente) per accedere con Google.",
-        "statusLabel": "Stato",
-        "statusConfigured": "Configurato",
-        "statusNotConfigured": "Non configurato",
-        "label": "Client ID",
-        "placeholder": "1234-abc.apps.googleusercontent.com",
-        "hint": "Serve solo il Client ID (niente client secret). Salvato localmente su questo dispositivo.",
-        "actions": {
-          "save": "Salva",
-          "remove": "Rimuovi"
-        },
-        "errors": {
-          "required": "Inserisci un Client ID."
-        },
-        "success": {
-          "saved": "Client ID salvato.",
-          "removed": "Client ID rimosso."
-        }
-      },
-      "oneSignal": {
-        "title": "Notifiche (OneSignal)",
-        "description": "Opzionale: abilita le notifiche push web tramite OneSignal. Per promemoria pianificati (send_after) configura un proxy.",
-        "statusLabel": "Stato",
-        "status": {
-          "enabled": "Abilitato",
-          "sdk": "SDK",
-          "schedulingProxy": "Proxy pianificazione",
-          "proxyUrl": "URL proxy",
-          "workerPath": "Service worker",
-          "pushSupported": "Push supportate",
-          "permission": "Permesso",
-          "subscribed": "Iscritto",
-          "subscriptionId": "ID iscrizione",
-          "externalId": "External ID"
-        },
-        "sdkStatus": {
-          "idle": "Non inizializzato",
-          "loading": "Caricamento…",
-          "ready": "Pronto",
-          "error": "Errore"
-        },
-        "values": {
-          "yes": "Sì",
-          "no": "No",
-          "granted": "Concesso",
-          "denied": "Negato",
-          "configured": "Configurato",
-          "notConfigured": "Non configurato"
-        },
-        "fields": {
-          "appId": {
-            "label": "App ID",
-            "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-            "hint": "Lo trovi in OneSignal → Impostazioni → Keys & IDs."
-          },
-          "apiKey": {
-            "label": "App API key (opzionale, per pianificazione)",
-            "placeholder": "Incolla la tua App API key OneSignal",
-            "hint": "Serve per pianificare notifiche con send_after. Salvata localmente su questo dispositivo."
-          },
-          "proxyUrl": {
-            "label": "URL proxy per pianificazione (richiesto per send_after)",
-            "placeholder": "https://tuo-worker.example.workers.dev",
-            "hint": "Le API REST OneSignal sono bloccate dal CORS del browser. Usa un piccolo proxy (es. Cloudflare Worker) che aggiunge la API key lato server."
-          },
-          "proxyKey": {
-            "label": "Chiave proxy (opzionale)",
-            "placeholder": "Segreto condiviso per proteggere il proxy",
-            "hint": "Se il proxy richiede una chiave, incollala qui (salvata localmente)."
-          }
-        },
-        "actions": {
-          "save": "Salva",
-          "remove": "Rimuovi",
-          "enable": "Abilita",
-          "disable": "Disabilita",
-          "refresh": "Aggiorna stato",
-          "subscribe": "Iscrivi questo browser",
-          "unsubscribe": "Disiscrivi"
-        },
-        "errors": {
-          "invalidAppId": "Inserisci un App ID OneSignal valido.",
-          "invalidApiKey": "Inserisci una API key OneSignal valida.",
-          "missingProxyUrl": "Inserisci un URL proxy per abilitare le notifiche pianificate.",
-          "initFailed": "Inizializzazione OneSignal non riuscita.",
-          "disableFailed": "Disattivazione OneSignal non riuscita.",
-          "refreshFailed": "Aggiornamento stato OneSignal non riuscito.",
-          "subscribeFailed": "Iscrizione alle notifiche push non riuscita.",
-          "unsubscribeFailed": "Disiscrizione dalle notifiche push non riuscita.",
-          "notInitialized": "Inizializza prima OneSignal."
-        },
-        "success": {
-          "saved": "Impostazioni OneSignal salvate.",
-          "removed": "Impostazioni OneSignal rimosse.",
-          "enabled": "OneSignal abilitato.",
-          "disabled": "OneSignal disabilitato.",
-          "refreshed": "Stato aggiornato.",
-          "subscribed": "Iscritto.",
-          "unsubscribed": "Disiscritto."
-        },
-        "securityNote": "Nota: le chiamate REST a OneSignal sono bloccate dal CORS del browser. Per la pianificazione serve un proxy lato server. La chiave proxy (se usata) è salvata localmente."
-      },
-      "storage": {
-        "title": "Storage (Google Drive)",
-        "description": "Seleziona la cartella TankLog su Google Drive. Finché non è collegata, il resto dell’app è bloccato.",
-        "statusLabel": "Stato connessione",
-        "statusConnected": "Collegato",
-        "statusNotConnected": "Non collegato",
-        "openInDrive": "Apri la cartella su Google Drive",
-        "label": "ID o URL della cartella TankLog",
-        "placeholder": "https://drive.google.com/drive/folders/…",
-        "hint": "Incolla link/ID della cartella TankLog. Puoi anche cercare cartelle “TankLog” esistenti o crearne una.",
-        "connect": "Collega cartella",
-        "disconnect": "Disconnetti",
-        "findExisting": "Cerca cartelle “TankLog” esistenti",
-        "searching": "Ricerca…",
-        "foundLabel": "Cartelle trovate",
-        "useThisFolder": "Usa questa cartella",
-        "create": "Crea cartella “TankLog”",
-        "createConfirm": "Crea cartella",
-        "creating": "Creazione…",
-        "createDialog": {
-          "title": "Crea cartella TankLog",
-          "description": "TankLog creerà una cartella “TankLog” nella root del tuo Drive. Se vuoi, puoi spostarla più tardi."
-        },
-        "errors": {
-          "invalidFolder": "Inserisci un ID o URL valido di una cartella Google Drive.",
-          "noFoldersFound": "Nessuna cartella “TankLog” trovata nel tuo Drive.",
-          "searchFailed": "Ricerca cartelle non riuscita.",
-          "createFailed": "Creazione della cartella TankLog non riuscita."
-        },
-        "success": {
-          "connected": "Cartella collegata.",
-          "disconnected": "Cartella disconnessa.",
-          "created": "Cartella TankLog creata e collegata."
-        }
-      },
-      "tanks": {
-        "title": "Vasche",
-        "description": "Crea vasche (cartella Drive + foglio per vasca) e seleziona quella attiva.",
-        "locked": "Collega prima la cartella TankLog su Drive.",
-        "listTitle": "Le tue vasche",
-        "listHint": "Le vasche vengono scoperte dalle cartelle Drive dentro TankLog.",
-        "refresh": "Aggiorna",
-        "add": "Aggiungi vasca",
-        "open": "Apri",
-        "loading": "Caricamento vasche…",
-        "empty": "Nessuna vasca trovata. Crea la prima vasca per iniziare.",
-        "creating": "Creazione…",
-        "createConfirm": "Crea vasca",
-        "createDialog": {
-          "title": "Aggiungi una nuova vasca",
-          "description": "TankLog creerà la struttura della cartella e inizializzerà tank_data.xlsx con i fogli richiesti."
-        },
-        "fields": {
-          "name": "Nome vasca",
-          "type": "Tipo vasca",
-          "volume": "Volume (litri)",
-          "startDate": "Data avvio",
-          "notes": "Note"
-        },
-        "placeholders": {
-          "name": "es. Reef 300L",
-          "volume": "es. 300",
-          "notes": "Opzionale"
-        },
-        "types": {
-          "freshwater": "Acqua dolce",
-          "planted": "Piantumata",
-          "marine": "Marino",
-          "reef": "Reef"
-        },
-        "errors": {
-          "noRootFolder": "Collega prima la cartella TankLog.",
-          "missingName": "Inserisci un nome vasca.",
-          "invalidVolume": "Inserisci un volume valido in litri.",
-          "createFailed": "Creazione vasca non riuscita."
-        },
-        "success": {
-          "created": "Vasca creata."
-        }
-      },
-      "legal": {
-        "title": "Informazioni legali",
-        "description": "Informazioni sulla privacy per TankLog.",
-        "privacyLink": "Leggi l’Informativa privacy"
-      },
-      "reset": {
-        "title": "Reset",
-        "description": "Cancella le impostazioni locali di TankLog su questo dispositivo. Non elimina nulla da Google Drive o Sheets.",
-        "action": "Reset impostazioni locali",
-        "confirmTitle": "Reset impostazioni locali?",
-        "confirmDescription": "Questo disconnetterà la cartella TankLog, cancellerà la vasca attiva e rimuoverà il Client ID OAuth Google salvato da questo dispositivo. I dati su Google Drive/Sheets non verranno eliminati.",
-        "confirmAction": "Reset"
-      }
-    },
-    "login": {
-      "metaTitle": "Accesso",
-      "title": "Accedi",
-      "description": "TankLog usa Google per accedere ai tuoi Google Sheets + Drive (niente backend, niente DB proprietari).",
-      "cardTitle": "Continua con Google",
-      "cardDescription": "Richiederemo accesso a Sheets e Drive (ricerca cartelle + file creati da TankLog).",
-      "clientId": {
-        "title": "Client ID Google OAuth",
-        "description": "TankLog è solo frontend e non può includere un Client ID OAuth condiviso. Incolla il tuo Client ID per abilitare l’accesso con Google.",
-        "steps": {
-          "create": "Crea un Client ID OAuth (Applicazione web) in Google Cloud Console.",
-          "origins": "Aggiungi questo sito a “Origini JavaScript autorizzate” (dev: http://localhost:3000).",
-          "paste": "Incolla qui il Client ID e salvalo."
-        },
-        "label": "Client ID",
-        "placeholder": "1234-abc.apps.googleusercontent.com",
-        "hint": "Serve solo il Client ID (niente client secret). Salvato localmente su questo dispositivo.",
-        "actions": {
-          "save": "Salva Client ID",
-          "remove": "Rimuovi"
-        },
-        "errors": {
-          "required": "Inserisci un Client ID."
-        },
-        "success": {
-          "saved": "Client ID salvato.",
-          "removed": "Client ID rimosso."
-        }
-      },
-      "errors": {
-        "missingClientId": "Client ID Google mancante. Salva il Client ID qui sopra per continuare.",
-        "loginFailed": "Accesso non riuscito."
-      },
-      "sessionNote": "La sessione è salvata in questa scheda del browser (session storage)."
-    },
-    "privacy": {
-      "metaTitle": "Informativa privacy",
-      "title": "Informativa privacy",
-      "cardDescription": "Come TankLog gestisce i tuoi dati (solo frontend, storage sotto il tuo controllo).",
-      "lastUpdatedLabel": "Ultimo aggiornamento: {date}"
-    }
+    "save": "Salva",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "close": "Chiudi",
+    "confirmTitle": "Conferma",
+    "deleted": "Eliminato.",
+    "invalidCost": "Inserisci un costo valido (0 o maggiore)."
   }
 }
-

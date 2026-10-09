@@ -1,0 +1,38 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+  min-height: 100%;
+  overflow-x: clip;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 antialiased;
+  min-height: 100dvh;
+  overflow-x: clip;
+  position: relative;
+}
+
+/* Full-viewport atmosphere (avoids background-attachment:fixed crop bugs). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: rgb(2 6 23);
+  background-image:
+    radial-gradient(ellipse 80% 55% at 50% -15%, rgb(8 145 178 / 0.28), transparent 60%),
+    radial-gradient(ellipse 55% 45% at 100% 0%, rgb(15 118 110 / 0.16), transparent 55%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgb(8 145 178 / 0.08), transparent 50%);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}

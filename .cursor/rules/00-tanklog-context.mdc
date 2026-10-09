@@ -9,9 +9,13 @@ Always treat these as the canonical requirements/spec:
 
 @project.md
 @roadmap.md
+@docs/v2-specs.md
+@docs/v2-data-model.md
 
 ## Rules
-- **Follow constraints first**: frontend-only, SSG, free stack, user-controlled data storage.
+- **Follow constraints first**: frontend-only, static/SSG, free stack, **BYO Supabase** user-controlled storage.
+- **Storage SoT**: `docs/v2-data-model.md` + `supabase/schema.sql` (not Google Sheets).
+- **UI kit**: Nuxt UI (not shadcn-vue) for v2 work.
 - **Roadmap-driven work**: keep changes small and aligned to the current sprint scope; update `roadmap.md` if scope changes.
 - **Call out conflicts early**: if a request violates constraints, explain why and propose the closest compliant alternative.
-
+- **Legacy Google**: `docs/schema_sheets.md` is migration reference only; do not use Drive/Sheets for normal CRUD paths.

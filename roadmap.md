@@ -1,250 +1,217 @@
-## TankLog — Roadmap (small sprints)
+## TankLog — Roadmap v2 (BYO Supabase)
 
 ### How we work
 - **Sprint size**: 3–5 days (small, focused)
 - **Rule**: ship something visible every sprint (even if simple)
 - **Definition of Done (for every sprint)**:
-  - Static build works (SSG)
+  - Static build works
   - Mobile layout works
   - Basic loading + empty + error states exist
 
-### MVP target (what “done” looks like)
-- Google login
-- Use the user’s **Google Sheet** as the database (tanks, tests, events, ranges)
-- Water tests: input, history, charts, out-of-range highlights
-- Photos: upload to **Google Drive** + timeline gallery
-- UI in **Italian + English** (dynamic language switch)
-- Installable **PWA** (offline-first baseline)
-- Custom **reminders + notifications** (best effort, device/browser dependent)
+### Canonical specs
+- [`docs/v2-specs.md`](docs/v2-specs.md)
+- [`docs/v2-data-model.md`](docs/v2-data-model.md)
+
+### MVP target (v2 “done”)
+- BYO Supabase connect + email auth
+- Postgres CRUD for tanks, tests, events, reminders, livestock, ranges
+- Photos on Supabase Storage + timeline/compare
+- Charts + out-of-range highlights
+- Optional Google → Supabase migration wizard
+- UI in Italian + English
+- Installable PWA (offline app shell)
+- Modern / futuristic Nuxt UI
 
 ### Sprint list (at a glance)
-- **Current sprint**: Sprint 15 — Settings + onboarding polish + MVP release (started 2026-01-20)
-- Sprint 0: Repo scaffold + first deploy (PWA foundation)
-- Sprint 1: Page skeletons + app navigation
-- Sprint 2: i18n foundation (it/en)
-- Sprint 3: Google setup + Auth (client-side)
-- Sprint 4: Google Drive: connect + discover tanks (per-tank sheets)
-- Sprint 5: Water tests: create (write to Sheets)
-- Sprint 6: Water tests: list + detail
-- Sprint 7: Parameter ranges + out-of-range highlighting
-- Sprint 8: Charts (trends over time)
-- Sprint 9: Tank detail page (bring it together)
-- Sprint 10: Events: CRUD (Sheets)
-- Sprint 11: Reminders: CRUD + upcoming/overdue
-- Sprint 12: Notifications: permission + reminder delivery
-- Sprint 13: Photos: upload to Drive + save metadata
-- Sprint 14: Photo timeline + comparison
-- Sprint 15: Settings + onboarding polish + MVP release
+- **Current sprint**: S10 Polish + MVP — complete 2026-10-09
+- S0: Scaffold Nuxt 4 + Nuxt UI + supabase-js + theme/i18n/PWA
+- S1: BYO connect + Auth
+- S2: Schema apply UX + health check
+- S3: Tanks CRUD
+- S4: Water tests create/list/detail
+- S5: Ranges + out-of-range + charts
+- S6: Events + Reminders (+ Web Notifications)
+- S7: Livestock
+- S8: Photos Storage + timeline/compare
+- S9: Migration wizard (Google → Supabase)
+- S10: Onboarding polish + privacy + export JSON + MVP release
 
 ---
 
-## Sprint 0 — Repo scaffold + first deploy
-**Goal**: a running Nuxt 3 static app with a clean UI baseline.
+## Docs foundation — data model + specs
+**Goal**: lock storage and product brief before coding the greenfield app.
 
-- [x] Scaffold Nuxt 3 (TypeScript) configured for **SSG**
-- [x] Install + configure Tailwind + `shadcn-vue`
-- [x] Enable PWA (`@vite-pwa/nuxt`): manifest + icons + service worker
-- [x] Offline cache baseline (app shell + static assets)
-- [x] App shell: header + simple navigation + responsive container
-- [x] Add GitHub Pages deploy workflow (`.github/workflows/deploy.yml`)
-- [ ] Deploy to a free host (GitHub Pages / Netlify / Cloudflare Pages)
-
-**Done when**
-- [x] `npm run generate` produces a static output
-- [ ] Deploy is live
-- [x] Home page loads and navigation works
-- [x] App is installable as a PWA (manifest detected)
-- [x] Home loads offline after a first successful visit
-
-## Sprint 1 — Page skeletons + app navigation
-**Goal**: all main pages exist and feel coherent.
-
-- [x] Create pages: `/`, `/tank/[id]`, `/tank/[id]/water-test`, `/tank/[id]/photos`, `/tank/[id]/events`, `/tank/[id]/reminders`, `/settings`
-- [x] Tank navigation: dashboard tank list + per-tank sidebar
-- [x] Add simple UI primitives (Card, Button, Dialog) and consistent spacing
+- [x] Write [`docs/v2-data-model.md`](docs/v2-data-model.md)
+- [x] Write [`supabase/schema.sql`](supabase/schema.sql) + [`docs/schema_supabase.md`](docs/schema_supabase.md)
+- [x] Write [`docs/supabase-setup.md`](docs/supabase-setup.md)
+- [x] Write [`docs/v2-specs.md`](docs/v2-specs.md)
+- [x] Update [`project.md`](project.md) for v2 constraints
+- [x] Align Cursor rules to Nuxt UI + Supabase
+- [x] Archive note: v1 Google docs are migration reference only
 
 **Done when**
-- [x] You can click through all pages without broken routes
-- [x] “Active tank” is visible in the UI (even if mocked)
-
-## Sprint 2 — i18n foundation (it/en)
-**Goal**: the whole UI can switch language.
-
-- [x] Configure Nuxt i18n (Italian + English)
-- [x] Add `LanguageSwitcher` component
-- [x] Localize navigation, page titles, buttons, empty states
-
-**Done when**
-- [x] Language switch updates UI immediately and persists (local storage)
-
-## Sprint 3 — Google setup + Auth (client-side)
-**Goal**: login/logout works and we can call Google APIs.
-
-- [x] Create/Document Google Cloud project setup (OAuth consent + credentials)
-- [x] Enable Google Sheets API + Google Drive API
-- [x] Implement Google Identity Services login (client-side OAuth)
-- [x] Protect all dashboard routes behind login (Nuxt middleware + `/login`)
-- [x] Store session/token safely for the session (and rehydrate on refresh)
-
-**Done when**
-- [x] Login + logout work
-- [x] We can obtain an access token with the right scopes
-
-## Sprint 4 — Google Drive: connect + discover tanks (per-tank sheets)
-**Goal**: connect the user’s TankLog folder and discover tanks from Drive.
-
-- [x] `useGoogleDrive()` composable: auth header + list helpers (folders/files)
-- [x] `useGoogleSheets()` composable: basic read helpers (values/batch updates)
-- [x] “Connect TankLog folder” step (Drive folder ID stored locally)
-- [x] Discover tanks from Drive:
-  - list `TankLog/` subfolders (one folder per tank)
-  - find `tank_data.xlsx` in each tank folder
-  - read `TANK_INFO` and show real tank list + active tank selection
-- [x] Gate the app: until the TankLog folder is connected, only Settings is accessible
-- [x] Create tank: create the tank folder structure + initialize `tank_data.xlsx` with required sheets/headers
-
-**Done when**
-- [x] App requires the TankLog Drive folder, remembers it locally, loads tanks from per‑tank sheets, and can create a new tank end‑to‑end
-
-## Sprint 5 — Water tests: create (write to Sheets)
-**Goal**: users can add a water test record.
-
-- [x] Define WATER_TESTS model (measurement-based: one row per parameter measurement) + client-side ID generation
-- [x] Water test form (minimal: date, tank, key params)
-- [x] Write to `WATER_TESTS` tab via Sheets API
-
-**Done when**
-- [x] Submitting the form creates a new row in Google Sheets
-- [x] Basic validation prevents obvious bad inputs
-
-## Sprint 6 — Water tests: list + detail
-**Goal**: history is usable.
-
-- [x] List water tests for active tank (sorted by date)
-- [x] Simple filters (date range / parameter presence)
-- [x] Row detail view (dialog or page section)
-
-**Done when**
-- [x] Users can find and open past tests quickly
-
-## Sprint 7 — Parameter ranges + out-of-range highlighting
-**Goal**: detect “bad values” immediately.
-
-- [x] Read `PARAMETER_RANGES` tab
-- [x] Compute out-of-range per test + per parameter
-- [x] Add `AlertBanner` + per-value highlighting in tables
-- [x] Add a ranges editor page (frontend) with presets (freshwater/marine/reef)
-
-**Done when**
-- [x] Any out-of-range value is clearly highlighted and explained
-- [x] Users can edit parameter ranges from the UI and save them to Sheets
-
-## Sprint 8 — Charts (trends over time)
-**Goal**: visualize stability and trends.
-
-**Status**: Completed (started 2026-01-20)
-
-- [x] Add `ChartComponent` wrapper (Chart.js or ECharts)
-- [x] Parameter time-series chart for active tank
-- [x] Localize chart labels + tooltips (it/en)
-
-**Done when**
-- [x] Users can select a parameter and see an accurate trend chart
-
-## Sprint 9 — Tank detail page (bring it together)
-**Goal**: one place to understand the tank status.
-
-**Status**: Completed (started 2026-01-20)
-
-- [x] `/tank/[id]` shows: latest values, alerts, charts, recent events and photos preview
-- [x] “Last 7/30/90 days” quick ranges for charts
-
-**Done when**
-- [x] Tank detail feels like the main dashboard for that tank
-
-## Sprint 10 — Events: CRUD (Sheets)
-**Goal**: track interventions (water changes, dosing, maintenance).
-
-**Status**: Completed (started 2026-01-20)
-
-- [x] Events model + form (type, date, notes, tank)
-- [x] Write to `EVENTS` tab
-- [x] List events on tank detail + `/tank/[id]/events` page
-- [x] Edit and delete events (update/delete rows in `EVENTS`)
-
-**Done when**
-- [x] Events can be added and viewed per tank
-- [x] Events can be edited and deleted per tank
-
-## Sprint 11 — Reminders: CRUD + upcoming/overdue (Sheets)
-**Goal**: track recurring tasks (water changes, dosing, batteries, etc).
-
-**Status**: Completed (started 2026-01-20)
-
-- [x] Define REMINDERS model + client-side ID generation
-- [x] Reminder form (title, schedule, next due, notes)
-- [x] Write to / read from `REMINDERS` tab via Sheets API (CRUD)
-- [x] Upcoming + overdue views (global + per tank)
-- [x] Marking a reminder as done can log a matching event in `EVENTS`
-
-**Done when**
-- [x] A reminder can be created and appears in the upcoming list
-- [x] Overdue reminders are clearly highlighted
-
-## Sprint 12 — Notifications: permission + reminder delivery
-**Goal**: notify the user when reminders are due (best effort without backend).
-
-- [ ] Notification permission UX (banner + Settings toggle)
-- [ ] Trigger notifications for due reminders while the app is open
-- [ ] Add snooze / mark done (updates next due date and/or status in Sheets)
-- [ ] Add settings: quiet hours + default snooze
-- [ ] Document limitations + optional path to background Web Push (post‑MVP)
-
-**Done when**
-- [ ] Creating a reminder “due soon” results in a real notification
-- [ ] Snooze / done updates the reminder and removes it from “due now”
-
-## Sprint 13 — Photos: upload to Drive + save metadata
-**Goal**: store photos in user-controlled storage.
-
-**Status**: In progress (started 2026-01-20)
-
-- [x] `useGoogleDrive()` composable: upload helper
-- [x] Photo uploader UI (tank + date + optional notes)
-- [x] Save photo metadata/link in `PHOTOS` tab
-
-**Done when**
-- [x] Upload creates a file in Drive and a row in the sheet
-
-## Sprint 14 — Photo timeline + comparison
-**Goal**: browse progress over time.
-
-- [x] Photo timeline/gallery for a tank (ordered by date)
-- [x] Fullscreen viewer
-- [x] Basic compare mode (pick two photos and toggle/side-by-side)
-
-**Done when**
-- [x] Users can browse and compare tank photos over time
-
-## Sprint 15 — Settings + onboarding polish + MVP release
-**Goal**: make it easy to start and safe to use.
-
-- [ ] Settings: language, disconnect account, change spreadsheet ID
-- [ ] Onboarding: “create/copy the template sheet” instructions (simple step-by-step)
-- [x] Reminders: start/end dates (persist initial date + optional end date to stop scheduling)
-- [ ] Robust error handling (expired token, missing tabs, bad sheet ID)
-- [ ] Final UI pass (copy, spacing, empty states)
-
-**Done when**
-- [ ] A new user can set up TankLog in < 10 minutes
-- [ ] MVP checklist (above) is complete
+- [x] An agent can implement v2 from specs + data model without guessing the schema
 
 ---
 
-### Post‑MVP backlog (pick later)
-- Alerts for dangerous trends (simple heuristics)
-- KPI stability score per parameter
-- Background Web Push notifications (FCM/OneSignal/etc)
-- Read-only sharing mode (no-write scopes)
-- Offline-friendly cache (last known data)
-- Photo tagging (fish/coral) + growth tracking
+## Sprint 0 — Scaffold
+**Goal**: empty Nuxt app with Nuxt UI, supabase client stub, i18n, PWA, futuristic base theme.
+
+- [x] Branch `feature/v2` (greenfield wipe + `nuxi init --template ui`)
+- [x] Nuxt 4 + TypeScript + `@nuxt/ui`
+- [x] `@supabase/supabase-js` wired for client-only BYO use (`useSupabaseConfig` / `useSupabaseClient`)
+- [x] i18n it/en + PWA baseline
+- [x] Remove Google GIS / shadcn dependency from the v2 tree
+- [x] Landing + shell with modern/futuristic tokens (cyan HUD)
+
+**Done when**
+- [x] `npm run generate` works
+- [x] Language switch works (PWA manifest present; install prompt via module)
+- [x] No Google scripts required to load the shell
+
+---
+
+## Sprint 1 — BYO connect + Auth
+**Goal**: users can paste Supabase keys and sign up / sign in.
+
+- [x] Settings: Supabase URL + anon key (localStorage)
+- [x] `useAuth`: signUp / signIn / signOut / session restore
+- [x] Middleware: protect dashboard routes
+- [x] Login UI (Nuxt UI)
+
+**Done when**
+- [x] Login + logout work against a BYO project
+- [x] Unauthenticated users cannot open tank pages
+
+---
+
+## Sprint 2 — Schema health
+**Goal**: clear path if SQL was not applied.
+
+- [x] Copy/link to `schema.sql` + setup doc in UI (`/dashboard/setup`, `/tanklog-schema.sql`)
+- [x] Health check: `tanks` selectable under RLS (`useSchemaHealth`)
+- [x] Gate dashboard until healthy (except settings + setup)
+- [x] Explicit `GRANT`s in `schema.sql` for Data API when auto-expose is OFF
+
+**Done when**
+- [x] Missing schema shows actionable error, not a blank crash
+
+---
+
+## Sprint 3 — Tanks CRUD
+**Goal**: create and select tanks in Postgres.
+
+- [x] Create tank (seed default `parameter_ranges` by type)
+- [x] List + active tank selection
+- [x] Edit / delete tank
+
+**Done when**
+- [x] End-to-end tank create → appear in dashboard
+
+---
+
+## Sprint 4 — Water tests
+**Goal**: measurement-based logging.
+
+- [x] Create session → many `water_tests` rows / shared `test_group_id`
+- [x] List + detail
+- [x] Basic validation
+- [x] Parameters sourced from tank `parameter_ranges`
+
+**Done when**
+- [x] Submitting a multi-param form persists correct rows
+
+---
+
+## Sprint 5 — Ranges + charts
+**Goal**: trends and alerts.
+
+- [x] Read/edit `parameter_ranges`
+- [x] Out-of-range highlighting
+- [x] Parameter time-series charts (7/30/90)
+
+**Done when**
+- [x] Bad values are obvious; charts match stored measurements
+
+---
+
+## Sprint 6 — Events + Reminders
+**Goal**: interventions and due tasks.
+
+- [x] Events CRUD (tank + livestock targets)
+- [x] Reminders CRUD + upcoming/overdue
+- [x] Mark done → event + next_due advance
+- [x] Notification permission UX + in-app due list
+
+**Done when**
+- [x] A due reminder can notify while the app is open
+
+---
+
+## Sprint 7 — Livestock
+**Goal**: unified inventory.
+
+- [x] CRUD + filters by category
+- [x] Detail page with related activity
+
+**Done when**
+- [x] Livestock can be added and opened per tank
+
+---
+
+## Sprint 8 — Photos
+**Goal**: Storage-backed media.
+
+- [x] Upload to bucket `photos` + `photos` row
+- [x] Timeline + fullscreen + compare
+- [x] Signed URL display helper
+
+**Done when**
+- [x] Upload appears in timeline for that tank
+
+---
+
+## Sprint 9 — Migration wizard
+**Goal**: import v1 Google data once.
+
+- [x] Temporary Google OAuth (import only)
+- [x] Discover TankLog folder / per-tank sheets
+- [x] Map rows + upload Drive files → Storage
+- [x] Report ok/skip/error; disconnect Google
+
+**Done when**
+- [x] Wizard can import a sample v1 tank into Supabase (incl. photos when Drive files exist)
+
+---
+
+## Sprint 10 — Polish + MVP release
+**Goal**: onboarding under 10 minutes.
+
+- [x] Onboarding wizard (create project → SQL → keys → account)
+- [x] Privacy page (BYO Supabase)
+- [x] Export JSON
+- [x] Final UI pass (copy, empty states, spacing)
+- [x] Deploy static site (GitHub Pages workflow + `npm run generate`)
+
+**Done when**
+- [x] New user can set up TankLog without Google
+- [x] MVP checklist above is complete
+
+---
+
+### Post‑MVP shipped
+- [x] Background Web Push (BYO OneSignal App ID + optional Cloudflare scheduling proxy; see `docs/onesignal.md`). In-app browser `Notification` remains the MVP baseline when OneSignal is off.
+- [x] Equipment UI (`equipment` table + tank subnav)
+- [x] Stability KPIs / dangerous-trend alerts (client-side on tank overview)
+- [x] Quiet hours (Settings) + reminder snooze (+1h / +1d); OneSignal schedule clamped outside quiet window
+- [x] Offline last-known cache (IndexedDB) for tank overview bundle
+- [x] Photo tags (`photos.tags`) + livestock growth oldest/newest compare
+- [x] Share snapshot: JSON + HTML download from Settings (no public link)
+- [x] Water-test parameter wait countdown (modal presets, sound, Notification / optional OneSignal)
+
+### Post‑MVP backlog
+- True public read-only sharing (anonymous RLS / signed share links) — deferred; conflicts with simple BYO RLS
+- Offline mutation queue / full offline sync
+
+### Legacy note
+v1 Google sprints (Sheets/Drive) are superseded by this board. Keep `docs/schema_sheets.md` only for migration mapping.

@@ -3,6 +3,7 @@
 TankLog is a static frontend app. **OneSignal’s REST API does not allow browser CORS**, so scheduling notifications (`send_after`) needs a small server-side proxy.
 
 This Cloudflare Worker:
+
 - Adds the OneSignal **App API key** server-side (kept secret in worker env)
 - Adds proper **CORS** headers for your TankLog origin
 - Optionally enforces a shared **proxy key**
@@ -12,7 +13,7 @@ This Cloudflare Worker:
 
 ## Setup
 
-1) Install Wrangler and create a worker
+1. Install Wrangler and create a worker
 
 ```bash
 npm i -g wrangler
@@ -20,29 +21,18 @@ wrangler login
 wrangler init tanklog-onesignal-proxy
 ```
 
-2) Copy `src/index.ts` from this repo into your worker project.
+2. Copy `src/index.ts` from this folder into your worker project.
 
-3) Configure secrets / vars
-
-Set the OneSignal App API key (secret):
+3. Configure secrets / vars
 
 ```bash
 wrangler secret put ONESIGNAL_APP_API_KEY
-```
-
-Set allowed origin (your TankLog origin):
-
-```bash
-wrangler secret put ALLOWED_ORIGIN
-```
-
-Optional: set a proxy key (shared secret required by the worker):
-
-```bash
+wrangler secret put ALLOWED_ORIGIN   # your TankLog origin, e.g. https://user.github.io
+# optional:
 wrangler secret put PROXY_KEY
 ```
 
-4) Deploy
+4. Deploy
 
 ```bash
 wrangler deploy
@@ -50,13 +40,13 @@ wrangler deploy
 
 ## Configure TankLog
 
-TankLog → **Dashboard → Settings → Notifications (OneSignal)**:
+Dashboard → Settings → Notifications (OneSignal):
+
 - **App ID**: from OneSignal
-- **Scheduling proxy URL**: your deployed worker URL (e.g. `https://tanklog-onesignal-proxy.<account>.workers.dev`)
+- **Scheduling proxy URL**: your deployed worker URL
 - **Proxy key**: only if you set `PROXY_KEY` in the worker
 
 ## Notes
 
-- This is optional. You can still use OneSignal Web Push subscriptions without scheduling.
-- If you change the worker URL, update the proxy URL in TankLog settings.
-
+- Optional: you can subscribe with the OneSignal Web SDK without the proxy.
+- Scheduling reminders requires the proxy URL.

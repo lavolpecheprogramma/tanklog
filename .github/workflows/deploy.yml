@@ -1,14 +1,16 @@
-name: Deploy to GitHub Pages
+name: deploy
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
       - main
-  workflow_dispatch:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: pages
@@ -24,30 +26,26 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
-      - name: Install
+      - name: Install dependencies
         run: npm ci
 
-      - name: Build (Nuxt) for GitHub Pages
+      - name: Generate
         run: npm run generate
         env:
-          # If deploying to a project page (<owner>.github.io/<repo>/), assets must be served from /<repo>/.
-          # If deploying to a user/organization page (<owner>.github.io/), this should be "/".
-          NUXT_APP_BASE_URL: ${{ secrets.NUXT_APP_BASE_URL }}
+          # Optional repo Variable for GitHub project pages, e.g. /tanklog/
+          NUXT_APP_BASE_URL: ${{ vars.NUXT_APP_BASE_URL }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./.output/public
+          path: .output/public
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -55,4 +53,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-

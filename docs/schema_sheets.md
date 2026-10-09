@@ -1,11 +1,14 @@
-# TankLog — Storage architecture (Google Sheets + Google Drive)
+# TankLog — Storage architecture (Google Sheets + Google Drive) — LEGACY (v1)
 
-This document defines the **full, unambiguous data storage architecture** for **TankLog**.
+> **v2 notice:** TankLog v2 storage is defined in [`docs/v2-data-model.md`](v2-data-model.md) and [`supabase/schema.sql`](../supabase/schema.sql).  
+> This document is kept only as a **migration reference** for importing existing Google Sheets/Drive data.
+
+This document defines the **full, unambiguous data storage architecture** for **TankLog v1**.
 
 ## Source of truth
 
-This document is the **source of truth** for TankLog storage.
-If any other document or implementation disagrees with it, it must be updated to match this document.
+For **v1 / migration mapping only**, this document describes the Google Sheets + Drive layout.
+For **v2 implementation**, prefer `docs/v2-data-model.md`.
 
 TankLog is **frontend-only**: there is no custom backend and no proprietary database.
 All persistent data lives in the user’s own Google account:

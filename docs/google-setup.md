@@ -1,58 +1,45 @@
-# Google setup (Sprint 3)
+# Google setup (migration only — v2)
 
-TankLog is **frontend-only** and uses **Google Identity Services (GIS)** to get an OAuth access token in the browser.
+TankLog v2 does **not** use Google for daily CRUD. Google OAuth is only for the optional **migration wizard** (`/dashboard/migrate`) that imports v1 Sheets/Drive data into your BYO Supabase project.
+
+Canonical storage: [`docs/v2-data-model.md`](v2-data-model.md) §9.
 
 ## 1) Create a Google Cloud project
 
-- Go to Google Cloud Console
-- Create a new project (or pick an existing one)
+- Google Cloud Console → create or pick a project
 
-## 2) Configure OAuth consent screen
+## 2) OAuth consent screen
 
 - APIs & Services → OAuth consent screen
-- User type: **External** (for personal use you can keep the app in *Testing*)
-- Add yourself as a **Test user**
-- Add these scopes (you can add more later):
-  - `openid`
-  - `email`
-  - `profile`
-  - `https://www.googleapis.com/auth/spreadsheets`
-  - `https://www.googleapis.com/auth/drive.metadata.readonly`
-  - `https://www.googleapis.com/auth/drive.file`
+- User type: **External** (Testing is fine for personal use; add yourself as test user)
+- Scopes for migration (read-only):
+  - `https://www.googleapis.com/auth/spreadsheets.readonly`
+  - `https://www.googleapis.com/auth/drive.readonly`
 
-## 3) Enable Google APIs
+## 3) Enable APIs
 
-- APIs & Services → Library
-- Enable:
-  - **Google Sheets API**
-  - **Google Drive API**
+- Google Sheets API
+- Google Drive API
 
-## 4) Create OAuth Client ID (Web)
+## 4) OAuth Client ID (Web)
 
-- APIs & Services → Credentials → Create Credentials → **OAuth client ID**
-- Application type: **Web application**
+- Credentials → Create → **OAuth client ID** → Web application
 - Authorized JavaScript origins:
-  - Local dev: `http://localhost:3000`
-  - Production: your site origin (example GitHub Pages: `https://<user>.github.io`)
+  - Local: `http://localhost:3000`
+  - Production: your static site origin
 
 Copy the **Client ID**.
 
-## 5) Configure TankLog
+## 5) Use in TankLog
 
-TankLog does **not** ship with a default Google OAuth Client ID.
-Each user must provide their own Client ID (“Bring Your Own Client ID”).
+1. Sign in to TankLog with your Supabase account (schema applied)
+2. Settings → **Open migration wizard**
+3. Paste the Client ID (stored only on this device under a migrate-specific key)
+4. Connect Google → pick `TankLog` folder → select tanks → import
+5. Review the report, then **Disconnect Google & clear Client ID**
 
-- Open TankLog
-- Go to **Login**
-- Paste your **Client ID** when prompted and save it
-- Then click **Sign in with Google**
+Do not leave a Google Client ID configured after import.
 
-The Client ID is stored **locally on your device** (localStorage) and can be edited or removed from the app settings.
+## Legacy note
 
-## Notes
-
-- TankLog stores the session token in **session storage** (cleared when the tab is closed).
-- Requested scopes:
-  - Sheets: full spreadsheet access (needed to read/write your TankLog sheet)
-  - Drive: `drive.metadata.readonly` (to discover folders/files) + `drive.file` (to create/upload TankLog files)
-
+v1 used GIS + Drive/Sheets for all persistence. That path is removed from the app tree; this doc remains for migration setup only.

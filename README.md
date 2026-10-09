@@ -1,70 +1,49 @@
-# TankLog
+# TankLog v2
 
-Frontend-only aquarium logbook + trends dashboard.
+Frontend-only aquarium logbook (Nuxt + Nuxt UI + BYO Supabase).
 
-**Constraints** (source of truth: `project.md` / `roadmap.md`):
-- Frontend-only, **SSG**, **PWA**
-- Free stack only
-- **User-controlled storage** (Google Sheets + Google Drive)
+## Specs
 
-## Local dev
+- [`docs/v2-specs.md`](docs/v2-specs.md) — product / engineering brief
+- [`docs/v2-data-model.md`](docs/v2-data-model.md) — Postgres + Storage model
+- [`supabase/schema.sql`](supabase/schema.sql) — SQL to run in your Supabase project
+- [`docs/supabase-setup.md`](docs/supabase-setup.md) — BYO setup guide
+- [`docs/google-setup.md`](docs/google-setup.md) — optional v1 migration OAuth
+- [`docs/onesignal.md`](docs/onesignal.md) — optional BYO web push + scheduling proxy
+- [`project.md`](project.md) · [`roadmap.md`](roadmap.md) (MVP + post-MVP shipped)
+
+## Stack
+
+- Nuxt 4 (static / `ssr: false`) + **Nuxt UI**
+- `@supabase/supabase-js` (BYO URL + anon key — not `@nuxtjs/supabase`)
+- `@nuxtjs/i18n` (it/en)
+- `@vite-pwa/nuxt`
+
+## Develop
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Google login (Sprint 3)
-
-TankLog uses Google OAuth (client-side) via Google Identity Services.
-
-- TankLog does **not** ship with a default OAuth Client ID.
-- Each user provides their own Google OAuth **Client ID** in the Login screen (stored locally on the device).
-- Setup guide: `docs/google-setup.md`
-- See `docs/environment.md` for build-time environment variables (for example `NUXT_APP_BASE_URL`)
-
-## Static build (SSG)
-
 ```bash
-npm run generate
+npm run generate   # static output → .output/public
 ```
 
-Static output is generated in `./.output/public` and can be deployed to any static host.
+## First-time setup (in the app)
 
-## PWA
-
-TankLog uses `@vite-pwa/nuxt` to generate:
-- `manifest.webmanifest`
-- `sw.js` (Workbox-based service worker)
-
-After a successful first visit, the app shell can load offline (best-effort, browser-dependent).
+1. Open `/onboarding`
+2. Create a Supabase project → apply `schema.sql` → paste URL + anon key → sign up
+3. Create a tank (or import from Google v1 via Settings → migrate)
 
 ## Deploy
 
-### GitHub Pages
-- A workflow is included at `.github/workflows/deploy.yml`.
-- Enable GitHub Pages in your repo settings: **Settings → Pages → Build and deployment: GitHub Actions**.
-- Pushing to `main` builds and deploys `./.output/public`.
-- The workflow sets `NUXT_APP_BASE_URL` automatically for:
-  - User/Org pages (`<owner>.github.io`) → `/`
-  - Project pages (`/<repo>/`) → `/<repo>/`
+Static hosting (GitHub Pages, Cloudflare Pages, Netlify, …) of `.output/public`.
 
-### Netlify / Cloudflare Pages
-- **Build command**: `npm run generate`
-- **Publish directory**: `.output/public`
+- GitHub Pages workflow: [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) (runs on `main` + `workflow_dispatch`)
+- Enable **Settings → Pages → GitHub Actions**
+- If the site is under a repo subpath, set Actions variable `NUXT_APP_BASE_URL` to `/<repo>/`
 
-## Open source
+## Branch
 
-TankLog is open source and provided **as-is**. It is not affiliated with Google.
-
-## Contributing
-
-See `CONTRIBUTING.md`.
-
-## Security
-
-See `SECURITY.md`.
-
-## License
-
-MIT — see `LICENSE`.
+Active greenfield work: `feature/v2`.

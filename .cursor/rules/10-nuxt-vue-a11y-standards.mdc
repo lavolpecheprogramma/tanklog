@@ -29,9 +29,13 @@ globs:
   - No heavy logic inside templates; move to computed/composables.
   - Always provide stable `:key` for `v-for`.
   - Avoid `v-if` and `v-for` on the same element.
-- Data access rules:
-  - Put Google API calls in composables (e.g. `useGoogleSheets`, `useGoogleDrive`, `useAuth`).
+- Data access rules (v2):
+  - Put Supabase calls in composables (e.g. `useSupabaseClient`, `useAuth`, `useTanks`, entity CRUD).
+  - Never ship the Supabase `service_role` key to the client; BYO URL + anon key only.
+  - Google APIs are allowed only inside an isolated migration module (`useMigrateFromGoogle`), not normal CRUD.
   - Avoid hidden side effects; prefer explicit actions and typed return values.
+- UI kit (v2):
+  - Prefer **Nuxt UI** components (`@nuxt/ui`) over bespoke primitives or legacy shadcn-vue.
 - Components:
   - Prefer small, focused components; split when they grow too large.
   - Use `defineProps`/`defineEmits` with proper typing; avoid `any`.
