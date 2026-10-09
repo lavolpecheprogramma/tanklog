@@ -209,9 +209,13 @@
 - [x] Share snapshot: JSON + HTML download from Settings (no public link)
 - [x] Water-test parameter wait countdown (modal presets, sound, Notification / optional OneSignal)
 
+### Post‑MVP shipped (continued)
+- [x] Bacterial protocol wizard on Reminders (BEA Aequilibrium Maturazione / Risoluzione / Mantenimento → dosing reminders from start date + volume)
+
 ### Post‑MVP backlog
 - True public read-only sharing (anonymous RLS / signed share links) — deferred; conflicts with simple BYO RLS
 - Offline mutation queue / full offline sync
+- Additional protocol templates beyond BEA Aequilibrium
 
 ### Legacy note
 v1 Google sprints (Sheets/Drive) are superseded by this board. Keep `docs/schema_sheets.md` only for migration mapping.

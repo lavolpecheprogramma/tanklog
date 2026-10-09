@@ -556,6 +556,47 @@
       "invalidDate": "Invalid due date.",
       "invalidRepeat": "Repeat interval must be a positive whole number.",
       "invalidQuantity": "Invalid quantity."
+    },
+    "protocol": {
+      "open": "Bacterial protocol",
+      "title": "Bacterial protocol",
+      "subtitle": "Pick a protocol and start date to generate dosing reminders.",
+      "protocol": "Protocol",
+      "calendar": "Calendar",
+      "startAt": "Start date and time",
+      "volume": "Tank volume (liters)",
+      "saveVolume": "Save this volume on the tank",
+      "calendarPreview": "Calendar overview",
+      "doseList": "Scheduled doses",
+      "doseSummary": "Dose: {quantity} {unit} per product",
+      "unitCapsule": "capsule",
+      "week": "Week {n}",
+      "reviewReminder": "Pause ended — review next cycle",
+      "reviewReminderTitle": "BEA Aequilibrium · pause ended",
+      "doseNotes": "Dilute capsule in 100 ml aquarium water; dose in high-flow area (sump). Skimmer off ~30 min.",
+      "reviewNotes": "BEA pause week ended — evaluate whether to repeat the cycle or switch calendar.",
+      "previewHint": "Set a start date and liters to preview the calendar.",
+      "apply": "Create reminders",
+      "created": "{count} reminders created.",
+      "partialFail": "{failed} failed — check the list and retry if needed.",
+      "protocols": {
+        "beaAequilibrium": "BEA Aequilibrium"
+      },
+      "variants": {
+        "maturazione": "Cycling",
+        "risoluzione": "Remediation",
+        "mantenimento": "Maintenance"
+      },
+      "variantHelp": {
+        "maturazione": "For newly set up tanks or cycling / tank moves.",
+        "risoluzione": "For medium/high nutrients, algae, films, detritus, low redox.",
+        "mantenimento": "For low/null nutrients and a stable system."
+      },
+      "errors": {
+        "invalidDate": "Invalid start date.",
+        "invalidVolume": "Enter tank volume in liters (positive number).",
+        "createFailed": "Could not create protocol reminders."
+      }
     }
   },
   "photos": {

@@ -141,6 +141,7 @@ See data-model §9 and `docs/supabase-setup.md`. Google is temporary and removed
 - [x] Reminders CRUD; upcoming / overdue
 - [x] Mark done → optional event + advance `next_due`
 - [x] Web Notifications best-effort while app is open
+- [x] Bacterial protocol wizard (BEA Aequilibrium calendars → one-shot dosing reminders from start date + tank volume)
 
 ### Livestock
 
@@ -200,6 +201,7 @@ Replace Google modules with Supabase-backed equivalents. Suggested surface:
 | `useParameterRanges` | list/save; seed defaults |
 | `useEvents` | CRUD |
 | `useReminders` | CRUD + mark done |
+| `useProtocolWizard` | Expand bacterial protocol templates → bulk create reminders |
 | `useLivestock` | CRUD |
 | `usePhotos` | upload/list; signed URL helper |
 | `useMigrateFromGoogle` | one-shot import (isolated module) |

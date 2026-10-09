@@ -25,6 +25,7 @@ const loadError = ref<string | null>(null)
 const formError = ref<string | null>(null)
 const busy = ref(false)
 const formOpen = ref(false)
+const protocolOpen = ref(false)
 const editingId = ref<string | null>(null)
 const actionId = ref<string | null>(null)
 
@@ -346,14 +347,33 @@ onBeforeUnmount(() => {
           {{ tank ? tank.name : t('common.loading') }}
         </p>
       </div>
-      <UButton
-        color="primary"
-        icon="i-lucide-plus"
-        @click="openCreate"
-      >
-        {{ t('reminders.new') }}
-      </UButton>
+      <div class="flex flex-wrap gap-2">
+        <UButton
+          color="neutral"
+          variant="soft"
+          icon="i-lucide-flask-conical"
+          :disabled="!tank"
+          @click="protocolOpen = true"
+        >
+          {{ t('reminders.protocol.open') }}
+        </UButton>
+        <UButton
+          color="primary"
+          icon="i-lucide-plus"
+          @click="openCreate"
+        >
+          {{ t('reminders.new') }}
+        </UButton>
+      </div>
     </div>
+
+    <ProtocolWizard
+      v-if="tank"
+      v-model="protocolOpen"
+      :tank-id="tank.id"
+      :volume-liters="tank.volumeLiters"
+      @applied="load"
+    />
 
     <TankSubnav
       v-if="tank"

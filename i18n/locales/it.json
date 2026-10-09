@@ -556,6 +556,47 @@
       "invalidDate": "Data di scadenza non valida.",
       "invalidRepeat": "L’intervallo di ripetizione deve essere un intero positivo.",
       "invalidQuantity": "Quantità non valida."
+    },
+    "protocol": {
+      "open": "Protocollo batterico",
+      "title": "Protocollo batterico",
+      "subtitle": "Scegli un protocollo e una data di inizio per generare i reminder di dosaggio.",
+      "protocol": "Protocollo",
+      "calendar": "Calendario",
+      "startAt": "Data e ora di inizio",
+      "volume": "Volume vasca (litri)",
+      "saveVolume": "Salva questo volume sulla vasca",
+      "calendarPreview": "Riepilogo calendario",
+      "doseList": "Dosaggi previsti",
+      "doseSummary": "Dosaggio: {quantity} {unit} per prodotto",
+      "unitCapsule": "capsula",
+      "week": "Settimana {n}",
+      "reviewReminder": "Fine pausa — valuta ripresa",
+      "reviewReminderTitle": "BEA Aequilibrium · fine pausa",
+      "doseNotes": "Diluire la capsula in 100 ml di acqua della vasca; dosare in zona di forte movimento (sump). Skimmer spento ~30 min.",
+      "reviewNotes": "Fine della settimana di pausa BEA — valuta se ripetere il ciclo o cambiare calendario.",
+      "previewHint": "Imposta data di inizio e litri per vedere il calendario.",
+      "apply": "Crea reminder",
+      "created": "{count} reminder creati.",
+      "partialFail": "{failed} non creati — controlla la lista e riprova se serve.",
+      "protocols": {
+        "beaAequilibrium": "BEA Aequilibrium"
+      },
+      "variants": {
+        "maturazione": "Maturazione",
+        "risoluzione": "Risoluzione",
+        "mantenimento": "Mantenimento"
+      },
+      "variantHelp": {
+        "maturazione": "Per vasche appena allestite o in maturazione/trasferimento.",
+        "risoluzione": "Per nutrienti medio/alti, alghe, patine, detrito, redox basso.",
+        "mantenimento": "Per nutrienti bassi/nulli e vasca stabile."
+      },
+      "errors": {
+        "invalidDate": "Data di inizio non valida.",
+        "invalidVolume": "Inserisci i litri della vasca (numero positivo).",
+        "createFailed": "Impossibile creare i reminder del protocollo."
+      }
     }
   },
   "photos": {
