@@ -81,6 +81,23 @@
     "signOut": "Esci",
     "checkEmail": "Controlla la email per confermare l’account, poi accedi.",
     "firstTime": "Prima volta? Setup guidato",
+    "reset": {
+      "forgot": "Password dimenticata",
+      "requestBody": "Inserisci l’email dell’account. Se esiste nel tuo progetto Supabase, riceverai un link di reset.",
+      "sendEmail": "Invia link di reset",
+      "emailSent": "Se l’email esiste, abbiamo inviato un link di reset. Controlla inbox (e spam).",
+      "title": "Scegli una nuova password",
+      "subtitle": "Apri il link di recupero dalla email, poi imposta una nuova password.",
+      "checking": "Verifica sessione di recupero…",
+      "sessionMissing": "Questo link di reset manca, è scaduto o è già stato usato.",
+      "requestAgain": "Richiedi un nuovo link",
+      "save": "Salva nuova password",
+      "updated": "Password aggiornata. Sei autenticato.",
+      "useSettings": "Sei già autenticato. Cambia la password dalle Impostazioni.",
+      "errors": {
+        "sessionMissing": "Apri il link di reset dalla email su questo dispositivo, poi riprova."
+      }
+    },
     "errors": {
       "configRequired": "Configura prima URL e anon key di Supabase.",
       "invalidUrl": "URL Supabase non valido."
@@ -235,6 +252,23 @@
     "exportHtmlCta": "Scarica snapshot HTML",
     "exportHtmlOk": "Snapshot HTML scaricato.",
     "exportHtmlBody": "Riepilogo autonomo da condividere offline — non è un link pubblico. I file foto non sono incorporati.",
+    "password": {
+      "title": "Password account",
+      "body": "Cambia la password del tuo account TankLog in questo progetto Supabase.",
+      "current": "Password attuale",
+      "next": "Nuova password",
+      "confirm": "Conferma nuova password",
+      "save": "Aggiorna password",
+      "saved": "Password aggiornata.",
+      "errors": {
+        "currentRequired": "Inserisci la password attuale.",
+        "currentIncorrect": "La password attuale non è corretta.",
+        "tooShort": "La nuova password deve avere almeno 6 caratteri.",
+        "mismatch": "Nuova password e conferma non coincidono.",
+        "sameAsCurrent": "La nuova password deve essere diversa da quella attuale.",
+        "notSignedIn": "Devi essere autenticato per cambiare la password."
+      }
+    },
     "quiet": {
       "title": "Ore silenziose",
       "body": "Sopprime le notifiche browser in-app e ritarda le push OneSignal programmate che cadono in questa fascia oraria locale.",

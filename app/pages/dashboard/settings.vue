@@ -30,6 +30,13 @@ const oneSignalMessage = ref<string | null>(null)
 const oneSignalError = ref<string | null>(null)
 const oneSignalBusy = ref(false)
 
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const passwordMessage = ref<string | null>(null)
+const passwordError = ref<string | null>(null)
+const passwordBusy = ref(false)
+
 const oneSignalStatusLabel = computed(() => {
   if (!oneSignalConfig.isEnabled.value) return t('settings.oneSignal.status.off')
   if (oneSignal.status.value === 'error') return t('settings.oneSignal.status.error')
@@ -104,6 +111,52 @@ async function logout() {
   await auth.signOut()
   health.status.value = 'unknown'
   await navigateTo('/dashboard/login')
+}
+
+function mapPasswordError(raw: string): string {
+  const lower = raw.toLowerCase()
+  if (lower.includes('current password is incorrect') || lower.includes('invalid login')) {
+    return t('settings.password.errors.currentIncorrect')
+  }
+  if (lower.includes('at least 6')) return t('settings.password.errors.tooShort')
+  if (lower.includes('must be different')) return t('settings.password.errors.sameAsCurrent')
+  if (lower.includes('not signed in')) return t('settings.password.errors.notSignedIn')
+  return raw
+}
+
+async function changePassword() {
+  passwordMessage.value = null
+  passwordError.value = null
+
+  if (!currentPassword.value) {
+    passwordError.value = t('settings.password.errors.currentRequired')
+    return
+  }
+  if (newPassword.value.length < 6) {
+    passwordError.value = t('settings.password.errors.tooShort')
+    return
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    passwordError.value = t('settings.password.errors.mismatch')
+    return
+  }
+  if (newPassword.value === currentPassword.value) {
+    passwordError.value = t('settings.password.errors.sameAsCurrent')
+    return
+  }
+
+  passwordBusy.value = true
+  try {
+    await auth.updatePassword(currentPassword.value, newPassword.value)
+    currentPassword.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
+    passwordMessage.value = t('settings.password.saved')
+  } catch (e) {
+    passwordError.value = mapPasswordError(e instanceof Error ? e.message : String(e))
+  } finally {
+    passwordBusy.value = false
+  }
 }
 
 async function exportJson() {
@@ -236,6 +289,76 @@ async function disableOneSignal() {
         role="alert"
       >
         {{ error }}
+      </p>
+    </form>
+
+    <form
+      class="mt-10 space-y-4 rounded-xl border border-cyan-500/15 bg-slate-900/40 p-4"
+      @submit.prevent="changePassword"
+    >
+      <div>
+        <p class="font-medium text-slate-100">
+          {{ t('settings.password.title') }}
+        </p>
+        <p class="mt-2 text-sm text-slate-400">
+          {{ t('settings.password.body') }}
+        </p>
+        <p
+          v-if="auth.user.value?.email"
+          class="mt-2 text-sm text-cyan-200/80"
+        >
+          {{ t('dashboard.signedInAs', { email: auth.user.value.email }) }}
+        </p>
+      </div>
+
+      <UFormField :label="t('settings.password.current')">
+        <UInput
+          v-model="currentPassword"
+          type="password"
+          class="w-full"
+          autocomplete="current-password"
+        />
+      </UFormField>
+      <UFormField :label="t('settings.password.next')">
+        <UInput
+          v-model="newPassword"
+          type="password"
+          class="w-full"
+          autocomplete="new-password"
+        />
+      </UFormField>
+      <UFormField :label="t('settings.password.confirm')">
+        <UInput
+          v-model="confirmPassword"
+          type="password"
+          class="w-full"
+          autocomplete="new-password"
+        />
+      </UFormField>
+
+      <UButton
+        type="submit"
+        color="primary"
+        variant="soft"
+        size="sm"
+        :loading="passwordBusy || auth.busy.value"
+      >
+        {{ t('settings.password.save') }}
+      </UButton>
+
+      <p
+        v-if="passwordMessage"
+        class="text-sm text-cyan-400"
+        role="status"
+      >
+        {{ passwordMessage }}
+      </p>
+      <p
+        v-if="passwordError"
+        class="text-sm text-red-400"
+        role="alert"
+      >
+        {{ passwordError }}
       </p>
     </form>
 
