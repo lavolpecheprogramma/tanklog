@@ -5,6 +5,16 @@ definePageMeta({
 
 const { t } = useI18n()
 const auth = useAuth()
+const site = useSiteMeta()
+
+useSeoMeta({
+  title: () => t('app.name'),
+  description: () => t('app.seoDescription'),
+  ogTitle: () => `${t('app.name')} — ${t('landing.title')}`,
+  ogDescription: () => t('landing.subtitle'),
+  ogImage: () => site.ogImage.value,
+  twitterCard: 'summary_large_image'
+})
 </script>
 
 <template>

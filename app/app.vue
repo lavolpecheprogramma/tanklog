@@ -2,20 +2,58 @@
 const { t, locale, setLocale } = useI18n()
 const auth = useAuth()
 const schema = useSchemaHealth()
+const site = useSiteMeta()
 
 useHead({
-  meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1' }],
   htmlAttrs: {
     lang: locale
-  }
+  },
+  titleTemplate: (titleChunk) => {
+    const name = t('app.name')
+    if (!titleChunk || titleChunk === name) return name
+    return `${titleChunk} · ${name}`
+  },
+  link: () =>
+    site.siteUrl.value
+      ? [{ rel: 'canonical', href: site.absoluteUrl('') }]
+      : [],
+  script: () => [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: t('app.name'),
+        description: t('app.seoDescription'),
+        ...(site.siteUrl.value ? { url: site.absoluteUrl('') } : {}),
+        applicationCategory: 'LifestyleApplication',
+        operatingSystem: 'Web',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD'
+        },
+        image: site.ogImage.value
+      })
+    }
+  ]
 })
 
 useSeoMeta({
   title: () => t('app.name'),
-  description: () => t('app.tagline'),
+  description: () => t('app.seoDescription'),
   ogTitle: () => t('app.name'),
-  ogDescription: () => t('app.tagline'),
-  twitterCard: 'summary'
+  ogDescription: () => t('app.seoDescription'),
+  ogImage: () => site.ogImage.value,
+  ogImageAlt: () => `${t('app.name')} — ${t('app.tagline')}`,
+  ogType: 'website',
+  ogSiteName: () => t('app.name'),
+  ogLocale: () => (locale.value === 'it' ? 'it_IT' : 'en_US'),
+  twitterCard: 'summary_large_image',
+  twitterTitle: () => t('app.name'),
+  twitterDescription: () => t('app.seoDescription'),
+  twitterImage: () => site.ogImage.value,
+  twitterImageAlt: () => `${t('app.name')} — ${t('app.tagline')}`
 })
 
 watch(

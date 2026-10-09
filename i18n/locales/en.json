@@ -1,7 +1,8 @@
 {
   "app": {
     "name": "TankLog",
-    "tagline": "Your aquarium technical log."
+    "tagline": "Your aquarium technical log.",
+    "seoDescription": "Track water tests, trends, events, reminders, and tank photos. TankLog keeps your aquarium data in your own Supabase project."
   },
   "nav": {
     "home": "Home",

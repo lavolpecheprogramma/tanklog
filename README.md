@@ -43,6 +43,7 @@ Static hosting (GitHub Pages, Cloudflare Pages, Netlify, …) of `.output/public
 - GitHub Pages workflow: [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) (runs on `main` + `workflow_dispatch`)
 - Enable **Settings → Pages → GitHub Actions**
 - If the site is under a repo subpath, set Actions variable `NUXT_APP_BASE_URL` to `/<repo>/`
+- For correct social share previews, set Actions variable `NUXT_PUBLIC_SITE_URL` to the public origin only (e.g. `https://you.github.io`)
 
 ## Branch
 

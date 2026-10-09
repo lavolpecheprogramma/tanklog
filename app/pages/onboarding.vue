@@ -7,6 +7,16 @@ const { t } = useI18n()
 const config = useSupabaseConfig()
 const auth = useAuth()
 const health = useSchemaHealth()
+const site = useSiteMeta()
+
+useSeoMeta({
+  title: () => t('onboarding.title'),
+  description: () => t('onboarding.subtitle'),
+  ogTitle: () => t('onboarding.title'),
+  ogDescription: () => t('onboarding.subtitle'),
+  ogImage: () => site.ogImage.value,
+  twitterCard: 'summary_large_image'
+})
 
 const step = ref(1)
 const projectUrl = ref(config.url.value ?? '')

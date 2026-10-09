@@ -1,7 +1,8 @@
 {
   "app": {
     "name": "TankLog",
-    "tagline": "Il log tecnico della tua vasca."
+    "tagline": "Il log tecnico della tua vasca.",
+    "seoDescription": "Registra test acqua, trend, eventi, reminder e foto della vasca. TankLog tiene i dati nel tuo progetto Supabase."
   },
   "nav": {
     "home": "Home",
