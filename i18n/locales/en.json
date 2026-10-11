@@ -229,6 +229,7 @@
       "cancelAria": "Cancel wait timer for {parameter}",
       "readyTitle": "{parameter} ready",
       "readyBody": "Time’s up — you can read {parameter} now.",
+      "stopAlarm": "Stop alarm",
       "invalidDuration": "Enter a wait time of at least a few seconds."
     },
     "errors": {

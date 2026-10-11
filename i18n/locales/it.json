@@ -229,6 +229,7 @@
       "cancelAria": "Annulla timer di attesa per {parameter}",
       "readyTitle": "{parameter} pronto",
       "readyBody": "Tempo scaduto — puoi leggere {parameter}.",
+      "stopAlarm": "Ferma sveglia",
       "invalidDuration": "Inserisci un tempo di attesa di almeno alcuni secondi."
     },
     "errors": {

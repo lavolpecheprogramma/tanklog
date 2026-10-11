@@ -8,6 +8,8 @@ export type ParameterTimerState = {
 }
 
 const STORAGE_KEY = 'tanklog.parameterTimers.v1'
+/** Keep ringing until stop or this cap (toast stays for the same window). */
+const ALARM_MAX_MS = 45_000
 
 function loadPersisted(): Record<string, ParameterTimerState> {
   if (!import.meta.client) return {}
@@ -35,27 +37,105 @@ function persist(map: Record<string, ParameterTimerState>) {
   }
 }
 
-function playBeep() {
-  if (!import.meta.client) return
+function getAudioContextCtor(): (typeof AudioContext) | null {
+  if (!import.meta.client) return null
+  return window.AudioContext
+    || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+    || null
+}
+
+let sharedAudioCtx: AudioContext | null = null
+
+async function ensureAudioContext(): Promise<AudioContext | null> {
+  const Ctx = getAudioContextCtor()
+  if (!Ctx) return null
   try {
-    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
-    if (!Ctx) return
-    const ctx = new Ctx()
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.type = 'sine'
-    osc.frequency.value = 880
-    gain.gain.value = 0.08
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-    osc.start()
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.7)
-    osc.stop(ctx.currentTime + 0.75)
-    void ctx.resume()
-    window.setTimeout(() => void ctx.close(), 1000)
+    if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+      sharedAudioCtx = new Ctx()
+    }
+    if (sharedAudioCtx.state === 'suspended') {
+      await sharedAudioCtx.resume()
+    }
+    return sharedAudioCtx
+  } catch {
+    return null
+  }
+}
+
+function playTone(ctx: AudioContext, frequency: number, durationSec: number, when = 0) {
+  const osc = ctx.createOscillator()
+  const gain = ctx.createGain()
+  osc.type = 'square'
+  osc.frequency.value = frequency
+  gain.gain.value = 0.0001
+  osc.connect(gain)
+  gain.connect(ctx.destination)
+  const startAt = ctx.currentTime + when
+  gain.gain.setValueAtTime(0.0001, startAt)
+  gain.gain.exponentialRampToValueAtTime(0.07, startAt + 0.02)
+  gain.gain.exponentialRampToValueAtTime(0.0001, startAt + durationSec)
+  osc.start(startAt)
+  osc.stop(startAt + durationSec + 0.02)
+}
+
+type AlarmController = {
+  stop: () => void
+}
+
+let activeAlarm: AlarmController | null = null
+
+function stopAlarmAudio() {
+  const current = activeAlarm
+  activeAlarm = null
+  current?.stop()
+}
+
+async function startAlarmLoop(onAutoStop?: () => void): Promise<boolean> {
+  if (!import.meta.client) return false
+  stopAlarmAudio()
+
+  const maybeCtx = await ensureAudioContext()
+  if (!maybeCtx) return false
+  const ctx: AudioContext = maybeCtx
+
+  let stopped = false
+  let pulseTimer: number | null = null
+  let maxTimer: number | null = null
+
+  function stop() {
+    if (stopped) return
+    stopped = true
+    if (pulseTimer != null) window.clearTimeout(pulseTimer)
+    if (maxTimer != null) window.clearTimeout(maxTimer)
+    pulseTimer = null
+    maxTimer = null
+  }
+
+  function pulse() {
+    if (stopped) return
+    try {
+      if (ctx.state === 'suspended') void ctx.resume()
+      playTone(ctx, 880, 0.16, 0)
+      playTone(ctx, 660, 0.16, 0.2)
+    } catch {
+      // ignore
+    }
+    pulseTimer = window.setTimeout(pulse, 850) as unknown as number
+  }
+
+  activeAlarm = { stop }
+  maxTimer = window.setTimeout(() => {
+    stopAlarmAudio()
+    onAutoStop?.()
+  }, ALARM_MAX_MS) as unknown as number
+
+  try {
+    await ctx.resume()
   } catch {
     // ignore
   }
+  pulse()
+  return true
 }
 
 function formatRemaining(ms: number): string {
@@ -70,6 +150,8 @@ export function useParameterTimers() {
   const nowMs = useState<number>('tanklog.parameterTimers.now', () => Date.now())
   const hydrated = useState<boolean>('tanklog.parameterTimers.hydrated', () => false)
   const tickId = useState<number | null>('tanklog.parameterTimers.tickId', () => null)
+  const alarming = useState<boolean>('tanklog.parameterTimers.alarming', () => false)
+  const alarmToastId = useState<string | number | null>('tanklog.parameterTimers.alarmToastId', () => null)
 
   const { t } = useI18n()
   const toast = useToast()
@@ -89,6 +171,19 @@ export function useParameterTimers() {
 
   function save() {
     persist(timers.value)
+  }
+
+  function stopAlarm(options: { removeToast?: boolean } = {}) {
+    const { removeToast = true } = options
+    stopAlarmAudio()
+    alarming.value = false
+    if (removeToast && alarmToastId.value != null) {
+      const id = alarmToastId.value
+      alarmToastId.value = null
+      toast.remove(id)
+    } else if (!removeToast) {
+      alarmToastId.value = null
+    }
   }
 
   function ensureTick() {
@@ -143,14 +238,45 @@ export function useParameterTimers() {
   }
 
   async function onComplete(timer: ParameterTimerState) {
-    playBeep()
-    toast.add({
-      title: t('waterTests.timer.readyTitle', { parameter: timer.parameter }),
-      description: t('waterTests.timer.readyBody', { parameter: timer.parameter }),
-      color: 'success',
-      icon: 'i-lucide-alarm-clock'
+    const quiet = notifyPrefs.isQuietNow()
+    const ring = !quiet && await startAlarmLoop(() => {
+      stopAlarm()
     })
-    if (!notifyPrefs.isQuietNow()) {
+    alarming.value = ring
+
+    if (ring) {
+      // Replace previous alarm toast if another timer finished while ringing.
+      if (alarmToastId.value != null) toast.remove(alarmToastId.value)
+      const added = toast.add({
+        title: t('waterTests.timer.readyTitle', { parameter: timer.parameter }),
+        description: t('waterTests.timer.readyBody', { parameter: timer.parameter }),
+        color: 'warning',
+        icon: 'i-lucide-alarm-clock',
+        duration: ALARM_MAX_MS,
+        actions: [{
+          label: t('waterTests.timer.stopAlarm'),
+          color: 'neutral',
+          variant: 'solid',
+          icon: 'i-lucide-volume-x',
+          onClick: () => {
+            stopAlarm()
+          }
+        }],
+        'onUpdate:open': (open: boolean) => {
+          if (!open) stopAlarm({ removeToast: false })
+        }
+      })
+      alarmToastId.value = added.id
+    } else {
+      toast.add({
+        title: t('waterTests.timer.readyTitle', { parameter: timer.parameter }),
+        description: t('waterTests.timer.readyBody', { parameter: timer.parameter }),
+        color: 'success',
+        icon: 'i-lucide-alarm-clock'
+      })
+    }
+
+    if (!quiet) {
       notifications.notify(
         t('waterTests.timer.readyTitle', { parameter: timer.parameter }),
         { body: t('waterTests.timer.readyBody', { parameter: timer.parameter }) }
@@ -164,6 +290,8 @@ export function useParameterTimers() {
     if (!Number.isFinite(durationMs) || durationMs < 15_000) {
       throw new Error(t('waterTests.timer.invalidDuration'))
     }
+    // Unlock audio during the user gesture so the later alarm can play.
+    await ensureAudioContext()
     const existing = timers.value[parameter]
     if (existing?.oneSignalMessageId) {
       await cancelPush(existing.oneSignalMessageId)
@@ -220,8 +348,10 @@ export function useParameterTimers() {
     timers,
     start,
     stop,
+    stopAlarm,
     remainingLabel,
     isRunning,
+    alarming,
     hydrate
   }
 }
