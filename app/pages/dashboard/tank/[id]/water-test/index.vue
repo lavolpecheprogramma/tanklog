@@ -35,6 +35,16 @@ const editingTestGroupId = ref<string | null>(null)
 const detailOpen = ref(false)
 const selectedSession = ref<WaterTestSession | null>(null)
 const actionId = ref<string | null>(null)
+const formCloseGuard = ref(false)
+
+type FormBaseline = {
+  measuredAtLocal: string
+  method: string
+  note: string
+  values: Record<string, string>
+}
+
+const formBaseline = ref<FormBaseline | null>(null)
 
 const formTitle = computed(() =>
   editingTestGroupId.value ? t('waterTests.editSession') : t('waterTests.newSession')
@@ -208,8 +218,34 @@ onMounted(() => {
   void load()
 })
 
+function captureFormBaseline() {
+  formBaseline.value = {
+    measuredAtLocal: measuredAtLocal.value,
+    method: method.value,
+    note: note.value,
+    values: { ...values.value }
+  }
+}
+
+function isFormDirty(): boolean {
+  const baseline = formBaseline.value
+  if (!baseline) return false
+  if (measuredAtLocal.value !== baseline.measuredAtLocal) return true
+  if (method.value !== baseline.method) return true
+  if (note.value !== baseline.note) return true
+  const keys = new Set([
+    ...Object.keys(baseline.values),
+    ...Object.keys(values.value)
+  ])
+  for (const key of keys) {
+    if ((values.value[key] ?? '') !== (baseline.values[key] ?? '')) return true
+  }
+  return false
+}
+
 function openCreate() {
   resetFormFields()
+  captureFormBaseline()
   formOpen.value = true
 }
 
@@ -247,6 +283,7 @@ function openEdit(session: WaterTestSession) {
   values.value = next
   formError.value = null
   detailOpen.value = false
+  captureFormBaseline()
   formOpen.value = true
 }
 
@@ -264,6 +301,42 @@ function resetFormFields() {
   method.value = ''
   measuredAtLocal.value = toDatetimeLocalValue(new Date())
   formError.value = null
+  formBaseline.value = null
+}
+
+async function requestCloseForm() {
+  if (formCloseGuard.value) return
+  if (!isFormDirty()) {
+    resetFormFields()
+    formOpen.value = false
+    return
+  }
+
+  formCloseGuard.value = true
+  formOpen.value = true
+  try {
+    const ok = await askConfirm({
+      title: t('common.confirmTitle'),
+      description: t('waterTests.confirmDiscard'),
+      confirmLabel: t('common.discard'),
+      cancelLabel: t('common.cancel'),
+      confirmColor: 'warning'
+    })
+    if (ok) {
+      resetFormFields()
+      formOpen.value = false
+    }
+  } finally {
+    formCloseGuard.value = false
+  }
+}
+
+async function onFormOpenChange(open: boolean) {
+  if (open) {
+    formOpen.value = true
+    return
+  }
+  await requestCloseForm()
 }
 
 async function persistOfflineCache() {
@@ -554,13 +627,13 @@ async function removeSession(session: WaterTestSession) {
 
     <UModal
       v-if="formOpen"
-      v-model:open="formOpen"
+      :open="formOpen"
       :title="formTitle"
       :ui="{
         content: 'w-[calc(100%-1rem)] max-w-lg max-h-[90dvh] sm:w-full',
         body: 'overflow-y-auto'
       }"
-      @update:open="(v: boolean) => { formOpen = v; if (!v) resetFormFields() }"
+      @update:open="onFormOpenChange"
     >
       <template #body>
         <form
@@ -635,14 +708,14 @@ async function removeSession(session: WaterTestSession) {
         </form>
       </template>
 
-      <template #footer="{ close }">
+      <template #footer>
         <div class="flex w-full flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <UButton
             color="neutral"
             variant="ghost"
             block
             class="sm:w-auto"
-            @click="close()"
+            @click="requestCloseForm"
           >
             {{ t('common.cancel') }}
           </UButton>
