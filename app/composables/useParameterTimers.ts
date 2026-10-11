@@ -248,12 +248,12 @@ export function useParameterTimers() {
       // Replace previous alarm toast if another timer finished while ringing.
       if (alarmToastId.value != null) toast.remove(alarmToastId.value)
       const added = toast.add({
-        title: t('waterTests.timer.readyTitle', { parameter: timer.parameter }),
-        description: t('waterTests.timer.readyBody', { parameter: timer.parameter }),
-        color: 'warning',
-        icon: 'i-lucide-alarm-clock',
-        duration: ALARM_MAX_MS,
-        actions: [{
+        'title': t('waterTests.timer.readyTitle', { parameter: timer.parameter }),
+        'description': t('waterTests.timer.readyBody', { parameter: timer.parameter }),
+        'color': 'warning',
+        'icon': 'i-lucide-alarm-clock',
+        'duration': ALARM_MAX_MS,
+        'actions': [{
           label: t('waterTests.timer.stopAlarm'),
           color: 'neutral',
           variant: 'solid',
